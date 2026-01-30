@@ -1,0 +1,90 @@
+{
+  "procesamiento_paralelo": true,
+  "aplica_estampilla_universidad": true,
+  "impuestos_procesados": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "exito": true,
+  "aplica_retencion": true,
+  "valor_total_factura": 37200000.0,
+  "iva_total": 5939495.8,
+  "valor_retencion": 1250420.168,
+  "concepto": "Servicios generales (declarantes)",
+  "tarifa_retencion": 4.0,
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 1250420.168,
+    "concepto": "Servicios generales (declarantes)",
+    "tarifa_retencion": 4.0,
+    "observaciones": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No procesada",
+    "valor_estampilla": 0,
+    "tarifa_aplicada": 0,
+    "rango_uvt": "No calculado",
+    "valor_contrato_pesos": 0,
+    "valor_contrato_uvt": 0,
+    "observaciones": [
+      "No se pudo procesar estampilla"
+    ]
+  },
+  "contribucion_obra_publica": {
+    "aplica": true,
+    "estado": "No procesada",
+    "valor_contribucion": 0,
+    "tarifa_aplicada": 0.05,
+    "valor_factura_sin_iva": 0,
+    "observaciones": [
+      "No se pudo procesar obra pública"
+    ]
+  },
+  "es_facturacion_extranjera": false,
+  "resumen_total": {
+    "valor_total_impuestos": 1250420.168,
+    "impuestos_aplicables": {
+      "retefuente": true,
+      "estampilla": false,
+      "obra_publica": false
+    }
+  },
+  "observaciones": [
+    "La base gravable se calcula restando el IVA del valor total de los items.",
+    "El NIT del tercero es 901.369.011-4 y se identifica como persona jurídica según el RUT.",
+    "En el RUT se identifica que el tercero tiene las siguientes responsabilidades: '05- Impto. renta y compl. régimen ordinario', '07- Retención en la fuente a título de rent', '14- Informante de exogena', '52 - Facturador electrónico', '55 - Informante de Beneficiarios Finales'.",
+    "En el RUT no se identifica si es responsable de IVA, pero como no es régimen simple, se asume que es responsable de IVA.",
+    "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+    "Aplicando tarifas convencionales",
+    "Detalle del cálculo:",
+    "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "tiempo_procesamiento_segundos": 8.228459,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "entidad_administrativa": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "es_consorcio": false,
+  "documentos_clasificados": {
+    "RUT ARTESANIAS.pdf": "RUT",
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO"
+  },
+  "version": "2.0.0",
+  "timestamp": "2025-08-06T09:07:37.696017",
+  "sistema": "integrado_retefuente_estampilla"
+}

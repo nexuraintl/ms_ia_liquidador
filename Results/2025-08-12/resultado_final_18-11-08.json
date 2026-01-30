@@ -1,0 +1,80 @@
+{
+  "procesamiento_paralelo": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "timestamp": "2025-08-12T18:11:08.890212",
+  "version": "2.0.0",
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 1250420.168,
+    "concepto": "Servicios generales (declarantes)",
+    "tarifa_retencion": 4.0,
+    "valor_base": 37200000.0,
+    "fecha_calculo": "2025-08-12T18:11:08.892647",
+    "mensajes_error": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de estampilla en el análisis"
+  },
+  "contribucion_obra_publica": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de obra pública en el análisis"
+  },
+  "iva_reteiva": {
+    "aplica": true,
+    "valor_iva_identificado": 5939495.8,
+    "valor_reteiva": 890924.37,
+    "porcentaje_iva": 0.19,
+    "tarifa_reteiva": 0.15,
+    "porcentaje_reteiva_texto": "15%",
+    "es_fuente_nacional": true,
+    "metodo_calculo": "fuente_nacional",
+    "estado_liquidacion": "Preliquidado",
+    "es_responsable_iva": true,
+    "observaciones": [
+      "IVA identificado: $5,939,495.80",
+      "Fuente: Nacional",
+      "Cálculo: $5,939,495.80 x 15% = $890,924.37"
+    ],
+    "calculo_exitoso": true
+  },
+  "resumen_total": {
+    "valor_total_impuestos": 2141344.538,
+    "impuestos_liquidados": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_exitoso": true
+  },
+  "timestamp_procesamiento": "2025-08-12T18:11:08.897649",
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "documentos_procesados": 4,
+  "documentos_clasificados": [
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf",
+    "FRA ARTESARNIAS.pdf",
+    "RUT ARTESANIAS.pdf",
+    "OBJ. CTO LEBRIJA.xlsx"
+  ],
+  "version_sistema": "2.0.0",
+  "modulos_utilizados": [
+    "Extraccion",
+    "Clasificador",
+    "Liquidador"
+  ]
+}

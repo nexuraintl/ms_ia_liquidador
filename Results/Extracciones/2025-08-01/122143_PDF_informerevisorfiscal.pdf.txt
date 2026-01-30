@@ -1,0 +1,86 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: informe revisor fiscal.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 12:21:43
+- Caracteres extraídos: 3148
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 121855,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 3148
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ 
+ 
+INFORME  REVISOR  FISCAL  
+ 
+A la Gerencia General de  
+ 
+VASS  CONSULTORIA  DE SISTEMAS  COLOMBIA  S. A. S. 
+ 
+Bogotá  D.C., 11 de diciembre de 2023  
+a) En mi calidad  de revisor  fiscal  de la empresa  VASS  CONSULTORIA  DE SISTEMAS  COLOMBIA  S. A. S. 
+identificada  con NIT. 900.376.503 -1 he efectuado los procedimientos de revisión que se detallan a 
+continuación con el  propósito de verificar el pago efectuado por la Compañía por concepto de aportes a 
+los sistemas de salud,  pensiones y riesgos profesionales y a las cajas de compensación familiar, Instituto 
+Colombiano de Bienestar  Familiar (ICBF) y Servicio Nacional de Aprendizaje (SENA), por el periodo 
+comprendido entre el 1 junio 2023  y el 3 0 de n oviembre  de 2023 . El pago de dichos aportes es 
+responsabilidad de la administración de la  compañía como parte de su gestión. Mi responsabilidad de 
+acuerdo con lo establecido en el Artículo 50 de la  ley 789 del 27 de diciembre  de 2002,  es emitir  un informe  
+certificando  el cumplimiento de  tales  obligaciones.  
+ 
+Los procedimientos  de revisión  realizados  fueron  los siguientes:  
+ 
+b) Indagación con el personal del área responsable, en relación con los procedimientos utilizados para la  
+identificación y el pago de aportes a los sistemas de salud, pensiones y riesgos profesionales y a las cajas  
+de compensación familiar, Instituto  Colombiano  de Bienestar Familiar (ICBF) y  Servicio  Nacional de  
+Aprendizaje  (SENA)  
+ 
+c) Obtención del listado de liquidación de aportes a los sistemas de salud, pensiones y riesgos profesionales  
+y a las cajas de compensación familiar, Instituto Colombiano de Bienestar Familiar (ICBF) y Servicio  
+Nacional de Aprendizaje (SENA), preparado por la compañía por el periodo comprendido  entre  1 junio 
+2023  y el 3 0 de n oviembre  de 2023.  
+ 
+ 
+d) Comparación del listado obtenido según se menciona en el literal anterior, con los documentos soporte  
+de los respectivos  pagos  de la compañía  y que,  de acuerdo  con la planilla  integral  de aportes  e información  
+contable suministrada por la administración, los pagos correspondientes al Instituto Colombiano de  
+Bienestar Social (ICBF) y Servicio Nacional de Aprendizaje (SENA), se realizaron en concordancia con el  
+Artículo  7 del  Decreto  1828  del 27 de  agosto  de 2013.  
+ 
+e) Con base en el resultado de los procedimientos enumerados anteriormente por el periodo comprendido  
+entre  el 1 junio 2023  y el 3 0 de n oviembre  de 2023 . Informo  que,  a la fecha  de la presente  certificación,  la 
+compañía se encuentra al día en el pago de los aportes de los sistemas de salud, pensiones y riesgos  
+profesionales y a las cajas de compensación familiar, Instituto Colombiano de Bienestar Familiar (ICBF) Y  
+Servicio Nacional de  Aprendizaje  (SENA).  
+ 
+Este informe es para uso exclusivo de la Administración de la Compañía, para propósitos de licitación y  
+facturación  y no  debe  ser utilizado  para  ningún  otro  propósito.  
+ 
+ 
+ 
+  
+ 
+ 
+Adelaida Correa Neira  
+Revisor  Fiscal  
+T.P. 80.662 -T 
+ 
+ 
+ 
+Teléfono:  (571)  5724404  
+Bogotá,  Carrera 71d No. 73ª-67 P2
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

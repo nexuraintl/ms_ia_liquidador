@@ -1,0 +1,315 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: rut.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 12:11:02
+- Caracteres extraídos: 9598
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 4,
+  "tamaño_archivo_bytes": 555369,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 9598
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+27. Fecha expedición
+  
+Exportadores
+ 
+Para uso exclusivo de la DIAN
+5. Número de Identificación Tributaria (NIT) 6. DV
+    
+ 
+ 
+984. Nombre51. Código38. País
+  
+56. Tipo
+985. Cargo50. Código  4. Número de formulario
+36. Nombre comercial 37. Sigla
+53. Código
+59. Anexos          SI NO 61. Fecha55. Forma
+57. Modo
+58. CPC
+60. No. de Folios:Ocupación
+123456789101112131415161718
+ 
+ 
+Actividad secundaria Otras actividades
+49. Fecha inicio actividad 48. Código 1 2Lugar de expedición 28.  País
+Actividad principalActividad económica
+47. Fecha inicio actividad 46. Código
+1 2 335. Razón social
+31. Primer apellido  32. Segundo apellido
+33. Primer nombre
+52. Número 
+establecimientos24. Tipo de contribuyente
+12. Dirección seccional 14. Buzón electrónico
+34. Otros nombres25. Tipo de documento
+29. Departamento26. Número de Identificación
+39. Departamento
+Firma del solicitante:2. Concepto
+1920212223242526
+12345678910
+54. Código
+11121314151617181920Responsabilidades, Calidades y Atributos
+IMPORTANTE: Sin perjuicio de las actualizaciones a que haya lugar, la inscripción en el Registro Único Tributario -RUT-, tendrá vigencia indefinida y en consecuencia no se exigirá su renovación    40. Ciudad/Municipio
+Parágrafo del artículo 1.6.1.2.20 del Decreto 1625 de 2016Sin perjuicio de las verificaciones que la DIAN realice.  
+Firma autorizada:IDENTIFICACIÓN
+41. Dirección principal
+Exportadores Obligados aduanerosUBICACIÓN30. Ciudad/Municipio
+42. Correo electrónico
+44. Teléfono 1 43. Código postal 45. Teléfono 2 
+CLASIFICACIÓNActualización02
+14953443861
+     9003765031Impuestos de Bogotá 32
+Persona jurídica 1                               
+           
+ 
+VASS CONSULTORIA  DE SISTEMAS  COLOMBIA  S.A.S
+ 
+COLOMBIA 169Bogotá D.C. 11Bogotá, D.C. 001
+CL 98   22   64 P 12
+fabian.garcia@vasscompany.com
+                   7423051       3105526775
+620120130131620220130131 47415820          
+05- Impto. renta y compl.  régimen  ordinar5 
+07- Retención en la fuente a título de  rent7 
+09- Retención en la fuente en el impuesto 9 
+10- Obligado aduanero10
+14- Informante de exogena14
+18- Precios de transferencia18
+19- Productor de bienes y/o servicios exen19
+26- Declaración individual  precios de tran26
+41- Declaración anual de activos en el exte41
+42- Obligado a llevar contabilidad 42
+48 - Impuesto sobre las ventas - IVA48
+52 - Facturador electrónico52
+55 - Informante de Beneficiarios Finales55                          
+22 23                         
+                              1 32 3 4
+818381
+ X   0 2023 - 10 - 04 / 10 : 59: 21
+BELLO MEJIA JENNY ANDREA 
+Representante Legal Suplente Certificado
+Fecha generación documento PDF: 04-10-2023 10:59:42AM
+
+--- PÁGINA 2 ---
+67. Sociedades y organismos 
+extranjerosPágina                           de
+95. Número de Identificación Tributaria (NIT) de la 
+Matriz o Controlante   Espacio reservado para la DIAN
+68. Sin personería jurídica
+93. Vinculación 
+económica
+81. Hasta80. Desde79. Ciudad/Municipio78. Departamento77. No. Matrícula mercantil76. Fecha de registro75. Entidad de registro74. Número de notaría73. Fecha72. Número71. Clase70. Beneficio64. Entidades o institutos de derecho público de orden nacional, departamental, 
+municipal y descentralizados
+69. Otras organizaciones no clasificadas66. Cooperativas63. Formas asociativas
+65. Fondos62. Naturaleza
+94. Nombre del grupo económico y/o empresarial4. Número de formulario
+88. Entidad de vigilancia y control
+97. Nombre o razón social de la matriz o controlante96. DV.82. Nacional %
+83. Nacional público %
+84. Nacional privado%
+85. Extranjero %
+86. Extranjero público %
+87. Extranjero privado %Hoja 2
+5. Número de Identificación Tributaria (NIT) 6. DV
+173. Nombre o razón social de la sociedad o natural del exterior con EP 
+ -
+ 
+ -
+ 
+ -
+ 
+ -
+ 
+ -
+ 589. Estado actual 90. Fecha cambio de estado
+1Item
+2
+3
+4
+Vinculación económicaCaracterísticas y formas de las organizaciones
+170. Número de identificación tributaria 
+otorgado en el exterior171. País
+172. Número de identificación tributaria 
+sociedad o natural del exterior con EPDocumento 2. Reforma 1. ConstituciónConstitución, Registro y Última Reforma Composición del Capital
+ Vigencia
+Entidad de vigilancia y control
+91. Número de Identificación Tributaria (NIT)                  92. DVEstado y Beneficio12. Dirección seccional 14. Buzón electrónico
+14953443861
+     9003765031Impuestos de Bogotá 322 4
+ 2 12   
+      
+     1
+04   
+                    
+20100801         
+    
+03   
+20100818         
+0002017630           
+11   
+001         
+20100801         
+99991231                0
+     0.0
+     0.0
+     100
+     0.0
+   100.0
+Superintendencia de Sociedades  5
+80 
+   
+   
+   
+   20160101
+        
+        
+        
+                     
+             
+             
+             
+              
+ 
+ 
+ 
+ 
+                
+    
+Fecha generación documento PDF: 04-10-2023 10:59:42AM
+
+--- PÁGINA 3 ---
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                         98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal
+1
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                        98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal2
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                         98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal3
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                          98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal4
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                        98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal5Página                           de
+   Espacio reservado para la DIAN 4. Número de formularioHoja 3
+5. Número de Identificación Tributaria (NIT) 6. DV
+12. Dirección seccional 14. Buzón electrónico
+Representación14953443861
+     9003765031Impuestos de Bogotá 323 4
+REPRS LEGAL PRIN 18
+REPRS LEGAL SUPL 19
+  
+  
+  20120511
+20160101
+        
+        
+        Cédula de Extranjerí 22
+Cédula de Ciudadan 13
+  
+  
+  386751              
+52707831            
+                    
+                    
+                     
+ 
+ 
+ 
+         
+        
+        
+        
+        ARIZA
+BELLO
+ALFARO
+MEJIA
+MIGUEL
+JENNY
+ANGEL
+ANDREA
+              
+              
+              
+              
+               
+ 
+ 
+ 
+ 
+Fecha generación documento PDF: 04-10-2023 10:59:42AM
+
+--- PÁGINA 4 ---
+127. Número de tarjeta profesional 125. Número de identificación                                                                                     
+132. Número de Identificación Tributaria (NIT)    
+144. Número de Identificación Tributaria (NIT)           
+147. Fecha de nombramiento
+156. Número de Identificación Tributaria (NIT)                  148. Tipo de documento124. Tipo de documento
+135. Fecha de nombramiento
+159. Fecha de nombramiento
+152. Primer apellido  140. Primer apellido  128. Primer apellido  129. Segundo apellido  
+141. Segundo apellido  
+153. Segundo apellido130. Primer nombre
+142. Primer nombre
+154. Primer nombre131. Otros nombres
+143. Otros nombres
+155. Otros nombres133. DV
+145. DV
+157. DV126. DVRevisor fiscal principalRevisor Fiscal y Contador
+136. Tipo de documento134. Sociedad o firma designada
+146. Sociedad o firma designada
+149. Número de identificación                                                                                            150. DV 151. Número de tarjeta profesional
+158. Sociedad o firma designada
+137. Número de identificación                                                                                          138. DV 139. Número de tarjeta profesionalRevisor fiscal suplente Contador
+Página                           de
+   Espacio reservado para la DIAN 4. Número de formularioHoja 5
+5. Número de Identificación Tributaria (NIT) 6. DV
+12. Dirección seccional 14. Buzón electrónico
+14953443861
+     9003765031Impuestos de Bogotá 324 4
+Cédula de Ciudadanía 1352331252             80662T  
+CORREA NEIRA ADELAIDA 
+     9013270391AUDIT ONE TAX & LEGAL SAS
+20180724
+Cédula de Ciudadanía 1352494395             272158T 
+VARGAS GONZALEZ DELIA ANGELICA
+     9013270391AUDIT ONE TAX & LEGAL SAS
+20220829
+Cédula de Ciudadanía 131071163574           239104T 
+GARCIA ARANGO FABIAN ANDRES
+               
+20171201
+Fecha generación documento PDF: 04-10-2023 10:59:42AM
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

@@ -1,0 +1,43 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)', por lo tanto, no aplica la liquidación de ninguno de los dos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.979718427242,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00 37,200,000.00"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El NIT administrativo de FIDUCOLDEX (830.054.060-5) es válido para la aplicación de impuestos.",
+    "No se procede con el cálculo de los impuestos debido a que el tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Este es un criterio excluyente para la aplicación de ambos impuestos."
+  ]
+}

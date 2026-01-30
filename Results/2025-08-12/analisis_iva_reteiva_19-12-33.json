@@ -1,0 +1,56 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 5939495.8,
+      "porcentaje_iva": 0.19,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00",
+          "valor_iva": 5939495.8,
+          "porcentaje": 0.19
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": false,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "En las 'Responsabilidades, Calidades y Atributos' del RUT, no se encuentra el código 48 'Impuesto sobre las ventas – IVA', lo que indica que el tercero no es responsable de IVA. Se encuentran los códigos: 05, 07, 14, 52, 55."
+    },
+    "concepto_facturado": {
+      "descripcion": "Prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": null,
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": null,
+      "iva_encontrado": null
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": true,
+    "porcentaje_reteiva": "15%",
+    "tarifa_decimal": 0.15,
+    "valor_reteiva_calculado": 0.0,
+    "metodo_calculo": "fuente_nacional"
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidación Sin Finalizar",
+    "observaciones": [
+      "En el RUT se identificó que el tercero no es responsable de IVA (ausencia del código 48) aunque la factura muestra un IVA."
+    ]
+  }
+}

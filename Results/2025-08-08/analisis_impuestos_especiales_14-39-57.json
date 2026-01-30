@@ -1,0 +1,44 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato corresponde a servicios conexos de obra (diseño, gestión e implementación), lo cual aplica para la Estampilla Pro Universidad Nacional. Dado que el contrato es de prestación de servicios y el objeto puede ser interpretado como relacionado con obra, también se evalúa la Contribución a Obra Pública. El tercero administra recursos públicos."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.99,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "El pago #2 corresponde al 30% del valor total por $37,200,000. El informe de pago indica Valor total del instrumento contractual: $124.000.000"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El objeto del contrato se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional. Para la Contribución a Obra Pública, se clasifica como 'contrato de obra' debido a la naturaleza de implementación del proyecto, aunque no sea construcción directa.",
+    "Se determinó el valor total del contrato ($124.000.000) basándose en la información del 'Informe de Aprobación de Pago' para el cálculo de la tarifa de la Estampilla Pro Universidad Nacional.",
+    "La tarifa para la Estampilla Pro Universidad Nacional se determina por el valor total del contrato en UVT. El valor del contrato es $124.000.000, que equivale a 2489.99 UVT (2025), ubicándose en el rango 'Más de 157,904 UVT' con una tarifa del 2.0%."
+  ]
+}

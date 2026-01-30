@@ -1,0 +1,41 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El tercero 'Aesthetic body center' no se encuentra en la lista de entidades que administran recursos públicos, lo cual es una condición excluyente para la aplicación de ambos impuestos. Adicionalmente, el objeto de la factura ('INSUMOS MEDICOS') no corresponde a las categorías de 'CONTRATO DE OBRA', 'INTERVENTORÍA' o 'SERVICIOS CONEXOS' requeridas para la aplicación de estos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "Aesthetic body center",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "INSUMOS MEDICOS",
+    "clasificacion_estampilla": "no_identificado",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 0.0,
+      "valor_contrato_uvt": 0.0,
+      "valor_factura_sin_iva": 4843200.0,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "TOTAL  $4.843.200"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 4843200.0,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "TOTAL  $4.843.200"
+    }
+  },
+  "observaciones": [
+    "El tercero 'Aesthetic body center' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS', por lo tanto, no se liquidan ninguno de los dos impuestos.",
+    "El objeto de la factura es la venta de 'INSUMOS MEDICOS', lo cual no clasifica como 'CONTRATO DE OBRA', 'INTERVENTORÍA' o 'SERVICIOS CONEXOS'.",
+    "No se identifica un valor total de contrato subyacente, ya que la factura corresponde a una venta de bienes y no a un pago parcial de un contrato de mayor valor.",
+    "El estado final de la preliquidación es 'No aplica el impuesto'."
+  ]
+}

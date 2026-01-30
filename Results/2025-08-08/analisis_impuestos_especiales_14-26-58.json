@@ -1,0 +1,45 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato es de prestación de servicios de diseño, gestión e implementación, lo cual aplica para Estampilla Pro Universidad Nacional (servicios conexos). El tercero administra recursos públicos. El contrato es de prestación de servicios y no menciona explícitamente 'obra', pero la descripción del objeto incluye 'diseño', que es un servicio conexo a obra. El tercer NIT '830.054.060-5' es un NIT válido que aplica para ambos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende. CLÁUSULA SEGUNDA - ALCANCE DEL OBJETO: Para el desarrollo del objeto contractual, LACONTRATISTA realizará como mínimo las actividades y entregables, de acuerdo con lo contemplado en los términos de referencia, la propuesta presentada el 31 de octubre 2024, en adelante “la Propuesta”, documentos que hacen parte integral del presente contrato.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.99,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "El pago #2 es por el 30% del valor total del contrato, que se describe como 'Pago # 2 por el 30% valor total prestación de servicios'. En el anexo 'Informe de Aprobación de Pago', se indica 'Valor total del instrumento contractual $124.000.000' y 'No. Factura/Cuenta de cobro DV 116'. La factura principal DV 119 indica un pago de $37,200,000.00.  Considerando que el pago #2 es el 30% del contrato y la factura principal DV 119 es de $37,200,000.00, y que el informe de pago menciona un valor de contrato de $124,000,000, se asume que la factura DV 119 corresponde al pago #1 o una parte del total. Sin embargo, la descripción del pago #2 en el anexo indica un 30% del valor total del contrato. Se usará el valor total del contrato de $124,000,000 para determinar la tarifa de la estampilla. El valor de la factura para el cálculo de la estampilla es el valor sin IVA de la factura DV 119: $31,260,504.20."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "FACTURA PRINCIPAL - PÁGINA 2 - Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de terceros que administran recursos públicos. El NIT de la factura es '901.369.011-4', que corresponde a la 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA'. El NIT del comprador es '830.054.060-5', que corresponde a 'FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX', el cual sí está en la lista de NITs válidos y administra recursos públicos. Por lo tanto, se aplica el análisis sobre el comprador.",
+    "Se identificó el valor total del contrato como $124,000,000 en el anexo 'INFORME DE APROBACIÓN DE PAGO', lo cual permite determinar la tarifa de la Estampilla Pro Universidad Nacional.",
+    "El objeto del contrato incluye 'diseño', lo cual es un servicio conexo que aplica para la Estampilla Pro Universidad Nacional. Sin embargo, no es un 'contrato de obra' explícito, por lo que no aplica para la Contribución a Obra Pública.",
+    "La tarifa de la Estampilla Pro Universidad Nacional se determina con base en el valor total del contrato: $124,000,000 COP. UVT 2025 = $49,799 COP. Valor del contrato en UVT = $124,000,000 / $49,799 = 2489.99 UVT. Este valor se encuentra en el rango 'Más de 157,904 UVT', por lo que la tarifa aplicable es del 2.0%."
+  ]
+}

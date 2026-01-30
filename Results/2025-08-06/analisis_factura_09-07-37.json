@@ -1,0 +1,67 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 31260504.2
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "La base gravable se calcula restando el IVA del valor total de los items.",
+    "El NIT del tercero es 901.369.011-4 y se identifica como persona jurídica según el RUT.",
+    "En el RUT se identifica que el tercero tiene las siguientes responsabilidades: '05- Impto. renta y compl. régimen ordinario', '07- Retención en la fuente a título de rent', '14- Informante de exogena', '52 - Facturador electrónico', '55 - Informante de Beneficiarios Finales'.",
+    "En el RUT no se identifica si es responsable de IVA, pero como no es régimen simple, se asume que es responsable de IVA."
+  ]
+}

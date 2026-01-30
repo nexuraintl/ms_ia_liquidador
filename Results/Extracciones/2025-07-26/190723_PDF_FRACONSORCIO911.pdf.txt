@@ -1,0 +1,152 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: FRA CONSORCIO  911.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-26 19:07:23
+- Caracteres extraídos: 1901
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 53039,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 1901
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+Item
+Código
+Descripción
+Unid
+Cant
+V. Unit
+Valor Total
+Pagina : 1 de 1
+NOTA CRÉDITO ELECTRÓNICA
+Señores
+NIT
+Dirección
+Teléfono
+Ciudad
+FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX
+830,054,060 - 5
+CL 28 13 A 24 P 6
+3275500
+BOGOTA D.C.-BOGOTA -
+COLOMBIA
+Elaborado por
+Aprobado por
+CUFE Factura :d052b1da53c570134eda939adcf85e454e8c9aa2d942f789a5b6725ea6bfcb3c5241162709a9cd6c2f86feb4e0b41e81
+CUDE :280803e2654e1dbbf3ebe86730636fd57ac7f220dc64c9a909f78c1d8d7833165f89b0ce9f647de110962a10166aa55e
+2025-01-20
+Fecha y Hora de Documento
+Generación
+Expedición
+2025-01-20
+09:34:06
+09:33:39
+Vencimiento
+2025-01-13
+Factura Relacionada No. FESM- 227 fecha factura: 2/01/2025
+CONSORCIO 911-SM
+NIT : 901,493,462 - 2
+CALLE 108 8 21
+BOGOTA - COLOMBIA
+4324075 
+INFO@LOGISTICA911.COM
+No responsables de iva - No somos autorretenedores
+Actividad Económica 8230 Tarifa 9,66
+Elaborado, impreso y enviado electrónicamente por Siigo S.A.S Nit: 830.048.145-8
+C - 002 - 36
+1
+0200001000001
+PERSONAL
+UN
+0
+.00
+9,345,000.00
+2
+0200001000001
+ALQUILER
+UN
+0
+.00
+113,396,875.00
+3
+0200001000001
+COMPRA
+UN
+0
+.00
+9,032,400.00
+4
+0200001000001
+TRANSPORTE PASAJEROS
+UN
+0
+.00
+90,000.00
+5
+0200001000001
+ALIMENTOS
+UN
+0
+.00
+1,947,000.00
+6
+4155950200
+PAGO A TERCEROS
+0
+.00
+27,329,500.00
+7
+0200001000001
+COMISION PAGO A TERCEROS
+UN
+0
+.00
+3,156,555.00
+A
+Total Items
+7
+ 
+Total Bruto
+164,297,330.00
+ 
+IVA
+19%
+26,023,887.70
+ 
+Total a Pagar
+$ 190.321.217,70
+FORMA DE PAGO
+MEDIO DE PAGO
+Credito
+Credito Clientes
+Nacionales
+Efectivo
+190.321.217,70
+Cuota 1 Vence el 2025-01-13
+VALOR EN LETRAS
+Ciento Noventa Millones Trescientos Veintiun Mil Doscientos Diecisiete Pesos M/Cte Con 70/100
+OBSERVACIONES
+EVENTO: HF24
+LUGAR: NEIVA - CENTRO DE CONVENCIONES JOSE EUSTACIO RIVERA
+PORCENTAJE DE PARTICIPACION:
+SINTONIZAR MEDIOS SAS NIT 830.107.841-1 50%
+PRODUCCION DE EVENTOS 911 SAS NIT 900.199.025-3 50%
+ORDEN DE COMPRA
+Prefijo
+CTO
+Numero
+047-2022
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

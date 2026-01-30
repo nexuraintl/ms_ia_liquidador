@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Endpoints</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; border: 1px solid #f44336; }
+        .success { background: #e8f5e8; border: 1px solid #4caf50; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Endpoints del Preliquidador</h1>
+    
+    <h2>1. Test POST Simple (sin archivos)</h2>
+    <button onclick="testPOSTSimple()">🔥 Probar POST Simple</button>
+    <div id="result1" class="result"></div>
+    
+    <h2>2. Test GET Health</h2>
+    <button onclick="testHealth()">💚 Probar Health</button>
+    <div id="result2" class="result"></div>
+    
+    <h2>3. Test GET Conceptos</h2>
+    <button onclick="testConceptos()">📋 Probar Conceptos</button>
+    <div id="result3" class="result"></div>
+    
+    <h2>4. Test POST con Archivo</h2>
+    <input type="file" id="fileInput" />
+    <button onclick="testPOSTArchivo()">📁 Probar POST con Archivo</button>
+    <div id="result4" class="result"></div>
+
+    <script>
+        async function testPOSTSimple() {
+            const result = document.getElementById('result1');
+            result.innerHTML = '⏳ Probando POST simple...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('nit_administrativo', 'test-nit');
+                
+                const response = await fetch('/api/prueba-simple', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.className = 'result success';
+                    result.innerHTML = `✅ POST Simple funciona!<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ Error ${response.status}: ${response.statusText}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function testHealth() {
+            const result = document.getElementById('result2');
+            result.innerHTML = '⏳ Probando Health...';
+            
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                result.className = 'result success';
+                result.innerHTML = `✅ Health OK!<br>Status: ${data.status}<br>Version: ${data.version}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function testConceptos() {
+            const result = document.getElementById('result3');
+            result.innerHTML = '⏳ Probando Conceptos...';
+            
+            try {
+                const response = await fetch('/api/conceptos');
+                const data = await response.json();
+                result.className = 'result success';
+                result.innerHTML = `✅ Conceptos OK!<br>Total: ${data.total_conceptos}<br>Primeros 3: ${data.conceptos.slice(0,3).map(c => c.concepto).join(', ')}`;
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function testPOSTArchivo() {
+            const result = document.getElementById('result4');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files[0]) {
+                result.className = 'result error';
+                result.innerHTML = '❌ Selecciona un archivo primero';
+                return;
+            }
+            
+            result.innerHTML = '⏳ Probando POST con archivo...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('archivos', fileInput.files[0]);
+                formData.append('nit_administrativo', 'test-nit');
+                
+                const response = await fetch('/api/prueba-procesamiento', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.className = 'result success';
+                    result.innerHTML = `✅ POST con archivo funciona!<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const errorData = await response.text();
+                    result.className = 'result error';
+                    result.innerHTML = `❌ Error ${response.status}: ${errorData}`;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

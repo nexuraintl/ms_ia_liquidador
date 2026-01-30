@@ -1,0 +1,36 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 37200000.0
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": null,
+    "calculo": null
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "La factura corresponde a un pago por prestación de servicios en el marco de un contrato.",
+    "El tercero es una asociación sin ánimo de lucro, lo cual se clasifica como Régimen Especial.",
+    "Se aplica la tarifa general de servicios a declarantes dado que no se cumplen las condiciones para el Art. 383."
+  ]
+}

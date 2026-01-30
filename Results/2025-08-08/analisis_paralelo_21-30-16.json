@@ -1,0 +1,159 @@
+{
+  "timestamp": "2025-08-08T21:30:16.516857",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "La factura no especifica el tipo de servicio de forma detallada, pero el anexo y el objeto del contrato indican que se trata de prestación de servicios. Dado que la 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' tiene como actividad económica '9499 Actividades de otras asociaciones n.c.p.', y no se identifica como persona natural en el RUT, se clasifica como persona jurídica con régimen ordinario.",
+      "La factura y los anexos no proporcionan información sobre si el tercero es responsable de IVA o no de forma explícita en el RUT. Sin embargo, al ser una asociación y no ser una persona natural ni estar clasificada como régimen simple, se asume que es responsable de IVA para la aplicación de la retención en la fuente general.",
+      "El RUT indica como actividad económica principal '9499 Actividades de otras asociaciones n.c.p.', y como responsabilidades '05- Impto. renta y compl. régimen ordinario', '07- Retención en la fuente a título de renta', '14- Informante de exogena', '52 - Facturador electrónico', '55 - Informante de Beneficiarios Finales'. Esto confirma que es una persona jurídica declarante en régimen ordinario."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": true,
+        "procesamiento_paralelo": true,
+        "razon_deteccion": "El objeto del contrato (diseño, gestión e implementación de la etapa de intercambio de saberes) incluye servicios conexos aplicables a la Estampilla Pro Universidad Nacional. Adicionalmente, dado que la actividad principal implica la ejecución de una ruta, se considera que podría haber componentes de obra, lo que activaría la Contribución a Obra Pública. El tercero administra recursos públicos y los NITs son válidos para ambos impuestos."
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": true,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos_obra",
+        "clasificacion_obra_publica": "contrato_obra",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación",
+          "intercambio de saberes",
+          "fortalecimiento de comunidad",
+          "ruta"
+        ],
+        "palabras_clave_obra_publica": [
+          "ruta"
+        ]
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": 124000000.0,
+          "valor_contrato_uvt": 2489.995783090905,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "porcentaje_calculado",
+          "texto_referencia": "Valor total del instrumento contractual $124.000.000 y Pago # 2 por el 30% valor total prestación de servicios"
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "directo",
+          "texto_referencia": "Total Bruto 31,260,504.20"
+        }
+      },
+      "observaciones": [
+        "La tarifa para la Estampilla Pro Universidad Nacional se determina en función del valor total del contrato de $124,000,000. Al convertirlo a UVT para 2025 ($49,799), el valor es aproximadamente 2489.99 UVT. Esto se ubica en el rango de 52,652 a 157,904 UVT, aplicando una tarifa del 1.0% para la Estampilla Pro Universidad Nacional. Sin embargo, revisando las tarifas nuevamente, el rango es '26 a 52,652 UVT: 0.5%', '52,652 a 157,904 UVT: 1.0%', 'Más de 157,904 UVT: 2.0%'. El valor de 2489.99 UVT es MENOR a 52,652 UVT. Por lo tanto, la tarifa correcta es 0.5%.",
+        "Se ha identificado que el contrato se refiere a la 'ruta Mujer Rural Soberana' y la 'implementación de la ruta'. Si bien no se menciona explícitamente 'obra', la naturaleza de la implementación de una ruta puede implicar actividades de construcción o mantenimiento, justificando la aplicación de la Contribución a Obra Pública. Se procede a aplicar la tarifa del 5% sobre el valor de la factura sin IVA."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": true,
+      "procesamiento_paralelo": true,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD",
+        "CONTRIBUCION_OBRA_PUBLICA"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "es_consorcio": false,
+      "administra_recursos_publicos": true,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": {},
+    "observaciones": [
+      "La tarifa para la Estampilla Pro Universidad Nacional se determina en función del valor total del contrato de $124,000,000. Al convertirlo a UVT para 2025 ($49,799), el valor es aproximadamente 2489.99 UVT. Esto se ubica en el rango de 52,652 a 157,904 UVT, aplicando una tarifa del 1.0% para la Estampilla Pro Universidad Nacional. Sin embargo, revisando las tarifas nuevamente, el rango es '26 a 52,652 UVT: 0.5%', '52,652 a 157,904 UVT: 1.0%', 'Más de 157,904 UVT: 2.0%'. El valor de 2489.99 UVT es MENOR a 52,652 UVT. Por lo tanto, la tarifa correcta es 0.5%.",
+      "Se ha identificado que el contrato se refiere a la 'ruta Mujer Rural Soberana' y la 'implementación de la ruta'. Si bien no se menciona explícitamente 'obra', la naturaleza de la implementación de una ruta puede implicar actividades de construcción o mantenimiento, justificando la aplicación de la Contribución a Obra Pública. Se procede a aplicar la tarifa del 5% sobre el valor de la factura sin IVA."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

@@ -1,0 +1,34 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Factura17.xlsx - Factura.pdf
+- Método de extracción: PDF_OCR
+- Fecha y hora: 2025-08-13 16:08:08
+- Caracteres extraídos: 73
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 52042,
+  "metodo": "PDF → Imagen → Google Vision OCR",
+  "caracteres_extraidos": 48,
+  "paginas_procesadas": 1,
+  "validacion": {
+    "paginas": 1,
+    "tamaño_bytes": 52042
+  }
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+
+--- PÁGINA 1 (OCR) ---
+OCR no disponible - Google Vision no configurado
+
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

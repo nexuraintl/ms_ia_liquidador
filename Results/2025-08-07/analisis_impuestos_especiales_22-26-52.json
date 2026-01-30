@@ -1,0 +1,43 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato es la prestación de servicios (diseño, gestión e implementación de la etapa de intercambio de saberes), lo cual se clasifica como servicios conexos para la estampilla pro Universidad Nacional. No aplica contribución a obra pública porque no es un contrato de obra."
+  },
+  "tercero_identificado": {
+    "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA  FIDUCOLDEX",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2490.01988,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Factura principal, Total Bruto 31,260,504.20. Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf, Valor total del instrumento contractual $124.000.000"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 0.0,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "No aplica"
+    }
+  },
+  "observaciones": [
+    "El valor del contrato se extrajo del informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf",
+    "El valor de la factura sin IVA se extrajo de la factura principal, Total Bruto 31,260,504.20"
+  ]
+}

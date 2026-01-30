@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preliquidador de Retefuente v2.0 - Colombia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        /* NUEVA SECCIÓN DE SELECCIÓN DE NIT */
+        .nit-selection {
+            background: #e7f3ff;
+            border: 2px solid #007bff;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .nit-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nit-description {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .nit-select {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            font-size: 1.1em;
+            background: white;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .nit-select:focus {
+            outline: none;
+            border-color: #0056b3;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+
+        .nit-info {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            display: none;
+        }
+
+        .nit-info.show {
+            display: block;
+        }
+
+        .nit-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nit-detail-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .nit-detail-label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .nit-detail-value {
+            color: #2c3e50;
+            font-size: 1em;
+        }
+
+        .impuestos-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .impuesto-tag {
+            background: #007bff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .impuesto-tag.implementado {
+            background: #28a745;
+        }
+
+        .impuesto-tag.futuro {
+            background: #6c757d;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border: 3px dashed #007bff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #0056b3;
+            background: #e7f3ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .upload-section.disabled {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #495057;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .files-list {
+            margin: 20px 0;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .file-icon {
+            font-size: 2em;
+            margin-right: 15px;
+            color: #28a745;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .file-size {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .results-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-left: 15px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #007bff;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-content {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .json-viewer {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .conceptos-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .conceptos-title {
+            font-weight: bold;
+            color: #004085;
+            margin-bottom: 10px;
+        }
+
+        .conceptos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .concepto-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            border: 1px solid #ccc;
+        }
+
+        .stats-section {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #b3d9ff;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* ESTILOS PARA CONSORCIOS */
+        .consorcio-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .consorcio-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .consorcio-title {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .consorcio-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .consorcio-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .consorcio-info-item {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .consorcio-info-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .consorcio-info-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .consorciados-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .consorciados-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .consorciados-header h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .consorciados-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 0;
+        }
+
+        .consorciado-card {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            position: relative;
+        }
+
+        .consorciado-card:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .consorciado-card.retencion-si {
+            border-left: 5px solid #28a745;
+        }
+
+        .consorciado-card.retencion-no {
+            border-left: 5px solid #dc3545;
+        }
+
+        .consorciado-nombre {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .consorciado-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .consorciado-detail {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .consorciado-detail-label {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+
+        .consorciado-detail-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .retencion-resultado {
+            text-align: center;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .retencion-si .retencion-resultado {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .retencion-no .retencion-resultado {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .resumen-retencion {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .resumen-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .resumen-numero {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .resumen-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .porcentajes-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+
+        .porcentajes-info.normalizado {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        @media (max-width: 768px) {
+            .consorcio-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .consorciados-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .consorcio-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .consorciado-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇨🇴 Preliquidador de Retefuente</h1>
+            <p>Sistema automatizado para calcular retención en la fuente - Colombia</p>
+            <div class="version-badge">v2.0.0 - Arquitectura Modular + Multi-NIT</div>
+        </div>
+
+        <div class="main-content">
+            <!-- NUEVA SECCIÓN: Selección de NIT Administrativo -->
+            <div class="nit-selection">
+                <div class="nit-title">
+                    🏢 Selección de NIT Administrativo
+                </div>
+                <div class="nit-description">
+                    Selecciona la entidad que realizará la liquidación de impuestos
+                </div>
+                
+                <select id="nitSelect" class="nit-select">
+                    <option value="">🔍 Cargando NITs disponibles...</option>
+                </select>
+                
+                <div id="nitInfo" class="nit-info">
+                    <div id="nitDetails"></div>
+                </div>
+            </div>
+
+            <!-- Sección de carga de archivos -->
+            <div class="upload-section" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">
+                    Arrastra tus documentos aquí o haz clic para seleccionar
+                </div>
+                <p style="color: #6c757d; margin-bottom: 20px;">
+                    Soporta: PDF, Excel, Word, Imágenes (JPG, PNG)<br>
+                    Máximo 6 archivos - Hasta 50MB cada uno
+                </p>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    📁 Seleccionar Archivos
+                </button>
+                <input type="file" id="fileInput" class="file-input" multiple 
+                       accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png,.docx,.doc">
+            </div>
+
+            <!-- Lista de archivos seleccionados -->
+            <div class="files-list" id="filesList"></div>
+
+            <!-- Botón de procesamiento -->
+            <div style="text-align: center;">
+                <button class="btn" id="processBtn" onclick="procesarFacturas()" disabled>
+                    🚀 Procesar Facturas
+                </button>
+            </div>
+
+            <!-- Indicador de carga -->
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>Procesando documentos con Inteligencia Artificial...<br>
+                <small>Sistema modular v2.0 procesando: Validación NIT → Extracción → Clasificación → Análisis → Liquidación</small></p>
+            </div>
+
+            <!-- Mensajes de error -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Sección de resultados -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <span style="font-size: 2em;">✅</span>
+                    <h2 class="results-title">Resultados del Procesamiento</h2>
+                </div>
+                <div id="resultsContent"></div>
+            </div>
+
+            <!-- Información de conceptos -->
+            <div class="conceptos-info">
+                <div class="conceptos-title">🔍 Conceptos de Retefuente Identificables:</div>
+                <p>El sistema puede identificar automáticamente los siguientes conceptos:</p>
+                <div class="conceptos-grid" id="conceptosGrid">
+                    <!-- Se carga dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let nitsData = [];
+        let selectedNit = null;
+
+        // ========================================
+        // FUNCIONES PARA GESTIÓN DE NITS
+        // ========================================
+
+        async function cargarNitsDisponibles() {
+            try {
+                console.log('🔍 Cargando NITs disponibles...');
+                const response = await fetch('/api/nits-disponibles');
+                const data = await response.json();
+                
+                if (data.success) {
+                    nitsData = data.nits;
+                    console.log(`✅ ${data.total_nits} NITs cargados:`, nitsData);
+                    poblarSelectNits();
+                } else {
+                    throw new Error('Error obteniendo NITs del servidor');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error cargando NITs:', error);
+                showError('Error cargando NITs disponibles: ' + error.message);
+                
+                // Mostrar opción manual en caso de error
+                const nitSelect = document.getElementById('nitSelect');
+                nitSelect.innerHTML = '<option value="">❌ Error cargando NITs - El sistema usará uno por defecto</option>';
+            }
+        }
+
+        function poblarSelectNits() {
+            const nitSelect = document.getElementById('nitSelect');
+            nitSelect.innerHTML = '<option value="">🏢 Selecciona un NIT administrativo...</option>';
+            
+            nitsData.forEach(nit => {
+                const option = document.createElement('option');
+                option.value = nit.nit;
+                
+                // Formatear texto del option
+                let texto = `${nit.nit} - ${nit.nombre}`;
+                
+                // Marcar si no aplica retención en la fuente
+                if (!nit.aplica_retencion_fuente) {
+                    texto += ' (No aplica ReteFuente)';
+                    option.disabled = true;
+                    option.style.color = '#6c757d';
+                }
+                
+                option.textContent = texto;
+                nitSelect.appendChild(option);
+            });
+            
+            console.log(`✅ Select poblado con ${nitsData.length} NITs`);
+        }
+
+        function onNitSelectionChange() {
+            const nitSelect = document.getElementById('nitSelect');
+            const selectedNitValue = nitSelect.value;
+            
+            if (selectedNitValue) {
+                selectedNit = nitsData.find(nit => nit.nit === selectedNitValue);
+                if (selectedNit) {
+                    mostrarInfoNit(selectedNit);
+                    habilitarUpload();
+                } else {
+                    console.error('NIT no encontrado en datos');
+                }
+            } else {
+                selectedNit = null;
+                ocultarInfoNit();
+                deshabilitarUpload();
+            }
+            
+            updateProcessButton();
+        }
+
+        function mostrarInfoNit(nit) {
+            const nitInfo = document.getElementById('nitInfo');
+            const nitDetails = document.getElementById('nitDetails');
+            
+            // Separar impuestos implementados vs futuros
+            const impuestosImplementados = nit.impuestos_aplicables.filter(imp => 
+                imp === 'RETENCION_FUENTE'
+            );
+            
+            const impuestosFuturos = nit.impuestos_aplicables.filter(imp => 
+                imp !== 'RETENCION_FUENTE'
+            );
+            
+            nitDetails.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📋 Información de la Entidad</h4>
+                    <div class="nit-details">
+                        <div class="nit-detail-item">
+                            <div class="nit-detail-label">NIT</div>
+                            <div class="nit-detail-value">${nit.nit}</div>
+                        </div>
+                        <div class="nit-detail-item">
+                            <div class="nit-detail-label">Nombre</div>
+                            <div class="nit-detail-value">${nit.nombre}</div>
+                        </div>
+                        <div class="nit-detail-item">
+                            <div class="nit-detail-label">Total Impuestos</div>
+                            <div class="nit-detail-value">${nit.total_impuestos} configurados</div>
+                        </div>
+                        <div class="nit-detail-item">
+                            <div class="nit-detail-label">Estado ReteFuente</div>
+                            <div class="nit-detail-value">${nit.aplica_retencion_fuente ? '✅ Habilitado' : '❌ Deshabilitado'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">💼 Impuestos Configurados</h4>
+                    
+                    ${impuestosImplementados.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: #28a745;">✅ Implementados (se procesarán):</strong>
+                            <div class="impuestos-tags">
+                                ${impuestosImplementados.map(imp => 
+                                    `<span class="impuesto-tag implementado">${imp.replace('_', ' ')}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${impuestosFuturos.length > 0 ? `
+                        <div>
+                            <strong style="color: #6c757d;">🔧 Futuros (próximamente):</strong>
+                            <div class="impuestos-tags">
+                                ${impuestosFuturos.map(imp => 
+                                    `<span class="impuesto-tag futuro">${imp.replace('_', ' ')}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            nitInfo.classList.add('show');
+        }
+
+        function ocultarInfoNit() {
+            const nitInfo = document.getElementById('nitInfo');
+            nitInfo.classList.remove('show');
+        }
+
+        function habilitarUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.classList.remove('disabled');
+        }
+
+        function deshabilitarUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.classList.add('disabled');
+        }
+
+        // ========================================
+        // FUNCIONES ORIGINALES (MODIFICADAS)
+        // ========================================
+
+        // Configurar eventos de drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const nitSelect = document.getElementById('nitSelect');
+
+        // Evento para cambio de NIT
+        nitSelect.addEventListener('change', onNitSelectionChange);
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!uploadArea.classList.contains('disabled')) {
+                uploadArea.classList.add('dragover');
+            }
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (!uploadArea.classList.contains('disabled')) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            if (!uploadArea.classList.contains('disabled')) {
+                fileInput.click();
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const maxFiles = 6;
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            const allowedTypes = ['.pdf', '.xlsx', '.xls', '.jpg', '.jpeg', '.png', '.docx', '.doc'];
+
+            for (let file of files) {
+                if (selectedFiles.length >= maxFiles) {
+                    showError(`Máximo ${maxFiles} archivos permitidos`);
+                    break;
+                }
+
+                if (file.size > maxSize) {
+                    showError(`El archivo ${file.name} excede el tamaño máximo de 50MB`);
+                    continue;
+                }
+
+                const extension = '.' + file.name.split('.').pop().toLowerCase();
+                if (!allowedTypes.includes(extension)) {
+                    showError(`Tipo de archivo no soportado: ${extension}`);
+                    continue;
+                }
+
+                selectedFiles.push(file);
+            }
+
+            updateFilesList();
+            updateProcessButton();
+        }
+
+        function updateFilesList() {
+            const filesList = document.getElementById('filesList');
+            filesList.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const icon = getFileIcon(file.name);
+                const size = formatFileSize(file.size);
+
+                fileItem.innerHTML = `
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${size}</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile(${index})">×</button>
+                `;
+
+                filesList.appendChild(fileItem);
+            });
+        }
+
+        function getFileIcon(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📄',
+                'xlsx': '📊', 'xls': '📊',
+                'docx': '📝', 'doc': '📝',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️'
+            };
+            return icons[extension] || '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFilesList();
+            updateProcessButton();
+        }
+
+        function updateProcessButton() {
+            const processBtn = document.getElementById('processBtn');
+            // Habilitar solo si hay archivos Y un NIT seleccionado (o permitir sin NIT para compatibilidad)
+            processBtn.disabled = selectedFiles.length === 0;
+            
+            // Actualizar texto del botón según el estado
+            if (selectedFiles.length === 0) {
+                processBtn.textContent = '📄 Selecciona archivos primero';
+            } else if (!selectedNit) {
+                processBtn.textContent = '🚀 Procesar con NIT por defecto';
+            } else {
+                processBtn.textContent = `🚀 Procesar con ${selectedNit.nit}`;
+            }
+        }
+
+        async function procesarFacturas() {
+            if (selectedFiles.length === 0) {
+                showError('Por favor selecciona al menos un archivo');
+                return;
+            }
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultsSection = document.getElementById('resultsSection');
+            const errorMessage = document.getElementById('errorMessage');
+            const processBtn = document.getElementById('processBtn');
+
+            // Mostrar loading
+            loadingIndicator.style.display = 'block';
+            resultsSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            processBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                
+                // Agregar archivos
+                selectedFiles.forEach(file => {
+                    formData.append('archivos', file);
+                });
+                
+                // Agregar NIT si está seleccionado
+                if (selectedNit) {
+                    formData.append('nit_administrativo', selectedNit.nit);
+                    console.log(`🏢 Procesando con NIT: ${selectedNit.nit} - ${selectedNit.nombre}`);
+                } else {
+                    console.log('⚠️ Procesando sin NIT específico (se usará por defecto)');
+                }
+
+                const response = await fetch('/api/procesar-facturas', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                // Actualizar estadísticas de extracción después del procesamiento
+                setTimeout(() => {
+                    checkExtracciones();
+                }, 1000);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    
+                    if (errorData.detail && typeof errorData.detail === 'object') {
+                        // Error estructurado del backend
+                        throw new Error(errorData.detail.mensaje || 'Error procesando archivos');
+                    } else {
+                        // Error simple
+                        throw new Error(errorData.detail || `Error HTTP: ${response.status}`);
+                    }
+                }
+
+                const result = await response.json();
+                console.log('Respuesta completa del servidor:', result);
+                displayResults(result);
+
+            } catch (error) {
+                console.error('Error:', error);
+                
+                let errorMessage = 'Error desconocido';
+                
+                if (error.message.includes('422')) {
+                    errorMessage = 'Error procesando con IA. Por favor inténtalo de nuevo.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Error interno del servidor. Verifica tu conexión.';
+                } else if (error.message.includes('timeout')) {
+                    errorMessage = 'La operación tardó demasiado. Inténtalo de nuevo.';
+                } else if (error.message.includes('NIT administrativo')) {
+                    errorMessage = `Error de NIT: ${error.message}`;
+                } else {
+                    errorMessage = `Error: ${error.message}`;
+                }
+                
+                showError(errorMessage);
+            } finally {
+                loadingIndicator.style.display = 'none';
+                processBtn.disabled = false;
+                updateProcessButton(); // Restaurar texto del botón
+            }
+        }
+
+        function displayResults(result) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+
+            console.log('Estructura de resultado:', result);
+
+            // Validar que tengamos la estructura correcta
+            if (!result || !result.success) {
+                showError('Respuesta inválida del servidor');
+                return;
+            }
+
+            // Verificar si tenemos la nueva estructura v2.0.0
+            const resultados = result.resultados || result;
+            const estadisticas = result.estadisticas || {};
+            
+            if (!resultados) {
+                showError('No se encontraron resultados en la respuesta');
+                return;
+            }
+
+            let html = '';
+
+            // NUEVA SECCIÓN: Información del NIT Administrativo
+            if (result.nit_administrativo) {
+                const nitAdmin = result.nit_administrativo;
+                html += `
+                    <div class="result-card" style="border-left-color: #17a2b8;">
+                        <div class="result-title">
+                            🏢 NIT Administrativo Utilizado
+                        </div>
+                        <div class="result-content">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px;">
+                                    <strong>NIT:</strong><br>${nitAdmin.nit}
+                                </div>
+                                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px;">
+                                    <strong>Entidad:</strong><br>${nitAdmin.nombre_entidad}
+                                </div>
+                                <div style="background: #e7f3ff; padding: 15px; border-radius: 8px;">
+                                    <strong>Método:</strong><br>
+                                    ${nitAdmin.usado_por_defecto ? 
+                                        '<span class="status-badge status-warning">Por defecto</span>' : 
+                                        '<span class="status-badge status-success">Seleccionado</span>'}
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <strong>Impuestos Aplicables:</strong>
+                                <div style="margin-top: 8px;">
+                                    ${nitAdmin.impuestos_aplicables.map(imp => 
+                                        `<span class="status-badge ${nitAdmin.impuestos_procesados.includes(imp) ? 'status-success' : 'status-info'}">${imp.replace('_', ' ')}</span>`
+                                    ).join('')}
+                                </div>
+                                <small style="color: #6c757d; margin-top: 10px; display: block;">
+                                    ✅ Verde = Procesado en esta ejecución | 🔵 Azul = Configurado para futuro
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Mostrar información de la versión y arquitectura
+            if (result.version && result.arquitectura) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-title">
+                            🏗️ Información del Sistema
+                        </div>
+                        <div class="result-content">
+                            <span class="status-badge status-info">Versión: ${result.version}</span>
+                            <span class="status-badge status-info">Arquitectura: ${result.arquitectura}</span>
+                            ${result.flujo_completado ? 
+                                `<p><strong>Flujo completado:</strong> ${result.flujo_completado.join(' → ')}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Estadísticas del procesamiento
+            if (estadisticas && Object.keys(estadisticas).length > 0) {
+                html += `
+                    <div class="stats-section">
+                        ${estadisticas.archivos_procesados ? 
+                            `<div class="stat-item">
+                                <div class="stat-number">${estadisticas.archivos_procesados}</div>
+                                <div class="stat-label">Archivos Procesados</div>
+                             </div>` : ''}
+                        ${estadisticas.archivos_exitosos ? 
+                            `<div class="stat-item">
+                                <div class="stat-number">${estadisticas.archivos_exitosos}</div>
+                                <div class="stat-label">Archivos Exitosos</div>
+                             </div>` : ''}
+                        ${estadisticas.documentos_clasificados ? 
+                            `<div class="stat-item">
+                                <div class="stat-number">${estadisticas.documentos_clasificados}</div>
+                                <div class="stat-label">Documentos Clasificados</div>
+                             </div>` : ''}
+                        ${estadisticas.conceptos_identificados ? 
+                            `<div class="stat-item">
+                                <div class="stat-number">${estadisticas.conceptos_identificados}</div>
+                                <div class="stat-label">Conceptos Identificados</div>
+                             </div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Clasificación de documentos
+            if (resultados.clasificacion_documentos) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-title">
+                            📋 Clasificación de Documentos
+                        </div>
+                        <div class="result-content">
+                `;
+                
+                Object.entries(resultados.clasificacion_documentos).forEach(([archivo, categoria]) => {
+                    const badge = categoria === 'FACTURA' ? 'status-success' : 
+                                 categoria === 'RUT' ? 'status-warning' : 
+                                 categoria === 'COTIZACION' ? 'status-info' : 'status-error';
+                    html += `<span class="status-badge ${badge}">${archivo}: ${categoria}</span>`;
+                });
+                
+                html += `</div></div>`;
+            }
+
+            // ==========================================
+            // PROCESAMIENTO ESPECÍFICO PARA CONSORCIOS
+            // ==========================================
+            if (estadisticas.es_consorcio && resultados.consorcio) {
+                html += displayConsorcioResults(resultados.consorcio);
+            }
+            // ==========================================
+            // PROCESAMIENTO NORMAL PARA FACTURAS
+            // ==========================================
+            else {
+                // Análisis de factura normal
+                if (resultados.analisis_factura) {
+                    const analisis = resultados.analisis_factura;
+                    html += `
+                        <div class="result-card">
+                            <div class="result-title">
+                                🔍 Análisis de Factura
+                            </div>
+                            <div class="result-content">
+                                <p><strong>Facturación exterior:</strong> 
+                                   ${analisis.es_facturacion_exterior ? 
+                                     '<span class="status-badge status-error">SÍ</span>' : 
+                                     '<span class="status-badge status-success">NO</span>'}</p>
+                                
+                                <p><strong>Valor total:</strong> ${analisis.valor_total ? 
+                                    `${analisis.valor_total.toLocaleString()}` : 'No identificado'}</p>
+                                <p><strong>IVA:</strong> ${analisis.iva ? 
+                                    `${analisis.iva.toLocaleString()}` : 'No identificado'}</p>
+                    `;
+                    
+                    if (analisis.conceptos_identificados && analisis.conceptos_identificados.length > 0) {
+                        html += `<p><strong>Conceptos identificados:</strong></p><ul>`;
+                        analisis.conceptos_identificados.forEach(concepto => {
+                            html += `<li>${concepto.concepto} (Tarifa: ${concepto.tarifa_retencion}%)</li>`;
+                        });
+                        html += `</ul>`;
+                    }
+                    
+                    if (analisis.naturaleza_tercero) {
+                        const tercero = analisis.naturaleza_tercero;
+                        html += `
+                            <p><strong>Naturaleza del tercero:</strong></p>
+                            <ul>
+                                <li>Tipo: ${tercero.es_persona_natural ? 'Persona Natural' : 'Persona Jurídica'}</li>
+                                <li>Declarante: ${tercero.es_declarante ? 'Sí' : 'No'}</li>
+                                <li>Régimen: ${tercero.regimen_tributario || 'No identificado'}</li>
+                                <li>Autorretenedor: ${tercero.es_autorretenedor ? 'Sí' : 'No'}</li>
+                                <li>Responsable IVA: ${tercero.es_responsable_iva ? 'Sí' : 'No'}</li>
+                            </ul>
+                        `;
+                    }
+
+                    if (analisis.observaciones && analisis.observaciones.length > 0) {
+                        html += `<p><strong>Observaciones:</strong></p><ul>`;
+                        analisis.observaciones.forEach(obs => {
+                            html += `<li>${obs}</li>`;
+                        });
+                        html += `</ul>`;
+                    }
+                    
+                    html += `</div></div>`;
+                }
+
+                // Resultado de liquidación para facturas normales
+                if (resultados.liquidacion) {
+                    const liquidacion = resultados.liquidacion;
+                    const statusClass = liquidacion.puede_liquidar ? 'status-success' : 'status-error';
+                    
+                    html += `
+                        <div class="result-card">
+                            <div class="result-title">
+                                💰 Resultado de Liquidación
+                            </div>
+                            <div class="result-content">
+                                <p><strong>Estado:</strong> 
+                                   <span class="status-badge ${statusClass}">
+                                       ${liquidacion.puede_liquidar ? 'LIQUIDABLE' : 'NO LIQUIDABLE'}
+                                   </span></p>
+                    `;
+                    
+                    if (liquidacion.puede_liquidar) {
+                        html += `
+                            <p><strong>Base de retención:</strong> ${liquidacion.valor_base_retencion.toLocaleString()}</p>
+                            <p><strong>Tarifa aplicada:</strong> ${liquidacion.tarifa_aplicada}%</p>
+                            <p><strong>Valor retención:</strong> <strong style="color: #28a745; font-size: 1.2em;">${liquidacion.valor_retencion.toLocaleString()}</strong></p>
+                            <p><strong>Concepto:</strong> ${liquidacion.concepto_aplicado}</p>
+                        `;
+                    }
+                    
+                    if (liquidacion.mensajes_error && liquidacion.mensajes_error.length > 0) {
+                        html += `<p><strong>Observaciones:</strong></p><ul>`;
+                        liquidacion.mensajes_error.forEach(error => {
+                            html += `<li>${error}</li>`;
+                        });
+                        html += `</ul>`;
+                    }
+                    
+                    html += `<p><strong>Fecha de cálculo:</strong> ${new Date(liquidacion.fecha_calculo).toLocaleString()}</p>`;
+                    html += `</div></div>`;
+                }
+            }
+
+            // JSON completo para debugging (colapsado por defecto)
+            html += `
+                <div class="result-card">
+                    <div class="result-title">
+                        🔧 Respuesta Completa (JSON)
+                    </div>
+                    <div class="result-content">
+                        <details>
+                            <summary style="cursor: pointer; color: #007bff; margin-bottom: 10px;">
+                                Mostrar/Ocultar respuesta técnica completa
+                            </summary>
+                            <div class="json-viewer">${JSON.stringify(result, null, 2)}</div>
+                        </details>
+                    </div>
+                </div>
+            `;
+
+            resultsContent.innerHTML = html;
+            resultsSection.style.display = 'block';
+        }
+
+        function displayConsorcioResults(consorcio) {
+            let html = '';
+            
+            // SECCIÓN PRINCIPAL DEL CONSORCIO
+            html += `
+                <div class="consorcio-section">
+                    <div class="consorcio-header">
+                        <div class="consorcio-title">
+                            🏢 ${consorcio.consorcio_info.nombre_consorcio}
+                        </div>
+                        <div class="consorcio-badge">
+                            ${consorcio.consorcio_info.total_consorciados} Consorciados
+                        </div>
+                    </div>
+                    
+                    <div class="consorcio-info-grid">
+                        <div class="consorcio-info-item">
+                            <div class="consorcio-info-label">NIT Consorcio</div>
+                            <div class="consorcio-info-value">${consorcio.consorcio_info.nit_consorcio}</div>
+                        </div>
+                        <div class="consorcio-info-item">
+                            <div class="consorcio-info-label">Valor Total</div>
+                            <div class="consorcio-info-value">${consorcio.resumen_retencion.valor_total_factura.toLocaleString()}</div>
+                        </div>
+                        <div class="consorcio-info-item">
+                            <div class="consorcio-info-label">IVA Total</div>
+                            <div class="consorcio-info-value">${consorcio.resumen_retencion.iva_total.toLocaleString()}</div>
+                        </div>
+                        <div class="consorcio-info-item">
+                            <div class="consorcio-info-label">Total Retenciones</div>
+                            <div class="consorcio-info-value">${consorcio.resumen_retencion.total_retenciones.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    
+                    ${consorcio.resumen_retencion.porcentajes_normalizados ? `
+                        <div class="porcentajes-info normalizado">
+                            ℹ️ <strong>Porcentajes Normalizados:</strong> 
+                            Los porcentajes originales sumaban ${consorcio.resumen_retencion.suma_porcentajes_original.toFixed(5)}% 
+                            y fueron ajustados automáticamente a 100.000% para cálculos precisos.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // TABLA DE CONSORCIADOS
+            html += `
+                <div class="consorciados-table">
+                    <div class="consorciados-header">
+                        <h3>👥 Detalle por Consorciado</h3>
+                        <p>Retención aplicada individualmente según naturaleza de cada tercero</p>
+                    </div>
+                    <div class="consorciados-grid">
+            `;
+            
+            consorcio.consorciados.forEach((consorciado, index) => {
+                const retencionClass = consorciado.aplica_retencion ? 'retencion-si' : 'retencion-no';
+                
+                html += `
+                    <div class="consorciado-card ${retencionClass}">
+                        <div class="consorciado-nombre">
+                            ${index + 1}. ${consorciado.nombre}
+                        </div>
+                        
+                        <div class="consorciado-details">
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">NIT</div>
+                                <div class="consorciado-detail-value">${consorciado.nit}</div>
+                            </div>
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">Participación</div>
+                                <div class="consorciado-detail-value">${consorciado.porcentaje_participacion.toFixed(5)}%</div>
+                            </div>
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">Valor Individual</div>
+                                <div class="consorciado-detail-value">${consorciado.valor_proporcional.toLocaleString()}</div>
+                            </div>
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">Tipo</div>
+                                <div class="consorciado-detail-value">
+                                    ${consorciado.naturaleza_tercero.es_persona_natural ? 'Natural' : 'Jurídica'}
+                                </div>
+                            </div>
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">Régimen</div>
+                                <div class="consorciado-detail-value">
+                                    ${consorciado.naturaleza_tercero.regimen_tributario || 'N/A'}
+                                </div>
+                            </div>
+                            <div class="consorciado-detail">
+                                <div class="consorciado-detail-label">IVA</div>
+                                <div class="consorciado-detail-value">
+                                    ${consorciado.naturaleza_tercero.es_responsable_iva ? 'Sí' : 'No'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="retencion-resultado">
+                            ${consorciado.aplica_retencion ? 
+                                `✅ APLICA RETENCIÓN: ${consorciado.valor_retencion.toLocaleString()}` :
+                                `❌ NO APLICA: ${consorciado.razon_no_retencion || 'Ver validaciones'}`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            // RESUMEN FINAL
+            html += `
+                <div class="resumen-retencion">
+                    <h3>📈 Resumen de Retenciones del Consorcio</h3>
+                    <div class="resumen-grid">
+                        <div class="resumen-item">
+                            <div class="resumen-numero">${consorcio.resumen_retencion.consorciados_con_retencion}</div>
+                            <div class="resumen-label">Con Retención</div>
+                        </div>
+                        <div class="resumen-item">
+                            <div class="resumen-numero">${consorcio.resumen_retencion.consorciados_sin_retencion}</div>
+                            <div class="resumen-label">Sin Retención</div>
+                        </div>
+                        <div class="resumen-item">
+                            <div class="resumen-numero">${consorcio.resumen_retencion.total_retenciones.toLocaleString()}</div>
+                            <div class="resumen-label">Total Retenciones</div>
+                        </div>
+                        <div class="resumen-item">
+                            <div class="resumen-numero">${((consorcio.resumen_retencion.total_retenciones / consorcio.resumen_retencion.valor_total_factura) * 100).toFixed(2)}%</div>
+                            <div class="resumen-label">% del Total</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // CONCEPTOS IDENTIFICADOS
+            if (consorcio.conceptos_identificados && consorcio.conceptos_identificados.length > 0) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-title">
+                            🔍 Conceptos de Retención Identificados
+                        </div>
+                        <div class="result-content">
+                `;
+                
+                consorcio.conceptos_identificados.forEach(concepto => {
+                    html += `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #007bff;">
+                            <strong>Concepto:</strong> ${concepto.concepto}<br>
+                            <strong>Tarifa:</strong> ${(concepto.tarifa_retencion * 100).toFixed(1)}%<br>
+                            <strong>Base Mínima:</strong> ${concepto.base_minima ? concepto.base_minima.toLocaleString() : 'No definida'}<br>
+                            <strong>Base Gravable Total:</strong> ${concepto.base_gravable.toLocaleString()}
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+            
+            // OBSERVACIONES
+            if (consorcio.observaciones && consorcio.observaciones.length > 0) {
+                html += `
+                    <div class="result-card">
+                        <div class="result-title">
+                            📝 Observaciones del Procesamiento
+                        </div>
+                        <div class="result-content">
+                            <ul>
+                `;
+                
+                consorcio.observaciones.forEach(obs => {
+                    html += `<li>${obs}</li>`;
+                });
+                
+                html += `
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 8000);
+        }
+
+        // Cargar conceptos al iniciar
+        async function loadConceptos() {
+            try {
+                const response = await fetch('/api/conceptos');
+                const data = await response.json();
+                
+                const conceptosGrid = document.getElementById('conceptosGrid');
+                conceptosGrid.innerHTML = '';
+                
+                if (data.conceptos && Array.isArray(data.conceptos)) {
+                    data.conceptos.forEach(item => {
+                        const conceptoItem = document.createElement('div');
+                        conceptoItem.className = 'concepto-item';
+                        
+                        // Manejar tanto estructura nueva como antigua
+                        const concepto = typeof item === 'string' ? item : item.concepto;
+                        conceptoItem.textContent = concepto;
+                        conceptosGrid.appendChild(conceptoItem);
+                    });
+                } else {
+                    conceptosGrid.innerHTML = '<p>No se pudieron cargar los conceptos</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error cargando conceptos:', error);
+                const conceptosGrid = document.getElementById('conceptosGrid');
+                conceptosGrid.innerHTML = '<p>Error cargando conceptos</p>';
+            }
+        }
+
+        // Verificar estado del sistema
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const health = await response.json();
+                console.log('Estado del sistema v2.0:', health);
+                
+                // Mostrar estado en consola para debugging
+                if (health.version) {
+                    console.log(`Sistema version ${health.version} - Arquitectura: ${health.arquitectura || 'legacy'}`);
+                }
+                if (health.modulos) {
+                    console.log('Estado de módulos:', health.modulos);
+                }
+                
+                // Verificar estadísticas de extracción
+                await checkExtracciones();
+                
+            } catch (error) {
+                console.error('Error verificando estado:', error);
+            }
+        }
+        
+        // Verificar estadísticas de extracción
+        async function checkExtracciones() {
+            try {
+                const response = await fetch('/api/extracciones');
+                const extracciones = await response.json();
+                
+                if (extracciones.success) {
+                    console.log('📁 Estadísticas de extracción:', extracciones.estadisticas);
+                    
+                    // Mostrar info en la interfaz si hay extracciones
+                    if (extracciones.estadisticas.total_archivos_guardados > 0) {
+                        mostrarInfoExtracciones(extracciones.estadisticas);
+                    }
+                } else {
+                    console.log('Sin estadísticas de extracción disponibles');
+                }
+                
+            } catch (error) {
+                console.log('Extracción de estadísticas no disponible (normal en primer uso)');
+            }
+        }
+        
+        // Mostrar información de extracciones en la interfaz
+        function mostrarInfoExtracciones(stats) {
+            const mainContent = document.querySelector('.main-content');
+            
+            // Verificar si ya existe el elemento
+            let infoExtraccion = document.getElementById('infoExtraccion');
+            if (!infoExtraccion) {
+                infoExtraccion = document.createElement('div');
+                infoExtraccion.id = 'infoExtraccion';
+                infoExtraccion.className = 'conceptos-info';
+                infoExtraccion.style.background = '#f0f9ff';
+                infoExtraccion.style.borderColor = '#0ea5e9';
+                
+                // Insertar antes de la sección de conceptos
+                const conceptosInfo = document.querySelector('.conceptos-info');
+                mainContent.insertBefore(infoExtraccion, conceptosInfo);
+            }
+            
+            const tiposText = Object.entries(stats.tipos_extraccion)
+                .map(([tipo, count]) => `${tipo}: ${count}`)
+                .join(', ');
+            
+            infoExtraccion.innerHTML = `
+                <div class="conceptos-title">💾 Guardado Automático de Extracciones:</div>
+                <p>Todos los textos extraídos se guardan automáticamente para auditoría y debugging.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
+                    <div class="concepto-item" style="background: #e0f2fe;">
+                        <strong>📅 Fecha:</strong> ${stats.fecha}
+                    </div>
+                    <div class="concepto-item" style="background: #e8f5e8;">
+                        <strong>📁 Archivos:</strong> ${stats.total_archivos_guardados}
+                    </div>
+                    <div class="concepto-item" style="background: #fff3e0;">
+                        <strong>💽 Tamaño:</strong> ${stats.tamaño_total_mb} MB
+                    </div>
+                    <div class="concepto-item" style="background: #fce4ec;">
+                        <strong>📂 Ubicación:</strong> Results/Extracciones/${stats.fecha}/
+                    </div>
+                </div>
+                ${tiposText ? `<p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Tipos procesados hoy:</strong> ${tiposText}</p>` : ''}
+            `;
+        }
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Preliquidador v2.0 - Frontend con Multi-NIT cargado');
+            
+            // Cargar NITs primero
+            cargarNitsDisponibles();
+            
+            // Cargar conceptos y verificar sistema
+            loadConceptos();
+            checkHealth();
+            
+            // Deshabilitar upload inicialmente
+            deshabilitarUpload();
+        });
+    </script>
+</body>
+</html>

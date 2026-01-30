@@ -1,0 +1,879 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: PARTICIPACION DOC 911.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 18:28:10
+- Caracteres extraídos: 99082
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 45,
+  "tamaño_archivo_bytes": 3763584,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 99082
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+   ACUERDO CONSORCIAL   Los abajo firmantes, manifestamos a través del presente documento, que hemos convenido asociarnos en Consorcio, el cual se denomina CONSORCIO 911-SM para participar en la convocatoria cuyo objeto consiste en “Contratar los servicios de Operador Logístico que adelante las labores relacionadas con el desarrollo de actividades para eventos, certámenes, servicios publicitarios y medios de Fondo Mujer Emprende”.  Por lo anterior expresamos lo siguiente:  Estará vigente desde la fecha de su firma y se extenderá por un término igual al plazo del contrato que se llegare a suscribir, liquidación y un (1) año más. No obstante, en el evento en que no ocurriere la liquidación del contrato dentro del año siguiente a la terminación del mismo, la duración se entenderá hasta la liquidación del contrato.  El objeto social de cada uno de los integrantes del presente consorcio se encuentra relacionado con el objeto del contrato y permitirá al representante legal designado la celebración y ejecución del futuro contrato.  El Consorcio está integrado por:   
+ 
+NOMBRE   
+ 
+IDENTIFICACIÓN 
+o NIT   
+PORCENTAJE 
+DE 
+PARTICIPACIÓN  OBLIGACIONES A  
+CARGO DE CADA  
+UNA DE LAS  
+PARTES  
+ SINTONIZAR 
+MEDIOS S.A.S  830.107.841 -1 50% Contratar los 
+servicios de 
+Operador Logístico 
+que adelante las 
+labores 
+relacionadas con el 
+desarrollo de 
+actividades para 
+eventos, 
+certámenes, 
+servicios 
+publicitarios y 
+medios de Fondo 
+Mujer Emprende ”. PRODUCCION DE 
+EVENTOS 911 S.A.S  900.199.025 -3 50% Contratar los 
+servicios de 
+Operador Logístico 
+que adelante las 
+labores 
+
+--- PÁGINA 2 ---
+relacionadas con el 
+desarrollo de 
+actividades para 
+eventos, 
+certámenes, 
+servicios 
+publicitarios y 
+medios de Fondo 
+Mujer Emprende ”.   El representante legal del Consorcio es: EDGAR MIGUEL CARDONA JAMAICA identificado con C. C. No 79.454.540 de Bogotá y MARTHA CECILIA DIAZ MANRIQUE identificada con C.C. No. 63.432.137 De Floridablanca como representante legal suplente.  Quienes están expresamente facultados para firmar el contrato y tomar todas las determinaciones que fuesen necesarias al respecto, con amplías y suficientes facultades.  La responsabilidad de los integrantes del Consorcio será solidaria.  Que ninguno de los integrantes del Consorcio, se encuentra incurso en alguna causal de inhabilidad e incompatibilidad.  Nuestros representantes tienen todas las facultades amplias y suficientes para actuar en nombre del CONSORCIO, y en nombre de cada uno de sus miembros, entre algunas de las facultades y sin limitarse a ellas, están las siguientes:  • Atender todo lo relacionado de manera directa e indirecta con la elaboración y presentación de los documentos de la oferta, y la celebración y ejecución del eventual Contrato en el caso de que La Fiduciaria Colombiana de Comercio Exterior S.A. FIDUCOLDEX seleccione la oferta de este Oferente Plural.  • Constituir apoderados conforme la legislación colombiana  • Presentación de los documentos de la oferta que tiene por objeto “Contratar los servicios de Operador Logístico que adelante las labores relacionadas con el desarrollo de actividades para eventos, certámenes, servicios publicitarios y medios de Fondo Mujer Emprende”.   • Suscribir la carta de presentación de la Oferta.   • A constituir un RUT y comprometerse a una vez liquidado el respectivo contrato realizar su cancelación.   • Informar la cuenta bancaria de uno o varios miembros o del consorcio a la cual se realizarán los pagos.  • Atender todos los posibles requerimientos que formule el La Fiduciaria Colombiana de Comercio Exterior S.A. FIDUCOLDEX relacionados con aclaraciones a la Oferta.  
+
+--- PÁGINA 3 ---
+ • Suscribir el contrato y cualquier otro documento y ejecutar cualquier otro acto que se requiera para la elaboración, presentación y ejecución de la oferta, dentro de los términos y condiciones del pliego de condiciones.  . Para que administre y disponga de los activos de EL CONSORCIO, y celebre con relación a ellos, toda clase de contratos para su disposición o administración.  . Para que celebre, administre, modifique y cancele contratos bancarios y financieros, entre otros el de cuenta corriente bancaria, cuenta de ahorro, depósito a término, tarjeta de crédito y con relación a aquellos, bajo nuestra autorización y responsabilidad: i) Solicite la afiliación a la Sucursal Virtual y efectúe inscripción de cuentas en la sucursal virtual; ii) solicite los plásticos de las tarjetas de débito y/o crédito; iii) solicite bloqueos de clave y/o plásticos para las tarjeta débito y/o crédito ; iv) solicite las claves de las tarjetas débito y/o crédito; v) efectúe marcación de exención de GMF, cuando sea procedente; vi) Suscriba los documentos necesarios para permitir que los productos, servicios, o canales solicitados puedan operar conforme con los reglamentos de la entidad, entre ellos los títulos valores que cada uno demande para su debida configuración.  . Para que firme, gire, ordene girar, endose, proteste, suscriba, acepte, avale y afiance títulos valores y para que haga toda clase de negocios relacionados con instrumentos negociables.  . Para que modifique, sustituya, nove y/o celebre acuerdos de pago de las obligaciones contraídas en nuestro nombre como miembros de EL CONSORCIO y para que transija las reclamaciones, pleitos y diferencias relativos a nuestros derechos y obligaciones.  . Para que celebre a nuestro nombre, sin limitación de ninguna naturaleza y como miembros del CONSORCIO, todo tipo de operaciones tales como: operaciones de crédito, leasing, arrendamiento operativo, compraventa, factoring y línea triangular. En desarrollo de tal atribución y conforme lo dicho, firme convenios, reglamentos, endosos y cesión de facturas o de documentos crediticios y aceptación de la cesión de los mismos, constituya garantías, pagarés, y demás documentos exigidos por la entidad para perfeccionar dichas operaciones. Así mismo queda facultado para acordar el valor y el tipo de interés, plazo y demás condiciones de la respectiva operación.  . Otorgue todo de tipo de garantías en favor de terceros y firme la documentación necesaria para su perfeccionamiento.  . Para que delegue total o parcialmente este poder y, en general, para que asuma la personería de todos y cada uno de los poderdantes respecto a su participación en EL CONSORCIO, siempre que lo estime conveniente, de manera que en ningún caso quedemos sin representación en negocios que nos interesen y guarden relación directa o indirecta con EL CONSORCIO, ya se refieran a actos dispositivos o meramente administrativos.  • Suscribir el eventual Contrato.  
+
+--- PÁGINA 4 ---
+Ninguna de las partes podrá ceder en todo o en parte su participación en el presente CONSORCIO.  Una vez constituido el CONSORCIO, éste tendrá el carácter de irrevocable desde su constitución hasta el vencimiento del plazo de ejecución del contrato, liquidación y 1 año más.  Todas las modificaciones que se efectúen al presente acuerdo deberán constar por escrito suscrito por los representantes legales de las partes, previa autorización de la entidad.   SEDE DEL CONSORCIO. La sede del Consorcio es:  Dirección: calle 108 # 8-21  Correo electrónico: licitaciones@logistica911.com  Teléfono: 4324075-4324074 Ciudad: Bogotá  FACTURACIÓN: La facturación se realizará directamente por el CONSORCIO.   Para constancia se firma en Bogotá a los 15 días del mes febrero del año 2024.    POR:                                          POR:   EDGAR MIGUEL CARDONA                 Y                MARTHA CECILIA DIAZ MANRIQUE Representante Legal                                                Representante Legal  C.C. 79.454.540               C.C. 63.432.137 PRODUCCION DE EVENTOS 911 SAS                 SITONIZAR MEDIOS SAS NIT:900.199.025-3                                                   NIT: 830.107.841-1 Calle 108 #8-21                                       CALLE 108 #8-21 TEL: 6044615                 TEL: 3143627359 C.C. 79.454.540               C.C. 63.432.137    Firma: _____________________                    Firma: ________________________________        Acepto el nombramiento como Representante Legal del CONSORCIO   Nombre: EDGAR MIGUEL CARDONA C.C 79.454.540   Firma: ________________   
+
+--- PÁGINA 5 ---
+     Acepto el nombramiento como Representante Legal SUPLENTE del CONSORCIO. Nombre: MARTHA CECILIA DIAZ                 C.C. 63.432.137    Firma: ________________  
+
+--- PÁGINA 6 ---
+27. Fecha expedición  
+ExportadoresPara uso exclusivo de la DIAN5. Número de Identificación Tributaria (NIT)6. DV    
+984. Nombre51. Código38. País  
+56. Tipo
+985. Cargo50. Código  4. Número de formulario
+36. Nombre comercial37. Sigla
+53. Código
+59. Anexos          SINO61. Fecha55. Forma57. Modo58. CPC60. No. de Folios:Ocupación
+123456789101112131415161718Actividad secundariaOtras actividades49. Fecha inicio actividad48. Código12Lugar de expedición28.  País
+Actividad principalActividad económica47. Fecha inicio actividad46. Código
+12335. Razón social31. Primer apellido  32. Segundo apellido33. Primer nombre
+52. Número establecimientos24. Tipo de contribuyente12. Dirección seccional14. Buzón electrónico
+34. Otros nombres25. Tipo de documento29. Departamento26. Número de Identificación
+39. Departamento
+Firma del solicitante:2. Concepto
+1920212223242526
+1234567891054. Código11121314151617181920Responsabilidades, Calidades y Atributos
+IMPORTANTE: Sin perjuicio de las actualizaciones a que haya lugar, la inscripción en el Registro Único Tributario -RUT-, tendrá vigencia indefinida y en consecuencia no se exigirá su renovación    40. Ciudad/Municipio
+Sin perjuicio de las verificaciones que la DIAN realice.  Firma autorizada:IDENTIFICACIÓN
+41. Dirección principal
+ExportadoresUsuarios aduanerosUBICACIÓN30. Ciudad/Municipio
+42. Correo electrónico44. Teléfono 143. Código postal45. Teléfono 2CLASIFICACIÓNActualización 02
+141123165529
+     9014934622Impuestos de Bogotá 32
+Persona jurídica 1                               
+           
+CONSORCIO 911-SM
+COLOMBIA 169Bogotá D.C. 11Bogotá, D.C. 001
+CALLE 108   8   21 P 1
+licitaciones@logistica911.com
+                   4324075          4324074
+823020210603                             0
+07- Retención en la fuente a título de  rent7 
+14- Informante de exogena14
+42- Obligado a llevar contabilidad 42
+48 - Impuesto sobre las ventas - IVA48
+52 - Facturador electrónico52
+55 - Informante de Beneficiarios Finales55                                        
+                              
+                                   
+      
+ X   0 2024 - 09 - 06 / 16 : 37: 36
+CARDONA JAMAICA EDGAR MIGUEL 
+Representante legal Certificado
+Fecha generación documento PDF: 06-09-2024 04:37:48PM
+
+--- PÁGINA 7 ---
+67. Sociedades y organismos extranjerosPágina                           de
+95. Número de Identificación Tributaria (NIT) de la Matriz o Controlante   Espacio reservado para la DIAN
+68. Sin personería jurídica
+93. Vinculación económica81. Hasta80. Desde79. Ciudad/Municipio78. Departamento77. No. Matrícula mercantil76. Fecha de registro75. Entidad de registro74. Número de notaría73. Fecha72. Número71. Clase70. Beneficio64. Entidades o institutos de derecho público de orden nacional, departamental, municipal y descentralizados69. Otras organizaciones no clasificadas66. Cooperativas63. Formas asociativas65. Fondos62. Naturaleza
+94. Nombre del grupo económico y/o empresarial4. Número de formulario
+88. Entidad de vigilancia y control
+97. Nombre o razón social de la matriz o controlante96. DV.82. Nacional%83. Nacional público%84. Nacional privado%85. Extranjero%86. Extranjero público%87. Extranjero privado%Hoja 2
+5. Número de Identificación Tributaria (NIT)6. DV
+173. Nombre o razón social de la sociedad o natural del exterior con EP-----589. Estado actual90. Fecha cambio de estado1Item234Vinculación económicaCaracterísticas y formas de las organizaciones
+170. Número de identificación tributaria otorgado en el exterior171. País172. Número de identificación tributaria sociedad o natural del exterior con EPDocumento2. Reforma1. ConstituciónConstitución, Registro y Última ReformaComposición del Capital
+ VigenciaEntidad de vigilancia y control91. Número de Identificación Tributaria (NIT)                  92. DVEstado y Beneficio12. Dirección seccional14. Buzón electrónico
+141123165529
+     9014934622Impuestos de Bogotá 322 5
+ 2     
+      
+ 3    1
+04   
+                    
+20210514         
+    
+98   
+20210514         
+                    
+11   
+001         
+20210514         
+20220530              100
+     0.0
+   100.0
+       0
+     0.0
+     0.0
+  
+80 
+   
+   
+   
+   20220630
+        
+        
+        
+                     
+             
+             
+             
+              
+ 
+ 
+ 
+ 
+                
+   
+Fecha generación documento PDF: 06-09-2024 04:37:48PM
+
+--- PÁGINA 8 ---
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal1
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal2
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal3
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                          98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal4
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal5Página                           de   Espacio reservado para la DIAN4. Número de formularioHoja 3
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónicoRepresentación141123165529
+     9014934622Impuestos de Bogotá 323 5
+REPRS LEGAL PRIN 18
+REPRS LEGAL SUPL 19
+  
+  
+  20210514
+20210514
+        
+        
+        Cédula de Ciudadaní 13
+Cédula de Ciudadan 13
+  
+  
+  79454540            
+63432137            
+                    
+                    
+                     
+ 
+ 
+ 
+         
+        
+        
+        
+        CARDONA
+DIAZJAMAICA
+MANRIQUEEDGAR
+MARTHAMIGUEL
+CECILIA              
+              
+              
+              
+               
+ 
+ 
+ 
+ 
+Fecha generación documento PDF: 06-09-2024 04:37:48PM
+
+--- PÁGINA 9 ---
+114. Nacionalidad112. Número de identificación                                                                                                     
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón socialPágina                           de   Espacio reservado para la DIAN4. Número de formularioHoja 4
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónico
+114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social1
+2
+3
+4114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social5Socios y/o Miembros de Juntas Directivas, Consorcios, Uniones Temporales141123165529
+     9014934622Impuestos de Bogotá 324 5
+NIT 31
+NIT 31
+  
+  
+  830107841           
+900199025           
+                    
+                    
+                    1
+3
+ 
+ 
+ COLOMBIA 169
+COLOMBIA 169
+   
+   
+   SINTONIZAR MEDIOS SAS
+PRODUCCION DE EVENTOS 911 S.A.S 
+ 
+ 
+ 
+       50
+      50
+        
+        
+        20210514
+20210514
+        
+        
+                
+        
+        
+        
+        
+Fecha generación documento PDF: 06-09-2024 04:37:48PM
+
+--- PÁGINA 10 ---
+127. Número de tarjeta profesional125. Número de identificación                                                                                     132. Número de Identificación Tributaria (NIT)    
+144. Número de Identificación Tributaria (NIT)           147. Fecha de nombramiento
+156. Número de Identificación Tributaria (NIT)                  148. Tipo de documento124. Tipo de documento
+135. Fecha de nombramiento
+159. Fecha de nombramiento152. Primer apellido  140. Primer apellido  128. Primer apellido  129. Segundo apellido  
+141. Segundo apellido  
+153. Segundo apellido130. Primer nombre
+142. Primer nombre
+154. Primer nombre131. Otros nombres
+143. Otros nombres
+155. Otros nombres133. DV
+145. DV
+157. DV126. DVRevisor fiscal principalRevisor Fiscal y Contador
+136. Tipo de documento134. Sociedad o firma designada
+146. Sociedad o firma designada149. Número de identificación                                                                                            150. DV151. Número de tarjeta profesional158. Sociedad o firma designada137. Número de identificación                                                                                          138. DV139. Número de tarjeta profesionalRevisor fiscal suplenteContadorPágina                           de   Espacio reservado para la DIAN4. Número de formularioHoja 5
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónico141123165529
+     9014934622Impuestos de Bogotá 325 5
+                               
+               
+        
+                               
+               
+        
+Cédula de Ciudadanía 131143350640          5 273222  
+PEREZ PEÑA PAOLA ESTHER
+               
+20240401
+Fecha generación documento PDF: 06-09-2024 04:37:48PM
+
+--- PÁGINA 11 ---
+Producto No. Producto Fecha Apertura Estado
+CUENTA DE AHORROS 69000001756 2021/06/18 ACTIVAViernes, 13deseptiembre de2024
+Señor(a)
+Aquienpuedainteresar
+BANCOLOMBIA S.A.sepermiteinformar queCONSORCIO 911-SM identificado(a) conNIT901493462, a
+lafechadeexpedición deestacertificación, tieneconelbancolossiguientes productos:
+*Importante: Estaconstancia solohacereferencia alosproductos mencionados anteriormente.
+*Sideseaverificar laveracidad deestainformación, puedecomunicarse conlaSucursal Telefónica Bancolombia los
+siguientes números: Medellín -Local:(60-4) 5109000-Bogotá -Local:(60-1) 3430000-Barranquilla -Local:
+(60-5)3618888-Cali-Local:(60-2)5540505-Restodelpaís:018000912345. Sucursales Telefónicas enel
+exterior: España (34)900995717-Estados Unidos(1)18663799714.
+
+
+--- PÁGINA 12 ---
+
+
+--- PÁGINA 13 ---
+Certiﬁcation in IFRS – The Institute of Certiﬁed Accountants of England and Wales - ICAEW 
+Bogo tá D.C. 02 de diciembre de 2024 
+CERT IFICO QUE:  
+PRO DUCCIÓN DE EVENTOS 911 S.A.S . 
+Se encuentra a paz y salvo con el pago de los aportes de sus empleados , a los 
+sistemas  de salud, riesgos profesionales, pensiones y aportes a las Cajas de  
+compensación familiar, Instituto Colombiano de Bienestar Familiar y Servicio  
+Nacional de Aprendizaje, de acuerdo con lo establecido en el artículo 50 de la  Ley 789 
+de 2002, hasta la fecha.  
+Así mismo la compañía PRODUCCIÓN DE EVENTOS 911 S.A.S . ha cumplido, durante 
+los seis (6) meses anteriores a la fecha de expedición de esta certificación con el pago 
+de sus aportes.  
+En cu mplimiento del artículo 2 de la Ley 43 de 1990, mi firma como Revisor Fiscal en 
+las certificaciones se fundamenta en los libros de contabilidad. La información 
+requerida que no es de carácter contable  fue verificada con las  planillas integradas 
+de autoliquidación de aportes, suministradas por la compañía  para esta certificación.  
+MAU RO ALBERTO CASTILLA ACOSTA  
+72.302.940 de Barranquilla  
+Revisor Fiscal de Producciones de Eventos 911 S.A.S.  
+T.P. 112750 - T 
+
+
+--- PÁGINA 14 ---
+27. Fecha expedición  
+ExportadoresPara uso exclusivo de la DIAN5. Número de Identificación Tributaria (NIT)6. DV    
+984. Nombre51. Código38. País  
+56. Tipo
+985. Cargo50. Código  4. Número de formulario
+36. Nombre comercial37. Sigla
+53. Código
+59. Anexos          SINO61. Fecha55. Forma57. Modo58. CPC60. No. de Folios:Ocupación
+123456789101112131415161718Actividad secundariaOtras actividades49. Fecha inicio actividad48. Código12Lugar de expedición28.  País
+Actividad principalActividad económica47. Fecha inicio actividad46. Código
+12335. Razón social31. Primer apellido  32. Segundo apellido33. Primer nombre
+52. Número establecimientos24. Tipo de contribuyente12. Dirección seccional14. Buzón electrónico
+34. Otros nombres25. Tipo de documento29. Departamento26. Número de Identificación
+39. Departamento
+Firma del solicitante:2. Concepto
+1920212223242526
+1234567891054. Código11121314151617181920Responsabilidades, Calidades y Atributos
+IMPORTANTE: Sin perjuicio de las actualizaciones a que haya lugar, la inscripción en el Registro Único Tributario -RUT-, tendrá vigencia indefinida y en consecuencia no se exigirá su renovación    40. Ciudad/Municipio
+Sin perjuicio de las verificaciones que la DIAN realice.  Firma autorizada:IDENTIFICACIÓN
+41. Dirección principal
+ExportadoresUsuarios aduanerosUBICACIÓN30. Ciudad/Municipio
+42. Correo electrónico44. Teléfono 143. Código postal45. Teléfono 2CLASIFICACIÓNActualización 02
+141128123308
+     9001990253Impuestos de Bogotá 32
+Persona jurídica 1                               
+           
+PRODUCCION DE EVENTOS 911 S.A.S
+PRODUCCION 911
+COLOMBIA 169Bogotá D.C. 11Bogotá, D.C. 001
+CL 108   8   21
+proveedores@logistica911.com
+110111          6014324075       3188068529
+823020080602 783020080602 90087310          
+05- Impto. renta y compl.  régimen  ordinar5 
+07- Retención en la fuente a título de  rent7 
+08- Retención timbre nacional8 
+09- Retención en la fuente en el impuesto 9 
+10- Obligado aduanero10
+14- Informante de exogena14
+48 - Impuesto sobre las ventas - IVA48
+52 - Facturador electrónico52
+55 - Informante de Beneficiarios Finales55                                  
+22 23                         
+                              3 34   
+96     
+ X   0 2024 - 09 - 24 / 08 : 56: 10
+CARDONA JAMAICA EDGAR MIGUEL 
+Representante legal Certificado
+Fecha generación documento PDF: 24-09-2024 08:57:35AM
+
+--- PÁGINA 15 ---
+67. Sociedades y organismos extranjerosPágina                           de
+95. Número de Identificación Tributaria (NIT) de la Matriz o Controlante   Espacio reservado para la DIAN
+68. Sin personería jurídica
+93. Vinculación económica81. Hasta80. Desde79. Ciudad/Municipio78. Departamento77. No. Matrícula mercantil76. Fecha de registro75. Entidad de registro74. Número de notaría73. Fecha72. Número71. Clase70. Beneficio64. Entidades o institutos de derecho público de orden nacional, departamental, municipal y descentralizados69. Otras organizaciones no clasificadas66. Cooperativas63. Formas asociativas65. Fondos62. Naturaleza
+94. Nombre del grupo económico y/o empresarial4. Número de formulario
+88. Entidad de vigilancia y control
+97. Nombre o razón social de la matriz o controlante96. DV.82. Nacional%83. Nacional público%84. Nacional privado%85. Extranjero%86. Extranjero público%87. Extranjero privado%Hoja 2
+5. Número de Identificación Tributaria (NIT)6. DV
+173. Nombre o razón social de la sociedad o natural del exterior con EP-----589. Estado actual90. Fecha cambio de estado1Item234Vinculación económicaCaracterísticas y formas de las organizaciones
+170. Número de identificación tributaria otorgado en el exterior171. País172. Número de identificación tributaria sociedad o natural del exterior con EPDocumento2. Reforma1. ConstituciónConstitución, Registro y Última ReformaComposición del Capital
+ VigenciaEntidad de vigilancia y control91. Número de Identificación Tributaria (NIT)                  92. DVEstado y Beneficio12. Dirección seccional14. Buzón electrónico
+141128123308
+     9001990253Impuestos de Bogotá 322 5
+ 2 10   
+      
+     1
+05   
+00727               
+20080131         
+76   
+03   
+20080205         
+1770890             
+11   
+4           
+20080131         
+20180131              100
+     0.0
+   100.0
+       0
+     0.0
+     0.0
+  
+   
+   
+   
+   
+           
+        
+        
+        
+                     
+             
+             
+             
+              
+ 
+ 
+ 
+ 
+                
+   
+Fecha generación documento PDF: 24-09-2024 08:57:35AM
+
+--- PÁGINA 16 ---
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal1
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal2
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal3
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                          98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal4
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal5Página                           de   Espacio reservado para la DIAN4. Número de formularioHoja 3
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónicoRepresentación141128123308
+     9001990253Impuestos de Bogotá 323 5
+REPRS LEGAL PRIN 18
+REPRS LEGAL SUPL 19
+REPRS LEGAL SUPL 19
+  
+  20080205
+20080205
+20240729
+        
+        Cédula de Ciudadaní 13
+Cédula de Ciudadan 13
+Cédula de Ciudadan 13
+  
+  79454540            
+42113050            
+80400120            
+                    
+                     
+ 
+ 
+ 
+         
+        
+        
+        
+        CARDONA
+PINEDA
+HOYOSJAMAICA
+CARDONA
+ROMEROEDGAR
+LINA
+HAIDERMIGUEL
+MARIA
+ERNESTO              
+              
+              
+              
+               
+ 
+ 
+ 
+ 
+Fecha generación documento PDF: 24-09-2024 08:57:35AM
+
+--- PÁGINA 17 ---
+114. Nacionalidad112. Número de identificación                                                                                                     
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón socialPágina                           de   Espacio reservado para la DIAN4. Número de formularioHoja 4
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónico
+114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social1
+2
+3
+4114. Nacionalidad112. Número de identificación                                                                                                    
+120. Valor capital del socio121. % Participación122. Fecha de ingreso123. Fecha de retiro116. Segundo apellido  117. Primer nombre113. DV111. Tipo de documento118. Otros nombres115. Primer apellido  119. Razón social5Socios y/o Miembros de Juntas Directivas, Consorcios, Uniones Temporales141128123308
+     9001990253Impuestos de Bogotá 324 5
+Cédula de Ciudada 13
+  
+  
+  
+  79454540            
+                    
+                    
+                    
+                     
+ 
+ 
+ 
+ COLOMBIA 169
+   
+   
+   
+   CARDONA JAMAICA EDGAR MIGUEL
+4,000,000,000
+ 
+ 
+ 
+      100
+        
+        
+        
+        20080205
+        
+        
+        
+                
+        
+        
+        
+        
+Fecha generación documento PDF: 24-09-2024 08:57:35AM
+
+--- PÁGINA 18 ---
+127. Número de tarjeta profesional125. Número de identificación                                                                                     132. Número de Identificación Tributaria (NIT)    
+144. Número de Identificación Tributaria (NIT)           147. Fecha de nombramiento
+156. Número de Identificación Tributaria (NIT)                  148. Tipo de documento124. Tipo de documento
+135. Fecha de nombramiento
+159. Fecha de nombramiento152. Primer apellido  140. Primer apellido  128. Primer apellido  129. Segundo apellido  
+141. Segundo apellido  
+153. Segundo apellido130. Primer nombre
+142. Primer nombre
+154. Primer nombre131. Otros nombres
+143. Otros nombres
+155. Otros nombres133. DV
+145. DV
+157. DV126. DVRevisor fiscal principalRevisor Fiscal y Contador
+136. Tipo de documento134. Sociedad o firma designada
+146. Sociedad o firma designada149. Número de identificación                                                                                            150. DV151. Número de tarjeta profesional158. Sociedad o firma designada137. Número de identificación                                                                                          138. DV139. Número de tarjeta profesionalRevisor fiscal suplenteContadorPágina                           de   Espacio reservado para la DIAN4. Número de formularioHoja 5
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónico141128123308
+     9001990253Impuestos de Bogotá 325 5
+Cédula de Ciudadanía 1372302940             112750T 
+CASTILLA ACOSTA MAURO ALBERTO
+               
+20240620
+                               
+               
+        
+                               
+               
+        
+Fecha generación documento PDF: 24-09-2024 08:57:35AM
+
+--- PÁGINA 19 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------ CON FUNDAMENTO EN LA MATRÍCULA E INSCRIPCIONES EFECTUADAS EN ELREGISTRO MERCANTIL, LA CÁMARA DE COMERCIO CERTIFICA: NOMBRE, IDENTIFICACIÓN Y DOMICILIO Razón social:        PRODUCCION DE EVENTOS 911 S.A.S                  Sigla:               PRODUCCION 911                                   Nit:                 900.199.025-3                                    Domicilio principal: Bogotá D.C.  MATRÍCULA Matrícula No.         01770890 Fecha de matrícula:   5 de febrero de 2008Último año renovado:  2024Fecha de renovación:  1 de abril de 2024Grupo NIIF:           Grupo II.                                        UBICACIÓN Dirección del domicilio principal:  Calle 108 8 21 Municipio:                          Bogotá D.C. Correo electrónico:                 cosorio@logistica911.com  Teléfono comercial 1:               6044615 Teléfono comercial 2:               No reportó. Teléfono comercial 3:               No reportó.  Dirección para notificación judicial:   Calle 108 8 21Municipio:                              Bogotá D.C. Correo electrónico de notificación:     cosorio@logistica911.com Teléfono para notificación 1:           6044615 Teléfono para notificación 2:           No reportó. Teléfono para notificación 3:           No reportó.   La   persona   jurídica   SI   autorizó  para  recibir  notificacionespersonales  a  través  de  correo  electrónico,  de conformidad con loestablecido  en los artículos 291 del Código General del Procesos y 67del  Código  de  Procedimiento  Administrativo  y  de  lo  ContenciosoAdministrativo. Página 1 de 12
+
+--- PÁGINA 20 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------  CONSTITUCIÓN Por  Escritura  Pública No. 0000727 del 31 de enero de 2008 de Notaría76 de Bogotá D.C., inscrito en esta Cámara de Comercio el 5 de febrerode  2008,  con el No. 01188320 del Libro IX, se constituyó la sociedadde naturaleza Comercial denominada PRODUCCION DE EVENTOS 911 LTDA.  REFORMAS ESPECIALES Por  Acta  No.  10 de Junta de Socios, del 8 de mayo de 2012, inscritoel  17  de  mayo  de  2012  bajo  el  número 01634617 del libro IX, lasociedad  de  la  referencia  se  transformó  de  sociedad  limitada asociedad  por  acciones  simplificada bajo el nombre de: PRODUCCION DEEVENTOS 911 S.A.S sigla PRODUCCIÓN 911.  Por  Acta No. 10 del 8 de mayo de 2012 de Junta de Socios, inscrito enesta Cámara de Comercio el 17 de mayo de 2012, con el No. 01634617 delLibro  IX,  la  sociedad  cambió  su  denominación  o  razón social dePRODUCCION DE EVENTOS 911 LTDA a PRODUCCION DE EVENTOS 911 S.A.S.  TÉRMINO DE DURACIÓN La  persona  jurídica  no  se  encuentra  disuelta  y  su  duración esindefinida.  OBJETO SOCIAL Objeto  Social:  La  sociedad -PRODUCCION DE EVENTOS 911 S.A.S.- podrárealizar  cualquier  actividad  económica  lícita de orden comercial ocivil,  tanto  en  Colombia como en el extranjero; empero, la sociedaddesarrollará  preferentemente  las  siguientes  actividades: el objetosocial  principal  de  la  sociedad.  A.  Actividades de producción deeventos  A1.  Plasmar  la producción logística de todo tipo de eventosmasivos  y  no  masivos  con  o  sin aglomeraciones de público a nivelnacional  e  internacional.  A2.  Ejecutar la tramitación y gestión depermisos  ante  entidades del orden nacional, departamental, municipal Página 2 de 12
+
+--- PÁGINA 21 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------y/o   distrital   para  eventos  públicos  y  privados.  A3.  Gestión,organización,  producción  y  posproducción  de  todo  tipo de eventos(recreativos,   culturales,  activaciones  de  marca,  lanzamiento  deproductos,  fiestas,  eventos  masivos,  conciertos didácticos y demásactividades   relacionados   con  el  medio  del  entretenimiento,  elfortalecimiento  de la cultura y la promoción. A4. Constituir brigadascontra  incendios,  como  también  elaborara  planes  de  emergencia ycontingencia.   A54.   Brindar  el  servicio  de  asesorías  para  lasproducciones  de  eventos  masivos y no masivos como también con o sinaglomeraciones  de  público  a  nivel  nacional  e  internacional. A6.Prestar  el servicio de suministro de recursos humanos. A7. Formalizaractividades  de  contratación  de actores y artistas obras teatrales yconciertos;   como   también  para  eventos  especiales,  y  de  otrasactividades  de esparcimiento. A8. Realizar actividades y servicios deproducción   de   teatro,   grupos   musicales   y  otras  actividadesartísticas.A9.  Suministrar  el  servicio  para autores, compositores,escultores,  artistas  de  espectáculos  y  otros  artistas  a  títuloindividual,  como  también  el  servicio  auxiliar para actividades deespectáculos.  A10.  Realizar  el  manejo  de  la  escenografía  y  lailuminación  para  los  diferentes  tipos  de  eventos. B. Actividadesestrategias   promocionales   Bi.   Ejecutar   la  producción  de  lasestrategias  promocionales.  B2.  Realizar  la activación de marcas delos  productos  que  requieran  los diferentes clientes y realizar susrespectivos  lanzamientos.  B3. Igualmente la activación de las marcasse  realizara  en  los  puntos  de  venta,  plazas mayoristas, canalesespeciales  y  tradicionales,  almacenes  de cadena que determinen losclientes.  B4. Realizar el volanteo y el plan blitz. C. Actividades defabricación  C1. Realizar la fabricación de carrocerías para vehículosautomotores,   fabricación  de  remolques  y  semirremolques  con  susrespectivas  piezas y demás accesorios. C2. Realizar la fabricación demuebles  utilizados  en  la oficina para almacenar, exhibir, trabajar,sentarse,   decorar,   soportar   elaborados  en  cualquier  material.Representación  legal:  La  representación  legal  de  la sociedad poracciones  simplificada  estará  a  cargo  de  una  persona  natural  ojurídica,  accionista o no, quien podrá tener suplente. C3. Igualmentefabricar   pupitres   tableros,   estanterías,  exhibidores,  vitrinaselaboradas  en  cualquier  material.  D.  Servicio  de transportes d1.Presentar  el  servicio  de  transporte  intermunicipal  de maquinariaespecializada  por carretera. D2. Contratar o suministrar todo tipo detransporte  terrestre,  férreo, marítimo, aéreo tanto a nivel nacionalo  internacional,  tanto  de  pasajeros  como de carga. E. Actividadesinmobiliarias  e1  realizar  actividades  inmobiliarias realizadas con Página 3 de 12
+
+--- PÁGINA 22 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------bienes  propios  o  arrendados.  F.  Alquiler  varios  F1. Alquiler demaquinaria  y equipos de oficina incluyendo computadores. F2. Alquilerde  muebles,  como  también  material escenográfico. F3. Suministrar acualquier  título,  equipos,  bienes muebles e inmuebles que facilitenla  actividad  de  las  comunicaciones  y  la  recreación;  igualmentesuministrar  recursos  humanos  y  técnicos  a  terceros; como tambiénprestar  asesorías  en materia de servicios. G. Actividades publicidady  mercadeo  G1.  Conceptualizar  y  crear  campañas publicitarias G2.Crear  y  diseñar piezas publicitarias G3. Realizar investigaciones demercadeo  a  terceros G4. Desarrollar y crear medios audiovisuales G5.Diseñar,  crear  y  crear  juegos  virtuales.  G6. Diseñar, elaborar yvender   al   público,   periódico,   carteles,  folletos  e  impresosaudiovisuales  y  publicidad en general como también crear, producir yrealizar   guiones  técnicos  literarios  y  recreativos  de  caráctercinematográfico,  noticioso  radial  teatral y similares. G7. Realizarcualquier  otra actividad complementaria a las anteriores e igualmentecomercializar   suministrar  y  organizar  todo  tipo  de  actividadesrelacionadas  con  alimentos  y  bebidas. H. Capacidad para garantizarobligaciones  de los accionistas y de terceros H1. La sociedad está encapacidad  de  garantizar obligaciones de los accionistas H2. Por ellola  sociedad  podrá  servir  de fiadora, avalista, codeudora, tanto delos  accionistas  como  a  terceros.  H3.  Las entidades prestadoras uotorgadoras  del  crédito  podrán  ser del sector público como privadoH4.  Las entidades prestadoras u otorgadoras del crédito deberán estarvigiladas   por   la   superintendencia  financiera  como  también  lasuperintendencia   de   sociedades.   H5.   Por  ultimo  (el)  o  (la)representante  autorización  expresa  alguna  por  parte  de  la juntadirectiva  según  el  caso  y  conforme  al  presente  estatuto,  paracomprometerse  para  dicho  cargo. En desarrollo del objeto social, lasociedad  podrá  celebrar  contratos  de  sociedad,  tomar intereses oparticipación  en  sociedades  y/o  empresas; igualmente celebrar todotipo  de  contratos  civiles,  mercantiles  con  personas  naturales yjurídicas   sean  estas  de  derecho  privado  o  de  derecho  públicoconvenientes  para  el  logro  de  los  fines  sociales,  tanto  en elterritorio  nacional  como  también en el extranjero; podrá ejercer enel  territorio  nacional  comercio  interior  e importar toda clase debienes  y servicios al igual que exportarlos, y celebrar toda clase deoperaciones  con  entidades  bancarias,  de crédito, aduaneras, girar,endosar,  descontar,  protestar,  ceder,  aceptar,  anular,  cancelar,cobrar,  recibir  letras  de  cambio,  cheques,  adquirir  a cualquiertítulo,   concesiones,   permiso,   marcas,   patentes,   franquicias,representaciones  y demás bienes y derechos mercantiles y cualesquiera Página 4 de 12
+
+--- PÁGINA 23 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------otros  efectos  de  comercio,  contratar toda clase de operaciones quesean  necesarias al objeto social; presentar licitaciones, concursar yen  general  toda  clase  de actos, contratos que se relacionen con elobjeto  social  principal o que sean fines o complementarios al mismo.Así mismo, la sociedad podrá desarrollar cualquier actividad lícita.  CAPITAL                         * CAPITAL AUTORIZADO *                         Valor              : $4.000.000.000,00No. de acciones    : 4.000.000,00Valor nominal      : $1.000,00                          * CAPITAL SUSCRITO *                          Valor              : $4.000.000.000,00No. de acciones    : 4.000.000,00Valor nominal      : $1.000,00                           * CAPITAL PAGADO *                           Valor              : $4.000.000.000,00No. de acciones    : 4.000.000,00Valor nominal      : $1.000,00  REPRESENTACIÓN LEGAL La  representación  legal de la sociedad estará a cargo de una personanatural  o  jurídica.  La  sociedad  tendrá  un  primer  suplente  delrepresentante  legal y un segundo suplente del representante legal. Elprimer  suplente  y el segundo suplente, reemplazarán al representantelegal  en  sus ausencias temporales y definitivas, como también cuandopara  algún  caso  se  declare  impedido. El primer suplente y segundosuplente  del  representante  legal tendrá las mismas atribuciones queel representante legal cuando entre a reemplazarlo.  FACULTADES Y LIMITACIONES DEL REPRESENTANTE LEGAL  Página 5 de 12
+
+--- PÁGINA 24 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------Facultades  del  Representante  Legal:  Facultades  del  representantelegal  y  primer suplente: El representante legal, está facultado paraejecutar,  a  nombre  de  la  sociedad,  todos  los  actos y contratosrelacionados  con  el  objeto social, con entidades públicas, privadasy/o  mixtas,  con  autorización  previa  de  la  junta directiva si lahubiere  o  de  la  asamblea  de  accionistas  en  aquellos  actos y/ocontratos  que superen los 10.000 salarios mínimos mensuales vigentes.El  representante  legal  se  entenderá  investido  de los más ampliospoderes  para  actuar  en  todas  las  circunstancias  en nombre de lasociedad,  con  excepción  de  aquellas facultades que, de acuerdo conlos   estatutos,  se  hubieren  reservado,  los  accionistas:  En  lasrelaciones  frente  a  terceros,  la sociedad quedará obligada por losactos   y   contratos   celebrados   por   él   representante   legal.Adicionalmente,  se  entiende  en  forma enunciativa que son funcionesdel  cargo,  las siguientes: 1. Constituir, para propósitos concretos,los  apoderados  especiales  que considere necesarios para representarjudicial  o  extrajudicialmente  a  la  sociedad.  2.  Convocar  a  laasamblea  general  y  a la junta directiva si la hubiere, tanto en susreuniones   ordinarias  como  extraordinarias,  con  arreglo  a  éstosestatutos;  3. Presentar a la asamblea de accionistas en sus reunionesordinarias,  un  informe  detallado  sobre la marcha de la compañía 4.Presentar  a la junta directiva, si la hubiere, los balances de pruebasemestral  y  cuentas  e  informes  de  la  compañía  a la asamblea deaccionistas  5.  Cuidar  de  la  recaudación e inversión de los fondossociales.  6.  Organizar adecuadamente los sistemas requeridos para lacontabilización,  pagos  y  demás operaciones de la sociedad. 7. Velarpor  el cumplimiento oportuno de todas las obligaciones de la sociedaden  materia impositiva. 8. Celebrar o ejecutar, previa autorización dela  asamblea  general  de  accionistas, los contratos de adquisición oenajenación  de  bienes  raíces  cualquiera  que  sea  su  cuantía; 9.Enajenar   o  gravar  la  totalidad  de  los  bienes  sociales  previaautorización  de  la  asamblea  general de accionistas; 10. Certificarconjuntamente  con  el contador de la compañía los estados financierosen  el caso de ser dicha certificación exigida por las normas legales.11.  Designar las personas que van a prestar servicios a la sociedad ypara   el   efecto  celebrar  los  contratos  que  de  acuerdo  a  !ascircunstancias  sean  convenientes;  además, fijará las remuneracionesque  les  correspondan,  dentro  de  los  límites  establecidos  en elpresupuesto  anual  de  ingresos  y  egresos. 12. Celebrar los actos ycontratos   comprendidos   en  el  objeto  social  de  la  compañía  ynecesarios  para  que  esta  desarrolle plenamente los fines, para loscuales  ha  sido  constituida.  13. Cumplir las demás funciones que le Página 6 de 12
+
+--- PÁGINA 25 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------correspondan  según  lo  previsto  en  las  normas  legales,  en estosestatutos  y  que sean compatibles con el cargo. 14. Representar a losaccionistas   en   las   asambleas  de  accionistas.  15.  En  generaldesarrollar   todas   las  actividades,  actos  y  acciones  que  seannecesarias  para  el  desarrollo  de  la  actividad  de  la  sociedad.Parágrafo  1. Facultades del segundo suplente del representante legal:El  segundo suplente del representante legal tendrá de manera taxativalas   siguientes   atribuciones:   1.   Constituir,   para  propósitosconcretos,  los  apoderados  especiales  que considere necesarios pararepresentar  judicial  o extrajudicialmente a la sociedad. 2. Convocara  la  asamblea general y a la junta directiva si la hubiere, tanto ensus  reuniones  ordinarias  como  extraordinarias, con arreglo a estosestatutos;  3. Presentar a la asamblea de accionistas en sus reunionesordinarias,  un  informe  detallado  sobre la marcha de la compañía 4.Presentar  a la junta directiva, si la hubiere, los balances de pruebasemestral  y  cuentas  e  informes  de  la  compañía  a la asamblea deaccionistas.  5.  Cuidar  de  la recaudación e inversión de los fondossociales.  6.  Organizar adecuadamente los sistemas requeridos para lacontabilización,  pagos  y  demás operaciones de la sociedad. 7. Velarpor  el cumplimiento oportuno de todas las obligaciones de la sociedaden   materia   impositiva.   8.  Celebrar  o  ejecutar,  contratos  dearrendamiento.  9.  Representar  a  la  compañía  en  la convocatoria,registro  de  participantes, formulación y absolución de consultas y/uobservaciones,  presentar propuestas, evaluar de la propuesta, expedirlas  certificaciones  juradas  solicitadas  y/o  necesarias, firmar lapropuesta  económica,  firmar  el  contrato  respectivo  y los otro sinecesarios  en  caso  de  salir  seleccionados;  lo  anterior  en  losprocesos  de licitación pública o privada, igualmente podrá celebrar yfirmar  las  modalidades  de  asociación  denominadas unión temporal oconsorcio,  y  en  general  todas las atribuciones para que la empresapueda  participar en licitaciones. 10. Certificar conjuntamente con elcontador  de  la  compañía  los  estados financieros en el caso de serdicha  certificación  exigida  por  las normas legales. 11. Designar yfirmar  contratación  laboral de las personas que van a ser vinculadasa  la  empresa  de  acuerdo  a  las  circunstancias sean convenientes;además,  fijará las remuneraciones que les correspondan, dentro de loslímites  establecidos  en  el presupuesto anual de ingresos y egresos.12.  Celebrar  los actos y contratos comprendidos en el desarrollo delobjeto  social  de  la  compañía y necesarios para que esta desarrolleplenamente  los  fines,  para  los  cuales ha sido constituida. 13. Leestá  prohibido  al  segundo  suplente del representante legal y a losdemás  administradores  de  la  sociedad,  por  sí  o  por interpuesta Página 7 de 12
+
+--- PÁGINA 26 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------persona,  obtener  bajo cualquier forma o modalidad jurídica préstamospor  parte  de  la  sociedad  u  obtener de parte de la sociedad aval,fianza   o  cualquier  otro  tipo  de  garantía  de  sus  obligacionespersonales.  NOMBRAMIENTOS REPRESENTANTES LEGALES Por Acta No. 24 del 22 de febrero de 2018, de Asamblea de Accionistas,inscrita  en  esta Cámara de Comercio el 7 de marzo de 2018 con el No.02309339 del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Representante     Edgar   Miguel  Cardona   C.C. No. 79454540         Legal             Jamaica                                              Por  Acta  No.  43  del  16  de  noviembre  de  2024,  de  Asamblea deAccionistas, inscrita en esta Cámara de Comercio el 29 de noviembre de2024 con el No. 03182641 del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Primer            Bleidy  Carolina  Gomez   C.C. No. 52800653         Suplente    Del   Buitrago                                            Representante                                                         Legal                                                                  Por  Acta  No. 42 del 16 de julio de 2024, de Asamblea de Accionistas,inscrita  en esta Cámara de Comercio el 29 de julio de 2024 con el No.03143627 del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Segundo           Haider   Ernesto  Hoyos   C.C. No. 80400120         Suplente    Del   Romero                                              Representante                                                         Legal                                                                    Página 8 de 12
+
+--- PÁGINA 27 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------REVISORES FISCALES Por  Acta  No. 42 del 20 de junio de 2024, de Asamblea de Accionistas,inscrita  en  esta Cámara de Comercio el 2 de julio de 2024 con el No.03134314 del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Revisor  Fiscal   Mauro  Alberto Castilla   C.C.   No.  72302940  T.P.Principal         Acosta                    No. 112750-T                REFORMAS DE ESTATUTOS Los estatutos de la sociedad han sido reformados así: DOCUMENTO                              INSCRIPCIÓNE.  P. No. 1457 del 6 de septiembre    01416160  del  23 de septiembrede  2010 de la Notaría 75 de Bogotá    de 2010 del Libro IX           D.C.                               E.  P.  No.  700  del 10 de mayo de    01479003  del  13  de  mayo  de2011  de  la  Notaría  75 de Bogotá    2011 del Libro IX              D.C.                               Acta  No.  10 del 8 de mayo de 2012    01634617  del  17  de  mayo  dede la Junta de Socios                  2012 del Libro IX              Acta  No.  11  del  25  de marzo de    01924133  del  26  de  marzo de2015 de la Asamblea de Accionistas     2015 del Libro IX              Acta   No.   22-2016   del   7   de    02147148  del  6  de octubre deseptiembre  de  2016 de la Asamblea    2016 del Libro IX              de Accionistas                     Acta  No.  24  del 22 de febrero de    02309338  del  7  de  marzo  de2018 de la Asamblea de Accionistas     2018 del Libro IX              Acta  No.  41  del  15  de junio de    03134313  del  2  de  julio  de2024 de la Asamblea de Accionistas     2024 del Libro IX              Acta  No.  42  del  16  de julio de    03143626  del  29  de  julio de2024 de la Asamblea de Accionistas     2024 del Libro IX  RECURSOS CONTRA LOS ACTOS DE INSCRIPCIÓN De  conformidad  con  lo  establecido  en  el  Código de ProcedimientoAdministrativo  y  de  lo  Contencioso  Administrativo y la Ley 962 de Página 9 de 12
+
+--- PÁGINA 28 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------2005,  los  actos  administrativos de registro, quedan en firme dentrode  los  diez  (10) días hábiles siguientes a la fecha de inscripción,siempre  que  no  sean  objeto  de  recursos.  Para  estos efectos, seinforma  que  para la Cámara de Comercio de Bogotá, los sábados NO sondías hábiles. Una   vez   interpuestos   los  recursos,  los  actos  administrativosrecurridos  quedan  en  efecto suspensivo, hasta tanto los mismos seanresueltos,   conforme   lo   prevé   el  artículo  79  del  Código  deProcedimiento Administrativo y de los Contencioso Administrativo.  A  la  fecha y hora de expedición de este certificado, NO se encuentraen curso ningún recurso.  CLASIFICACIÓN DE ACTIVIDADES ECONÓMICAS - CIIU Actividad principal Código CIIU:     8230Actividad secundaria Código CIIU:    7830Otras actividades Código CIIU:       9008, 9007   ESTABLECIMIENTO(S) DE COMERCIO A  nombre  de  la  persona  jurídica  figura(n)  matriculado(s)en estaCámara  de  Comercio de Bogotá el(los) siguiente(s) establecimiento(s)de comercio: Nombre:                     LOGISTICA 911 INC.                       Matrícula No.:              00996479Fecha de matrícula:         29 de febrero de 2000Último año renovado:        2024Categoría:                  Establecimiento de comercioDirección:                  Calle 108 N° 8 - 21                      Municipio:                  Bogotá D.C. Nombre:                     PRODUCCION  DE  EVENTOS 911 LTDA SUCURSAL                            ECUADOR                                  Matrícula No.:              03236839Fecha de matrícula:         15 de abril de 2020Último año renovado:        2024 Página 10 de 12
+
+--- PÁGINA 29 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------Categoría:                  Establecimiento de comercioDirección:                  Calle 108 #  8- 21                       Municipio:                  Bogotá D.C. SI    DESEA    OBTENER   INFORMACIÓN   DETALLA   DE   LOS   ANTERIORESESTABLECIMIENTOS  DE  COMERCIO  O  DE  AQUELLOS  MATRICULADOS  EN  UNAJURISDICCIÓN  DIFERENTE  A  LA  DEL  PROPIETARIO,  DEBERÁ SOLICITAR ELCERTIFICADO  DE  MATRÍCULA MERCANTIL DEL RESPECTIVO ESTABLECIMIENTO DECOMERCIO. LA  INFORMACIÓN  CORRESPONDIENTE  A  LOS ESTABLECIMIENTOS DE COMERCIO,AGENCIAS  Y  SUCURSALES, QUE LA PERSONA JURÍDICA TIENE MATRICULADOS ENOTRAS   CÁMARAS   DE   COMERCIO   DEL   PAÍS,   PODRÁ  CONSULTARLA  ENWWW.RUES.ORG.CO.  TAMAÑO EMPRESARIAL De  conformidad  con  lo  previsto  en  el  artículo  2.2.1.13.2.1 delDecreto  1074  de 2015 y la Resolución 2225 de 2019 del DANE el tamañode la empresa es  Grande  Lo anterior de acuerdo a la información reportada por el matriculado oinscrito en el formulario RUES:        Ingresos por actividad ordinaria $ 38.998.214.729        Actividad económica por la que percibió mayores ingresos en el        período - CIIU : 8230  INFORMACIÓN COMPLEMENTARIA Que,  los  datos del empresario y/o el establecimiento de comercio hansido  puestos  a  disposición  de  la  Policía Nacional a través de laconsulta a la base de datos del RUES.  Los   siguientes  datos  sobre  RIT  y  Planeación  son  informativos:Contribuyente   inscrito  en  el  registro  RIT  de  la  Dirección  deImpuestos,  fecha de inscripción : 23 de marzo de 2022. Fecha de envíode  información  a  Planeación  : 29 de noviembre de 2024. \n \n Señorempresario,  si  su  empresa tiene activos inferiores a 30.000 SMLMV yuna  planta  de  personal  de  menos  de 200 trabajadores, usted tiene Página 11 de 12
+
+--- PÁGINA 30 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 3 de diciembre de 2024 Hora: 09:19:02Recibo No. AB24791571Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B24791571DE76C Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------derecho  a  recibir un descuento en el pago de los parafiscales de 75%en  el  primer año de constitución de su empresa, de 50% en el segundoaño  y de 25% en el tercer año. Ley 590 de 2000 y Decreto 525 de 2009.Recuerde  ingresar  a  www.supersociedades.gov.co para verificar si suempresa está obligada a remitir estados financieros. Evite sanciones.  El  presente  certificado  no  constituye permiso de funcionamiento enningún caso. **********************************************************************Este  certificado  refleja  la  situación  jurídica  registral  de  lasociedad, a la fecha y hora de su expedición.  **********************************************************************Este  certificado  fue  generado  electrónicamente con firma digital ycuenta con plena validez jurídica conforme a la Ley 527 de 1999. **********************************************************************Firma  mecánica  de  conformidad  con  el  Decreto  2150  de 1995 y laautorización   impartida   por  la  Superintendencia  de  Industria  yComercio, mediante el oficio del 18 de noviembre de 1996.  
+        Página 12 de 12
+
+--- PÁGINA 31 ---
+
+
+--- PÁGINA 32 ---
+ 
+ 
+ 
+ 
+ 
+SINTONIZAR MEDIOS LTDA.  
+       NIT 830.107.841 -1 
+      
+ Carrera 16   Nº 93-78   OFC 203     EDIFICIO TORRE SEKI  P.H.      TELÉFONO: 601-7422839        BOGOTÀ - COLOMBIA  
+ 
+ 
+ 
+ 
+EL SUSCRITO REVISOR FISCAL DE LA COMPAÑÍA  
+SINTONIZAR MEDIOS S.A.S. SE PERMITE CERTIFICAR  
+ 
+ 
+ 
+ 
+ 
+Que de común acuerdo con los registros contables y los documentos que 
+soportan dichos registros la Compañía SINTONIZAR MEDIOS S.A.S. , 
+Identificada con el NIT 830.107.841 -1, se encuentra a Paz y Salvo hasta la 
+fecha, por concepto de las Obligaciones de Parafiscales, (Caja de 
+Compensación Familiar, Instituto Colombiano de Bienestar Familiar y Servicio 
+Nacional de Aprendizaje — SENA) y en Seguridad social (Salud, Fondo de 
+Pensio nes y Riesgos Laborales).  
+ 
+Se expide a solicitud de la Compañía, para dar cumplimiento a la Ley 789 de 
+2002, en su artículo 50, el día 3 del mes de diciembre  de 2024 . 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+JUAN NEPOMUCENO DUQUE GELVEZ  
+Reviso r Fiscal TP. Nº 8847 -T 
+ 
+ 
+ 
+
+
+--- PÁGINA 33 ---
+  
+ExportadoresPara uso exclusivo de la DIAN5. Número de Identificación Tributaria (NIT)6. DV    
+984. Nombre51. Código38. País  
+56. Tipo
+985. Cargo50. Código  4. Número de formulario
+36. Nombre comercial37. Sigla
+53. Código
+59. Anexos          SINO55. Forma57. Modo58. CPC60. No. de Folios:Ocupación
+123456789101112131415161718Actividad secundariaOtras actividades49. Fecha inicio actividad48. Código12Lugar de expedición28.  País
+Actividad principalActividad económica47. Fecha inicio actividad46. Código
+12335. Razón social31. Primer apellido  32. Segundo apellido33. Primer nombre
+52. Número establecimientos24. Tipo de contribuyente12. Dirección seccional14. Buzón electrónico
+34. Otros nombres25. Tipo de documento29. Departamento26. Número de Identificación
+39. Departamento
+Firma del solicitante:2. Concepto
+1920212223242526
+1234567891054. Código11121314151617181920Responsabilidades, Calidades y Atributos
+IMPORTANTE: Sin perjuicio de las actualizaciones a que haya lugar, la inscripción en el Registro Único Tributario -RUT-, tendrá vigencia indefinida y en consecuencia no se exigirá su renovación    40. Ciudad/Municipio
+Sin perjuicio de las verificaciones que la DIAN realice.  Firma autorizada:IDENTIFICACIÓN
+41. Dirección principal
+ExportadoresUsuarios aduanerosUBICACIÓN30. Ciudad/Municipio
+42. Correo electrónico44. Teléfono 143. Código postal45. Teléfono 2CLASIFICACIÓNActualización 02
+141137313786
+     8301078411Impuestos de Bogotá 32
+Persona jurídica 1                               
+           
+SINTONIZAR MEDIOS SAS
+SINTONIZAR MEDIOS
+COLOMBIA 169Bogotá D.C. 11Bogotá, D.C. 001
+CR 16   93   78 OF 203
+impuestos@sintonizarmedios.com
+                6017422839       3168751600
+731020020827 791220020827 82304645         1
+05- Impto. renta y compl.  régimen  ordinar5 
+07- Retención en la fuente a título de  rent7 
+08- Retención timbre nacional8 
+10- Obligado aduanero10
+14- Informante de exogena14
+42- Obligado a llevar contabilidad 42
+48 - Impuesto sobre las ventas - IVA48
+52 - Facturador electrónico52
+55 - Informante de Beneficiarios Finales55                                  
+23                            
+                                   
+      
+ X   0
+DIAZ MANRIQUE MARTHA CECILIA 
+Representante legal Certificado
+Fecha generación documento PDF: 16-12-2024 10:36:54AM
+
+--- PÁGINA 34 ---
+67. Sociedades y organismos extranjerosPágina                           de
+95. Número de Identificación Tributaria (NIT) de la Matriz o Controlante   Espacio reservado para la DIAN
+68. Sin personería jurídica
+93. Vinculación económica81. Hasta80. Desde79. Ciudad/Municipio78. Departamento77. No. Matrícula mercantil76. Fecha de registro75. Entidad de registro74. Número de notaría73. Fecha72. Número71. Clase70. Beneficio64. Entidades o institutos de derecho público de orden nacional, departamental, municipal y descentralizados69. Otras organizaciones no clasificadas66. Cooperativas63. Formas asociativas65. Fondos62. Naturaleza
+94. Nombre del grupo económico y/o empresarial4. Número de formulario
+88. Entidad de vigilancia y control
+97. Nombre o razón social de la matriz o controlante96. DV.82. Nacional%83. Nacional público%84. Nacional privado%85. Extranjero%86. Extranjero público%87. Extranjero privado%Hoja 2
+5. Número de Identificación Tributaria (NIT)6. DV
+173. Nombre o razón social de la sociedad o natural del exterior con EP-----589. Estado actual90. Fecha cambio de estado1Item234Vinculación económicaCaracterísticas y formas de las organizaciones
+170. Número de identificación tributaria otorgado en el exterior171. País172. Número de identificación tributaria sociedad o natural del exterior con EPDocumento2. Reforma1. ConstituciónConstitución, Registro y Última ReformaComposición del Capital
+ VigenciaEntidad de vigilancia y control91. Número de Identificación Tributaria (NIT)                  92. DVEstado y Beneficio12. Dirección seccional14. Buzón electrónico
+141137313786
+     8301078411Impuestos de Bogotá 322 4
+ 2 12   
+      
+     1
+05 01
+3473      10        
+20020822 20170802
+ 4   
+03 03
+20020827 20170830
+1208394   1208394   
+11 11
+001   4     
+20020827 20170802
+20120822 20991231     100
+     0.0
+   100.0
+       0
+     0.0
+     0.0
+Superintendencia de Sociedades  5
+80 
+   
+   
+   
+   20160101
+        
+        
+        
+                     
+             
+             
+             
+              
+ 
+ 
+ 
+ 
+                
+   
+Fecha generación documento PDF: 16-12-2024 10:36:54AM
+
+--- PÁGINA 35 ---
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal1
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal2
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                         98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal3
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                          98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal4
+103. Número de tarjeta profesional102. DV101. Número de identificación                                                                        98. Representación100. Tipo de documento99. Fecha inicio ejercicio representación104. Primer apellido  105. Segundo apellido  106. Primer nombre108. Número de Identificación Tributaria (NIT)107. Otros nombres109. DV110. Razón social representante legal5Página                           de   Espacio reservado para la DIAN4. Número de formularioHoja 3
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónicoRepresentación141137313786
+     8301078411Impuestos de Bogotá 323 4
+REPRS LEGAL PRIN 18
+REPRS LEGAL SUPL 19
+  
+  
+  20170830
+20170830
+        
+        
+        Cédula de Ciudadaní 13
+Cédula de Ciudadan 13
+  
+  
+  63432137            
+19243096            
+                    
+                    
+                     
+ 
+ 
+ 
+         
+        
+        
+        
+        DIAZ
+DIAZMANRIQUE
+SALAMANCAMARTHA
+GUILLERMOCECILIA
+              
+              
+              
+              
+               
+ 
+ 
+ 
+ 
+Fecha generación documento PDF: 16-12-2024 10:36:54AM
+
+--- PÁGINA 36 ---
+127. Número de tarjeta profesional125. Número de identificación                                                                                     132. Número de Identificación Tributaria (NIT)    
+144. Número de Identificación Tributaria (NIT)           147. Fecha de nombramiento
+156. Número de Identificación Tributaria (NIT)                  148. Tipo de documento124. Tipo de documento
+135. Fecha de nombramiento
+159. Fecha de nombramiento152. Primer apellido  140. Primer apellido  128. Primer apellido  129. Segundo apellido  
+141. Segundo apellido  
+153. Segundo apellido130. Primer nombre
+142. Primer nombre
+154. Primer nombre131. Otros nombres
+143. Otros nombres
+155. Otros nombres133. DV
+145. DV
+157. DV126. DVRevisor fiscal principalRevisor Fiscal y Contador
+136. Tipo de documento134. Sociedad o firma designada
+146. Sociedad o firma designada149. Número de identificación                                                                                            150. DV151. Número de tarjeta profesional158. Sociedad o firma designada137. Número de identificación                                                                                          138. DV139. Número de tarjeta profesionalRevisor fiscal suplenteContadorPágina                           de   Espacio reservado para la DIAN4. Número de formularioHoja 5
+5. Número de Identificación Tributaria (NIT)6. DV12. Dirección seccional14. Buzón electrónico141137313786
+     8301078411Impuestos de Bogotá 324 4
+Cédula de Ciudadanía 1313351690             8847T   
+DUQUE GELVEZ JUAN NEPOMUCENO
+               
+20150302
+                               
+               
+        
+                               
+               
+        
+Fecha generación documento PDF: 16-12-2024 10:36:54AM
+
+--- PÁGINA 37 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------ CON FUNDAMENTO EN LA MATRÍCULA E INSCRIPCIONES EFECTUADAS EN ELREGISTRO MERCANTIL, LA CÁMARA DE COMERCIO CERTIFICA: NOMBRE, IDENTIFICACIÓN Y DOMICILIO Razón social:        SINTONIZAR MEDIOS SAS                            Nit:                 830.107.841-1    Administración    :    Direccion                     Seccional De Impuestos De Bogota, Regimen Comun  Domicilio principal: Bogotá D.C.  MATRÍCULA Matrícula No.         01208394 Fecha de matrícula:   27 de agosto de 2002Último año renovado:  2024Fecha de renovación:  30 de marzo de 2024Grupo NIIF:           Grupo III.                                       UBICACIÓN Dirección del domicilio principal:  Carrera 16 No 93 - 78 Oficina 203 Municipio:                          Bogotá D.C. Correo electrónico:                 mdiaz@sintonizarmedios.com  Teléfono comercial 1:               3168751600 Teléfono comercial 2:               6017422839 Teléfono comercial 3:               No reportó.  Dirección  para  notificación  judicial: Carrera 16 No 93 - 78 Oficina203Municipio:                              Bogotá D.C. Correo electrónico de notificación:     mdiaz@sintonizarmedios.com Teléfono para notificación 1:           3168751600 Teléfono para notificación 2:           6017422839 Teléfono para notificación 3:           No reportó.   La   persona   jurídica   SI   autorizó  para  recibir  notificacionespersonales  a  través  de  correo  electrónico,  de conformidad con loestablecido  en los artículos 291 del Código General del Procesos y 67del  Código  de  Procedimiento  Administrativo  y  de  lo  Contencioso Página 1 de 9
+
+--- PÁGINA 38 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------Administrativo.  CONSTITUCIÓN Por  Escritura Pública No. 0003473 del 22 de agosto de 2002 de Notaría4  de Bogotá D.C., inscrito en esta Cámara de Comercio el 27 de agostode  2002,  con el No. 00841504 del Libro IX, se constituyó la sociedadde naturaleza Comercial denominada SINTONIZAR MEDIOS LTDA.  Por  Escritura  Pública  No. 0003522, de la Notaría 04 de Bogotá D.C.,del 26 de agosto de 2002, se aclaró la Escritura de Constitución.  REFORMAS ESPECIALES Por  Acta  No.  10  de  la  Junta  de Socios del 02 de agosto de 2017,inscrita  el  30  de  agosto de 2017 bajo el número 02255499 del libroIX,  la sociedad de la referencia se transformó de Sociedad Limitada aSociedad  por  Acciones  Simplificada  bajo  el  nombre de: SINTONIZARMEDIOS LTDA.  Por  Acta  No. 10 del 2 de agosto de 2017 de Junta de Socios, inscritoen  esta  Cámara  de  Comercio  el  30  de  agosto de 2017, con el No.02255499  del  Libro  IX,  la  sociedad cambió su denominación o razónsocial de SINTONIZAR MEDIOS LTDA a SINTONIZAR MEDIOS SAS.  TÉRMINO DE DURACIÓN La  persona  jurídica  no  se  encuentra  disuelta  y  su  duración esindefinida.  OBJETO SOCIAL El  objeto  de  la  sociedad  será:  A). La sociedad tendrá por objetosocial  principal:  La  prestación de los servicios de publicidad, losservicios  de  mercadeo,  los  servicios de agencia de publicidad, losservicios  de  diseño, elaboración, conceptualización e implementación Página 2 de 9
+
+--- PÁGINA 39 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------de   estrategias   de  comunicaciones  integrales,  los  servicios  deredifusión  sonora  de  cualquier  naturaleza,  la comercialización deradio,  televisión,  prensa  y  medios  impresos,  el monitoreo de losdiferentes  medios  de comunicación, la realización y comercializaciónde  eventos, operador profesional de congresos, ferias y convenciones,btl,  asesoría  y/o  producción de congresos, ferias y convenciones deforma  parcial  o  total,  merchandising,  asesoría  en comunicacionesintegrales,  la  realización  de  campañas  masivas  de publicidad, laconceptualización,   diseños   y   realización   de  avisos,  materialimpresos,   videos,  videoclips,  animaciones  prestaciones,  cuñas  ycomerciales,  la  consultoría  o  asesoría  en comunicaciones e imagencorporativa,  el diseño, realización y/o implementación de estrategiasde  comunicación,  las  relaciones  publicas,  el  manejo de medios decomunicación,   free  press,  la  capacitación  y/o  entrenamiento  devoceros,    free    press   digital,   la   elaboración,   desarrollo,mantenimiento,  actualización  y  manejo de páginas web, la prestaciónde  servicios  de  salas  de  edición  y  de  cabinas  de  sonido.  Laimportancia  y  exportación de equipos, maquinarias que se utilicen enla  explotación  del  objeto  principal  de la sociedad. Producción deradio  y  televisión. La realización de todas las actividades afines ycomplementarias   del   objeto   social.  B).-  Prestar  servicios  decapacitación,  entrenamiento  de  personal,  asesoría técnica, C).- Lasociedad  podrá  realizar  toda  clase  de actos jurídicos, convenios,contratos  de  naturaleza  mercantil, civil o de cualquier otra índolerelacionado  con el principal objeto social y tendientes al desarrollodel  mismo,  suscripción  de  los  documentos  y  otorgamiento  de loscontratos  que  sean  medio  o  consecuencia de su objeto social en suactividad  profesional y comercial. La obtención de créditos con o singarantía  de  cualquier  naturaleza  y  su  otorgamiento, así como seravales  o  garantes,  D).- Promover, constituir, organizar, explotar ytomar  participación  en  el  capital  y  patrimonio de todo género desociedades    mercantiles,    civiles,    asociaciones    o   empresasindustriales,  comerciales  de  servicios  o  e cualquier otra índole,tanto   nacionales   como  extranjeras,  así  como  participar  en  suadministración  y  liquidación.  E).- Adquirir o disponer en cualquierforma  legal,  de  toda  clase  de acciones o participaciones en otrassociedades  o  asociaciones,  ya sean de naturaleza civil o mercantil.F).-  La  emisión, suscripción, aceptación, endoso o aval de cualquiertítulo  o  valores  mobiliarios  que  la  ley  permita. G).- Obtener oconceder  préstamos  otorgados  y  recibiendo  garantías  específicas,emitir  obligaciones,  aceptar,  girar, endosar y avalar toda clase detítulos  de  crédito y otorgar fianzas y garantías de cualquier clase, Página 3 de 9
+
+--- PÁGINA 40 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------respecto  de  las  obligaciones contraídas o de los títulos emitidos oaceptados  por  terceros.  H).- Adquirir, enajenar, tomar y otorgar eluso  y/o  goce  por  cualquier  título  permitido por la ley de bienesmuebles  e  inmuebles.  I).-  Obtener  y  otorgar por cualquier títulopatentes,   marcas,  nombres  comerciales,  opciones  y  preferencias,derechos  de  autor  y concesiones para todo tipo de actividades. J).-Girar  en el ramo de comisiones, mediaciones y aceptar el desempeño derepresentaciones  de  negociaciones  de  toda especia. K).- Otorgar eluso  o  goce  de bienes muebles o inmuebles propios o ajenos previo elcumplimiento   de   los   requisitos   legales  correspondientes.  L).-Hipotecar   o  gravar  en  cualquier  forma  permitida  por  la  ley,inmuebles  y  muebles  que se posean por cualquier tipo legal. M).- Laemisión,   suscripción,   aceptación,  endoso,  aval,  de  cualesquiertítulos  o  valores  mobiliarios  que permita la ley. N).- La sociedadpodrá  importar y exportar materias primas, productos manufacturados oprocesados  artesanal  o  industrialmente,  así como mercancías que laley  colombiana  permita.  O)-  La  sociedad  podrá  llevar a cabo, engeneral,  todas  las  operaciones,  de  cualquier naturaleza que ellasfueren,  relacionadas  con el objeto mencionado, así como cualesquieraactividades  similares,  conexas  o  complementarias  o  que  permitanfacilitar  o  desarrollar  el  comercio o la industria de la sociedad.P).-  La  sociedad  podrá  hacer  y practicar todos los demás actos decomercio  a  que  pueda dedicarse legítimamente, en los términos de laley  una  sociedad mercantil colombiana. Q).- Se faculta a la sociedadpara  desarrollar  actividades  que  fomenten la Cultura, Recreación yDeporte,   tales  como  la  organización  de  eventos  de  actividadesculturales,  deportivas, artísticas, físicas, generadora de relacionessociales,  de conocimiento mutuo, de impacto social, bienestar social,musicales y de recreación.  CAPITAL                         * CAPITAL AUTORIZADO *                         Valor              : $160.000.000,00No. de acciones    : 800,00Valor nominal      : $200.000,00                          * CAPITAL SUSCRITO *                          Valor              : $160.000.000,00 Página 4 de 9
+
+--- PÁGINA 41 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------No. de acciones    : 800,00Valor nominal      : $200.000,00                           * CAPITAL PAGADO *                           Valor              : $160.000.000,00No. de acciones    : 800,00Valor nominal      : $200.000,00  REPRESENTACIÓN LEGAL La  representación  legal  de  la  sociedad  por acciones simplificadaestará  a  cargo de una persona natural o jurídica, accionista o no, ytendrá  como  suplente  una  persona  natural o jurídica que puede seraccionista o no, designado por la asamblea general de accionistas.  FACULTADES Y LIMITACIONES DEL REPRESENTANTE LEGAL La  sociedad  será  gerenciada, administrada y representada legalmenteante   terceros   por   el   Representante   Legal,  quien  no  tendrárestricciones  de  contratación  por  razón  de la naturaleza ni de lacuantía  de  los  actos que celebre. Por lo tanto, se entenderá que elRepresentante  Legal  podrá  celebrar  o  ejecutar  todos  los actos ycontratos  comprendidos  en  el  objeto  social  o  que  se relacionendirectamente  con la existencia y el funcionamiento de la sociedad. ElRepresentante  Legal se entenderá investido de los más amplios poderespara  actuar en todas las circunstancias en nombre de la sociedad, conexcepción  de  aquellas  facultades que, de acuerdo con los estatutos,se  hubieren  reservado  los  accionistas.  En las relaciones frente aterceros,  la  sociedad  quedará  obligada  por  los actos y contratoscelebrados   por   el   Representante  Legal.  Le  está  prohibido  alRepresentante  Legal y a los demás administradores de la sociedad, porsí   o  por  interpuesta  persona,  obtener  bajo  cualquier  forma  omodalidad  jurídica  préstamos  por  parte de la sociedad u obtener departe  de a sociedad aval, fianza o cualquier otro tipo de garantía desus obligaciones personales.  NOMBRAMIENTOS  Página 5 de 9
+
+--- PÁGINA 42 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------REPRESENTANTES LEGALES Por  Acta No. 10 del 2 de agosto de 2017, de Junta de Socios, inscritaen esta Cámara de Comercio el 30 de agosto de 2017 con el No. 02255499del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Representante     Martha   Cecilia   Diaz   C.C. No. 000000063432137  Legal             Manrique                                              CARGO             NOMBRE                    IDENTIFICACIÓN Representante     Guillermo          Diaz   C.C. No. 000000019243096  Legal Suplente    Salamanca                                             REVISORES FISCALES Por  Acta No. 10 del 2 de agosto de 2017, de Junta de Socios, inscritaen esta Cámara de Comercio el 30 de agosto de 2017 con el No. 02255499del Libro IX, se designó a: CARGO             NOMBRE                    IDENTIFICACIÓN Revisor Fiscal    Juan  Nepomuceno  Duque   C.C. No. 000000013351690                    Gelvez                                                REFORMAS DE ESTATUTOS Los estatutos de la sociedad han sido reformados así: DOCUMENTO                              INSCRIPCIÓNE.   P.   No.  0003607  del  22  de    00955041  del  28 de septiembreseptiembre  de  2004  de la Notaría    de 2004 del Libro IX           30 de Bogotá D.C.                  E.   P.   No.  0004222  del  28  de    01094410  del 5 de diciembre denoviembre  de 2006 de la Notaría 30    2006 del Libro IX              de Bogotá D.C.                     E.  P.  No. 0002360 del 6 de agosto    01233772  del  8  de  agosto de Página 6 de 9
+
+--- PÁGINA 43 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------de  2008 de la Notaría 30 de Bogotá    2008 del Libro IX              D.C.                               E.  P.  No. 1844 del 14 de julio de    01316448  del  30  de  julio de2009  de  la  Notaría  30 de Bogotá    2009 del Libro IX              D.C.                               E.  P.  No.  613 del 14 de marzo de    01643536  del  19  de  junio de2012  de  la  Notaría  30 de Bogotá    2012 del Libro IX              D.C.                               Acta  No.  10  del  2  de agosto de    02255499  del  30  de agosto de2017 de la Junta de Socios             2017 del Libro IX              Acta  No. 17 del 20 de mayo de 2021    02708764  del  25  de  mayo  dede la Asamblea de Accionistas          2021 del Libro IX  RECURSOS CONTRA LOS ACTOS DE INSCRIPCIÓN De  conformidad  con  lo  establecido  en  el  Código de ProcedimientoAdministrativo  y  de  lo  Contencioso  Administrativo y la Ley 962 de2005,  los  actos  administrativos de registro, quedan en firme dentrode  los  diez  (10) días hábiles siguientes a la fecha de inscripción,siempre  que  no  sean  objeto  de  recursos.  Para  estos efectos, seinforma  que  para la Cámara de Comercio de Bogotá, los sábados NO sondías hábiles. Una   vez   interpuestos   los  recursos,  los  actos  administrativosrecurridos  quedan  en  efecto suspensivo, hasta tanto los mismos seanresueltos,   conforme   lo   prevé   el  artículo  79  del  Código  deProcedimiento Administrativo y de los Contencioso Administrativo.  A  la  fecha y hora de expedición de este certificado, NO se encuentraen curso ningún recurso.  CLASIFICACIÓN DE ACTIVIDADES ECONÓMICAS - CIIU Actividad principal Código CIIU:     7310Actividad secundaria Código CIIU:    7912Otras actividades Código CIIU:       8230, 4645   ESTABLECIMIENTO(S) DE COMERCIO Página 7 de 9
+
+--- PÁGINA 44 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------ A  nombre  de  la  persona  jurídica  figura(n)  matriculado(s)en estaCámara  de  Comercio de Bogotá el(los) siguiente(s) establecimiento(s)de comercio: Nombre:                     SINTONIZAR MEDIOS                        Matrícula No.:              02595824Fecha de matrícula:         22 de julio de 2015Último año renovado:        2024Categoría:                  Establecimiento de comercioDirección:                  Cl 94 # 16-09 Of 506                     Municipio:                  Bogotá D.C. SI    DESEA    OBTENER   INFORMACIÓN   DETALLA   DE   LOS   ANTERIORESESTABLECIMIENTOS  DE  COMERCIO  O  DE  AQUELLOS  MATRICULADOS  EN  UNAJURISDICCIÓN  DIFERENTE  A  LA  DEL  PROPIETARIO,  DEBERÁ SOLICITAR ELCERTIFICADO  DE  MATRÍCULA MERCANTIL DEL RESPECTIVO ESTABLECIMIENTO DECOMERCIO. LA  INFORMACIÓN  CORRESPONDIENTE  A  LOS ESTABLECIMIENTOS DE COMERCIO,AGENCIAS  Y  SUCURSALES, QUE LA PERSONA JURÍDICA TIENE MATRICULADOS ENOTRAS   CÁMARAS   DE   COMERCIO   DEL   PAÍS,   PODRÁ  CONSULTARLA  ENWWW.RUES.ORG.CO.  TAMAÑO EMPRESARIAL De  conformidad  con  lo  previsto  en  el  artículo  2.2.1.13.2.1 delDecreto  1074  de 2015 y la Resolución 2225 de 2019 del DANE el tamañode la empresa es  Grande  Lo anterior de acuerdo a la información reportada por el matriculado oinscrito en el formulario RUES:        Ingresos por actividad ordinaria $ 30.226.395.338        Actividad económica por la que percibió mayores ingresos en el        período - CIIU : 7310  INFORMACIÓN COMPLEMENTARIA Que,  los  datos del empresario y/o el establecimiento de comercio hansido  puestos  a  disposición  de  la  Policía Nacional a través de la Página 8 de 9
+
+--- PÁGINA 45 ---
+Cámara de Comercio de BogotáSede VirtualCERTIFICADO DE EXISTENCIA Y REPRESENTACIÓN LEGALFecha Expedición: 6 de diciembre de 2024 Hora: 09:20:28Recibo No. AB24810309Valor: $ 7,900 CÓDIGO DE VERIFICACIÓN B248103097AFF8 Verifique el contenido y confiabilidad de este certificado, ingresando awww.ccb.org.co/certificadoselectronicos y digite el respectivo código, para que visualice laimagen generada al momento de su expedición. La verificación se puede realizar de manerailimitada, durante 60 días calendario contados a partir de la fecha de su expedición.------------------------------------------------------------------------------------------------consulta a la base de datos del RUES.  Los   siguientes  datos  sobre  RIT  y  Planeación  son  informativos:Contribuyente   inscrito  en  el  registro  RIT  de  la  Dirección  deImpuestos,  fecha  de  inscripción  :  27  de agosto de 2002. Fecha deenvío  de información a Planeación : 28 de agosto de 2024. \n \n Señorempresario,  si  su  empresa tiene activos inferiores a 30.000 SMLMV yuna  planta  de  personal  de  menos  de 200 trabajadores, usted tienederecho  a  recibir un descuento en el pago de los parafiscales de 75%en  el  primer año de constitución de su empresa, de 50% en el segundoaño  y de 25% en el tercer año. Ley 590 de 2000 y Decreto 525 de 2009.Recuerde  ingresar  a  www.supersociedades.gov.co para verificar si suempresa está obligada a remitir estados financieros. Evite sanciones.  El  presente  certificado  no  constituye permiso de funcionamiento enningún caso. **********************************************************************Este  certificado  refleja  la  situación  jurídica  registral  de  lasociedad, a la fecha y hora de su expedición.  **********************************************************************Este  certificado  fue  generado  electrónicamente con firma digital ycuenta con plena validez jurídica conforme a la Ley 527 de 1999. **********************************************************************Firma  mecánica  de  conformidad  con  el  Decreto  2150  de 1995 y laautorización   impartida   por  la  Superintendencia  de  Industria  yComercio, mediante el oficio del 18 de noviembre de 1996.  
+ Página 9 de 9
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

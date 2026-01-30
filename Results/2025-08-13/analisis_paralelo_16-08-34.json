@@ -1,0 +1,129 @@
+{
+  "timestamp": "2025-08-13T16:08:34.151669",
+  "procesamiento_paralelo": true,
+  "impuestos_analizados": [
+    "retefuente",
+    "impuestos_especiales",
+    "iva_reteiva"
+  ],
+  "resultados_analisis": {
+    "retefuente": {
+      "error": "Error analizando factura: 3 validation errors for AnalisisFactura\nconceptos_identificados.0.tarifa_retencion\n  Field required [type=missing, input_value={'concepto': 'CONCEPTO_NO...0, 'base_gravable': 0.0}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.5/v/missing\nnaturaleza_tercero\n  Field required [type=missing, input_value={'es_facturacion_extranje...a aplicación de IVA.']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.5/v/missing\nes_facturacion_exterior\n  Field required [type=missing, input_value={'es_facturacion_extranje...a aplicación de IVA.']}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.5/v/missing"
+    },
+    "impuestos_especiales": {
+      "analisis_gemini": {
+        "deteccion_automatica": {
+          "aplica_estampilla_universidad": false,
+          "aplica_contribucion_obra_publica": false,
+          "procesamiento_paralelo": false,
+          "razon_deteccion": "El tercero 'Aesthetic body center' no se encuentra en la lista de entidades que administran recursos públicos, lo cual es una condición excluyente para la aplicación de ambos impuestos. Adicionalmente, el objeto de la factura ('INSUMOS MEDICOS') no corresponde a las categorías de 'CONTRATO DE OBRA', 'INTERVENTORÍA' o 'SERVICIOS CONEXOS' requeridas para la aplicación de estos impuestos."
+        },
+        "tercero_identificado": {
+          "nombre": "Aesthetic body center",
+          "es_consorcio": false,
+          "administra_recursos_publicos": false,
+          "consorciados": []
+        },
+        "objeto_contrato": {
+          "descripcion_identificada": "INSUMOS MEDICOS",
+          "clasificacion_estampilla": "no_identificado",
+          "clasificacion_obra_publica": "no_aplica",
+          "palabras_clave_estampilla": [],
+          "palabras_clave_obra_publica": []
+        },
+        "valores_identificados": {
+          "estampilla_universidad": {
+            "valor_contrato_pesos": 0.0,
+            "valor_contrato_uvt": 0.0,
+            "valor_factura_sin_iva": 4843200.0,
+            "metodo_identificacion": "directo",
+            "texto_referencia": "TOTAL  $4.843.200"
+          },
+          "contribucion_obra_publica": {
+            "valor_factura_sin_iva": 4843200.0,
+            "metodo_identificacion": "directo",
+            "texto_referencia": "TOTAL  $4.843.200"
+          }
+        },
+        "observaciones": [
+          "El tercero 'Aesthetic body center' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS', por lo tanto, no se liquidan ninguno de los dos impuestos.",
+          "El objeto de la factura es la venta de 'INSUMOS MEDICOS', lo cual no clasifica como 'CONTRATO DE OBRA', 'INTERVENTORÍA' o 'SERVICIOS CONEXOS'.",
+          "No se identifica un valor total de contrato subyacente, ya que la factura corresponde a una venta de bienes y no a un pago parcial de un contrato de mayor valor.",
+          "El estado final de la preliquidación es 'No aplica el impuesto'."
+        ]
+      },
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": false,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "impuestos_detectados": []
+      },
+      "tercero_identificado": {
+        "nombre": "Aesthetic body center",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "estampilla_universidad": null,
+      "contribucion_obra_publica": null,
+      "observaciones": [
+        "El tercero 'Aesthetic body center' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS', por lo tanto, no se liquidan ninguno de los dos impuestos.",
+        "El objeto de la factura es la venta de 'INSUMOS MEDICOS', lo cual no clasifica como 'CONTRATO DE OBRA', 'INTERVENTORÍA' o 'SERVICIOS CONEXOS'.",
+        "No se identifica un valor total de contrato subyacente, ya que la factura corresponde a una venta de bienes y no a un pago parcial de un contrato de mayor valor.",
+        "El estado final de la preliquidación es 'No aplica el impuesto'."
+      ]
+    },
+    "iva_reteiva": {
+      "analisis_iva": {
+        "iva_identificado": {
+          "tiene_iva": false,
+          "valor_iva_total": 0.0,
+          "porcentaje_iva": 0.0,
+          "detalle_conceptos_iva": [],
+          "metodo_identificacion": "iva_cero"
+        },
+        "responsabilidad_iva_rut": {
+          "rut_disponible": false,
+          "es_responsable_iva": null,
+          "codigo_encontrado": "no_encontrado",
+          "texto_referencia": "NO DISPONIBLE"
+        },
+        "concepto_facturado": {
+          "descripcion": "Prolene 3/0 (suturas), Monosyn 3/0 (suturas), Adrenalina (medicamento)",
+          "aplica_iva": true,
+          "razon_exencion_exclusion": "El producto 'Adrenalina' es un medicamento y se encuentra exento de IVA según los puntos 28, 29 y 30 de la lista de Bienes Exentos de IVA. Sin embargo, 'Prolene 3/0' y 'Monosyn 3/0' son suturas quirúrgicas (dispositivos médicos) que no están listadas como bienes excluidos o exentos en las configuraciones proporcionadas. Por lo tanto, estos últimos deberían estar gravados con IVA a la tarifa general.",
+          "categoria": "gravado"
+        }
+      },
+      "analisis_fuente_ingreso": {
+        "validaciones_fuente": {
+          "uso_beneficio_colombia": true,
+          "ejecutado_en_colombia": true,
+          "asistencia_tecnica_colombia": false,
+          "bien_ubicado_colombia": true
+        },
+        "es_fuente_nacional": true,
+        "validacion_iva_extranjero": {
+          "es_extranjero": false,
+          "iva_esperado_19": false,
+          "iva_encontrado": 0.0
+        }
+      },
+      "calculo_reteiva": {
+        "aplica_reteiva": false,
+        "porcentaje_reteiva": null,
+        "tarifa_decimal": 0.0,
+        "valor_reteiva_calculado": 0.0,
+        "metodo_calculo": null
+      },
+      "estado_liquidacion": {
+        "estado": "Preliquidación Sin Finalizar",
+        "observaciones": [
+          "El RUT del tercero no está disponible, por lo que no se pudo validar su responsabilidad de IVA.",
+          "La factura no discrimina el IVA y el total facturado es igual al subtotal, lo que implica un IVA del 0%.",
+          "Existe una inconsistencia: mientras que la 'Adrenalina' es un bien exento de IVA, las suturas 'Prolene 3/0' y 'Monosyn 3/0' son dispositivos médicos que, según las listas proporcionadas, deberían estar gravados con IVA. Esta situación impide finalizar la preliquidación."
+        ]
+      }
+    }
+  }
+}

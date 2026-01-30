@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-08-13T11:21:12.970542",
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "clasificacion": {
+    "FRA  BDO INNPULSA.pdf": "FACTURA",
+    "OBJ. CTO BDO.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "parafiscal_audit_20250624145931.pdf": "ANEXO"
+  },
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "impuestos_aplicables": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "procesamiento_paralelo": true
+}

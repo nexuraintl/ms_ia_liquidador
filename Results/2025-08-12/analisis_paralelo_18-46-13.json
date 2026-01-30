@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-12T18:46:13.403183",
+  "procesamiento_paralelo": true,
+  "impuestos_analizados": [
+    "retefuente",
+    "impuestos_especiales",
+    "iva_reteiva"
+  ],
+  "resultados_analisis": {
+    "retefuente": 

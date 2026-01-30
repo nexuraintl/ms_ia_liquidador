@@ -1,0 +1,56 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 5939495.8,
+      "porcentaje_iva": 0.19,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.",
+          "valor_iva": 5939495.8,
+          "porcentaje": 0.19
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": null,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "No se encontraron los códigos 48 (Responsable de IVA), 49 (No responsable de IVA) o 53 (Persona Jurídica No Responsable de IVA) en la sección de Responsabilidades, Calidades y Atributos del RUT."
+    },
+    "concepto_facturado": {
+      "descripcion": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": null,
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": null,
+      "iva_encontrado": null
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": false,
+    "porcentaje_reteiva": null,
+    "tarifa_decimal": null,
+    "valor_reteiva_calculado": 0.0,
+    "metodo_calculo": null
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidación Sin Finalizar",
+    "observaciones": [
+      "No se pudo identificar la responsabilidad de IVA del tercero en el RUT (códigos 48, 49 o 53 no encontrados), a pesar de que la factura muestra IVA."
+    ]
+  }
+}

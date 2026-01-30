@@ -1,0 +1,156 @@
+{
+  "timestamp": "2025-08-08T21:01:30.280900",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "La factura indica que es un pago por prestación de servicios. El beneficiario es la Asociación de Artesanas-os Hecho en Lebrija. En el RUT, la actividad económica principal es 'Otras actividades de asociaciones n.c.p.' (9499), lo que sugiere que es una entidad sin fines de lucro, sin embargo, para efectos de retención en la fuente se clasifica como régimen ordinario dado que la descripción del RUT no indica explícitamente que sea un régimen especial o simple y no se encuentra información que lo excluya de la aplicación de la retención en la fuente. Se aplicará la tarifa general para servicios a declarantes."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": true,
+        "procesamiento_paralelo": true,
+        "razon_deteccion": "El objeto del contrato (diseño, gestión e implementación de la etapa de intercambio de saberes y fortalecimiento de comunidad) es un servicio conexo que aplica para la Estampilla Pro Universidad Nacional. Dado que se trata de un contrato de prestación de servicios que involucra actividades de diseño y gestión, y se indica que es un 'Contrato' en el informe de pago, se asume que podría haber un componente de obra subyacente o que la tipología contractual general permite la aplicación de ambos impuestos. El tercero (Fiduciaridad Fiducoldex) es un administrador de recursos públicos y está en la lista de NITs válidos."
+      },
+      "tercero_identificado": {
+        "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+        "es_consorcio": false,
+        "administra_recursos_publicos": true,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos_obra",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": 124000000.0,
+          "valor_contrato_uvt": 2489.99,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "porcentaje_calculado",
+          "texto_referencia": "El informe de pago indica 'Valor total del instrumento contractual $124.000.000' y el concepto del pago es 'Primer pago correspondiente al cincuenta por ciento (50%) del valor total de la prestación del servicio'. La factura muestra un valor total de $37,200,000, que incluye IVA."
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "directo",
+          "texto_referencia": "Valor Bruto de la factura electrónica de venta No. DV 1 19."
+        }
+      },
+      "observaciones": [
+        "El objeto del contrato principal incluye 'diseño, gestión e implementación', lo cual se clasifica como servicios conexos para la Estampilla Pro Universidad Nacional. No se identifica directamente como obra para la Contribución a Obra Pública. Sin embargo, la tipología contractual se menciona como 'Contrato' en el informe de pago, lo que podría implicar que la naturaleza de la prestación de servicios se enmarca dentro de un contrato que podría dar lugar a ambos impuestos si se considera un componente de obra o si la entidad contratante aplica ambos por política.",
+        "Para la Estampilla Pro Universidad Nacional, se calculó el valor total del contrato ($124,000,000) a partir de la información del informe de pago que indica que el pago actual es el 50% del valor total. El valor del contrato se encuentra en el rango de 26 a 52,652 UVT (2489.99 UVT), por lo que aplica la tarifa del 0.5% para la estampilla.",
+        "El NIT de la entidad facturada (ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA) es 901.369.011-4, pero el NIT que se debe verificar para la aplicación de los impuestos es el del comprador/administrador de recursos públicos, que es FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX con NIT 830.054.060-5, el cual está en la lista de NITs válidos.",
+        "Se ha tomado el 'Valor Bruto' de la factura ($31,260,504.20) como el valor de la factura sin IVA para el cálculo de ambos impuestos."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": true,
+      "procesamiento_paralelo": true,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD",
+        "CONTRIBUCION_OBRA_PUBLICA"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+      "es_consorcio": false,
+      "administra_recursos_publicos": true,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": {},
+    "observaciones": [
+      "El objeto del contrato principal incluye 'diseño, gestión e implementación', lo cual se clasifica como servicios conexos para la Estampilla Pro Universidad Nacional. No se identifica directamente como obra para la Contribución a Obra Pública. Sin embargo, la tipología contractual se menciona como 'Contrato' en el informe de pago, lo que podría implicar que la naturaleza de la prestación de servicios se enmarca dentro de un contrato que podría dar lugar a ambos impuestos si se considera un componente de obra o si la entidad contratante aplica ambos por política.",
+      "Para la Estampilla Pro Universidad Nacional, se calculó el valor total del contrato ($124,000,000) a partir de la información del informe de pago que indica que el pago actual es el 50% del valor total. El valor del contrato se encuentra en el rango de 26 a 52,652 UVT (2489.99 UVT), por lo que aplica la tarifa del 0.5% para la estampilla.",
+      "El NIT de la entidad facturada (ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA) es 901.369.011-4, pero el NIT que se debe verificar para la aplicación de los impuestos es el del comprador/administrador de recursos públicos, que es FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX con NIT 830.054.060-5, el cual está en la lista de NITs válidos.",
+      "Se ha tomado el 'Valor Bruto' de la factura ($31,260,504.20) como el valor de la factura sin IVA para el cálculo de ambos impuestos."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

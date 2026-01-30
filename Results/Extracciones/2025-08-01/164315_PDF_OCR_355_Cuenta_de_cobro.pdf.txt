@@ -1,0 +1,56 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: 355_Cuenta_de_cobro.pdf
+- Método de extracción: PDF_OCR
+- Fecha y hora: 2025-08-01 16:43:15
+- Caracteres extraídos: 756
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 164750,
+  "metodo": "PDF → Imagen → Google Vision OCR",
+  "caracteres_extraidos": 731,
+  "paginas_procesadas": 1,
+  "validacion": {
+    "paginas": 1,
+    "tamaño_bytes": 164750
+  }
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+
+--- PÁGINA 1 (OCR) ---
+Bogotá, 1 de julio de 2025
+CUENTA DE COBRO No. 001
+FIDEICOMISOS SOCIEDAD FIDUCIARIA
+FIDUCOLDEX
+NIT 830.054.060-5
+PATRIMONIO AUTÓNOMO COLOMBIA PRODUCTIVA
+DEBE A:
+VIVIANA YISETH PONGUTA TORO
+C.C. 1024537280 de BOGOTÁ
+La suma de Seis Millones Ciento Sesenta y Cinco Mil ($6.165.000) por concepto
+del primer pago de honorarios por los servicios prestados como Analista Senior
+en la ejecución del contrato No. 008-2025 celebrado con el patrimonio autónomo
+COLOMBIA PRODUCTIVA.
+TOTAL
+$6.165.000
+FORMA DE PAGO: Consignación en la Cuenta de ahorros No. 52514665125 del
+Banco Bancolombia.
+Atentamente,
+VIVIANA YISETH PONGUTA TORO
+C.C. 1024537280 de Bogotá
+Celular: 3144162460
+Correo: vivianaponguta1@gmail.com
+Dirección: Calle 14 sur # 7-22
+
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

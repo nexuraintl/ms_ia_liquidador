@@ -1,0 +1,83 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: 5. Cert. de Dependientes Viviana Ponguta.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 17:25:27
+- Caracteres extraídos: 1206
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 2,
+  "tamaño_archivo_bytes": 495444,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 1206
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+EL SUSCRITO CONTADOR PÚBLICO 
+ 
+ 
+  
+ 
+CERTIFICA QUE: 
+ 
+ 
+ 
+En cumplimiento a lo dispuesto en el artículo 387 del Estatuto Tributario, artículo 1.2.4.1.18 
+del Decreto 1625 de 2016, modificado por el artículo 9 del decreto 2250 de 2017, el señor 
+José Luis Ponguta López identificado con CC 19.344. 234 se encuentra en situación de 
+dependencia por ausencia de ingresos o ingresos para la vigencia 2024 menores a 
+doscientas sesenta (260) UVT, cumpliendo así los criterios para ser dependiente de la 
+Señora Viviana Yiseth Ponguta Toro identificada con CC 1.024.5 37.280 toda vez que es 
+padre de la misma. 
+ 
+ 
+Solicito se tome nota de la situación de dependencia que informo en la presente, para 
+efecto de los beneficios tributarios aplicables. 
+ 
+*** 
+ 
+ 
+La presente certificación se expide en la cuidad de Bogotá D.C a los treinta (30) días del 
+mes de marzo del 2025, a solicitud de la señora Viviana Yiseth Ponguta. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Cordialmente, 
+ 
+ 
+ 
+ 
+ALEJANDRO MELO ARDILA 
+Contador Público. 
+Cedula de ciudadanía: 1.030.653.359 
+Tarjeta profesional: 261.207-T
+Viviana Yiseth Ponguta Toro
+Cédula de ciudadanía: 1024537280
+_________________
+
+--- PÁGINA 2 ---
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

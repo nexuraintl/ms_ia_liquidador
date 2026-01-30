@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-12T16:53:08.897512",
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "clasificacion": {
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "FACTURA",
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "RUT ARTESANIAS.pdf": "RUT",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO"
+  },
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "impuestos_aplicables": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "procesamiento_paralelo": true
+}

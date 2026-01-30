@@ -1,0 +1,145 @@
+{
+  "timestamp": "2025-08-06T09:04:01.367805",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "800.178.148-8",
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": false,
+    "nombre_entidad_estampilla": null,
+    "nombre_entidad_obra_publica": "Fiduciaria Colombiana de Comercio Exterior S.A"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 31260504.2
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ESPECIAL",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "La factura corresponde a un pago por prestación de servicios de Intercambio de Saberes Fase 2.",
+      "El NIT del tercero es 901.369.011-4 y se identifica como persona jurídica.",
+      "En el RUT se identifica que el tercero pertenece al régimen especial y es responsable de IVA."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": false,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "estampilla_universidad": {
+        "objeto_contrato": {
+          "tipo": "no_identificado",
+          "aplica_estampilla": false,
+          "palabras_clave_encontradas": []
+        },
+        "valor_contrato": {
+          "valor_total_pesos": 0.0,
+          "valor_total_uvt": 0.0,
+          "metodo_identificacion": "no_identificado"
+        }
+      },
+      "contribucion_obra_publica": {
+        "objeto_contrato": {
+          "es_contrato_obra": false,
+          "palabras_clave_encontradas": []
+        },
+        "valor_factura": {
+          "valor_sin_iva": 0.0,
+          "metodo_identificacion": "no_identificado"
+        }
+      },
+      "observaciones": [
+        "El NIT del pagador (830.054.060-5) aplica para Estampilla Pro Universidad Nacional, pero el objeto del contrato es de prestación de servicios, no de obra, interventoría o servicios conexos de obra.",
+        "El NIT del pagador (830.054.060-5) aplica para Contribución a Obra Pública 5%, pero el objeto del contrato es de prestación de servicios, no de obra."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": false,
+      "aplica_contribucion_obra_publica": false,
+      "procesamiento_paralelo": false,
+      "impuestos_detectados": []
+    },
+    "tercero_identificado": {
+      "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "es_consorcio": false,
+      "administra_recursos_publicos": false,
+      "consorciados": []
+    },
+    "estampilla_universidad": null,
+    "contribucion_obra_publica": null,
+    "observaciones": [
+      "El NIT del pagador (830.054.060-5) aplica para Estampilla Pro Universidad Nacional, pero el objeto del contrato es de prestación de servicios, no de obra, interventoría o servicios conexos de obra.",
+      "El NIT del pagador (830.054.060-5) aplica para Contribución a Obra Pública 5%, pero el objeto del contrato es de prestación de servicios, no de obra."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

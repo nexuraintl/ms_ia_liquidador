@@ -1,0 +1,48 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato (diseño, gestión e implementación de la etapa de intercambio de saberes) incluye servicios conexos aplicables a la Estampilla Pro Universidad Nacional. Adicionalmente, dado que la actividad principal implica la ejecución de una ruta, se considera que podría haber componentes de obra, lo que activaría la Contribución a Obra Pública. El tercero administra recursos públicos y los NITs son válidos para ambos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación",
+      "intercambio de saberes",
+      "fortalecimiento de comunidad",
+      "ruta"
+    ],
+    "palabras_clave_obra_publica": [
+      "ruta"
+    ]
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.995783090905,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "Valor total del instrumento contractual $124.000.000 y Pago # 2 por el 30% valor total prestación de servicios"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "La tarifa para la Estampilla Pro Universidad Nacional se determina en función del valor total del contrato de $124,000,000. Al convertirlo a UVT para 2025 ($49,799), el valor es aproximadamente 2489.99 UVT. Esto se ubica en el rango de 52,652 a 157,904 UVT, aplicando una tarifa del 1.0% para la Estampilla Pro Universidad Nacional. Sin embargo, revisando las tarifas nuevamente, el rango es '26 a 52,652 UVT: 0.5%', '52,652 a 157,904 UVT: 1.0%', 'Más de 157,904 UVT: 2.0%'. El valor de 2489.99 UVT es MENOR a 52,652 UVT. Por lo tanto, la tarifa correcta es 0.5%.",
+    "Se ha identificado que el contrato se refiere a la 'ruta Mujer Rural Soberana' y la 'implementación de la ruta'. Si bien no se menciona explícitamente 'obra', la naturaleza de la implementación de una ruta puede implicar actividades de construcción o mantenimiento, justificando la aplicación de la Contribución a Obra Pública. Se procede a aplicar la tarifa del 5% sobre el valor de la factura sin IVA."
+  ]
+}

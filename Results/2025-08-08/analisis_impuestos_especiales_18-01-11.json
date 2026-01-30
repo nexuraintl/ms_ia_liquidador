@@ -1,0 +1,44 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato es de prestación de servicios de diseño, gestión e implementación, lo cual califica para la Estampilla Pro Universidad Nacional. El contrato es de obra, por lo tanto, también aplica la Contribución a Obra Pública del 5%. El tercero (FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX) no administra recursos públicos, por lo que ninguno de los impuestos aplica."
+  },
+  "tercero_identificado": {
+    "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "El valor total del contrato no se encuentra especificado en los documentos proporcionados."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El tercero 'FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, ninguno de los impuestos especiales integrados aplica.",
+    "El objeto del contrato se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional. No aplica para la Contribución a Obra Pública ya que no es un contrato de obra pura.",
+    "El valor total del contrato no se pudo determinar con la información disponible, lo que impide la liquidación de la Estampilla Pro Universidad Nacional según los rangos de UVT. Sin embargo, se ha identificado el valor de la factura sin IVA para efectos informativos."
+  ]
+}

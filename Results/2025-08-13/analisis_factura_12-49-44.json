@@ -1,0 +1,66 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+      "tarifa_retencion": 11.0,
+      "base_gravable": 978638.82
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 1164580.2,
+  "iva": 185941.38,
+  "observaciones": [
+    "El servicio corresponde a Revisoría Fiscal, clasificado como Honorarios y comisiones por servicios.",
+    "El tercero BDO AUDIT S.A.S. BIC es una persona jurídica, por lo tanto, no aplica el Artículo 383.",
+    "La factura ya incluye la retención en la fuente calculada correctamente en $107,650.27, correspondiente al 11% sobre la base gravable de $978,638.82."
+  ]
+}

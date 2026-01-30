@@ -1,0 +1,70 @@
+{
+  "procesamiento_paralelo": true,
+  "aplica_estampilla_universidad": true,
+  "impuestos_procesados": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "exito": true,
+  "aplica_retencion": false,
+  "valor_total_factura": 0,
+  "iva_total": 0,
+  "valor_retencion": 0,
+  "concepto": "No identificado",
+  "tarifa_retencion": 0,
+  "retefuente": {
+    "aplica": false,
+    "valor_retencion": 0,
+    "concepto": "No identificado",
+    "tarifa_retencion": 0,
+    "observaciones": []
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No procesada",
+    "valor_estampilla": 0,
+    "tarifa_aplicada": 0,
+    "rango_uvt": "No calculado",
+    "valor_contrato_pesos": 0,
+    "valor_contrato_uvt": 0,
+    "observaciones": [
+      "No se pudo procesar estampilla"
+    ]
+  },
+  "contribucion_obra_publica": {
+    "aplica": true,
+    "estado": "No procesada",
+    "valor_contribucion": 0,
+    "tarifa_aplicada": 0.05,
+    "valor_factura_sin_iva": 0,
+    "observaciones": [
+      "No se pudo procesar obra pública"
+    ]
+  },
+  "es_facturacion_extranjera": false,
+  "resumen_total": {
+    "valor_total_impuestos": 0,
+    "impuestos_aplicables": {
+      "retefuente": false,
+      "estampilla": false,
+      "obra_publica": false
+    }
+  },
+  "observaciones": [],
+  "naturaleza_tercero": null,
+  "tiempo_procesamiento_segundos": 7.098685,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "entidad_administrativa": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "es_consorcio": false,
+  "documentos_clasificados": {
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "RUT ARTESANIAS.pdf": "RUT"
+  },
+  "version": "2.0.0",
+  "timestamp": "2025-08-08T14:26:58.900328",
+  "sistema": "integrado_retefuente_estampilla"
+}

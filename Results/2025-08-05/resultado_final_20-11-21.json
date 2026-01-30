@@ -1,0 +1,97 @@
+{
+  "procesamiento_paralelo": true,
+  "aplica_estampilla_universidad": true,
+  "impuestos_procesados": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "exito": true,
+  "aplica_retencion": true,
+  "valor_total_factura": 37200000.0,
+  "iva_total": 5939495.8,
+  "valor_retencion": 1250420.168,
+  "concepto": "Servicios generales (declarantes)",
+  "tarifa_retencion": 4.0,
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 1250420.168,
+    "concepto": "Servicios generales (declarantes)",
+    "tarifa_retencion": 4.0,
+    "observaciones": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "valor_estampilla": 0.0,
+    "tarifa_aplicada": 0.0,
+    "rango_uvt": "",
+    "valor_contrato_pesos": 0.0,
+    "valor_contrato_uvt": 0.0,
+    "observaciones": [
+      "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no administra recursos públicos"
+    ]
+  },
+  "contribucion_obra_publica": {
+    "aplica": true,
+    "estado": "No procesada",
+    "valor_contribucion": 0,
+    "tarifa_aplicada": 0.05,
+    "valor_factura_sin_iva": 0,
+    "observaciones": [
+      "No se pudo procesar obra pública"
+    ]
+  },
+  "es_facturacion_extranjera": false,
+  "resumen_total": {
+    "valor_total_impuestos": 1250420.168,
+    "impuestos_aplicables": {
+      "retefuente": true,
+      "estampilla": false,
+      "obra_publica": false
+    }
+  },
+  "observaciones": [
+    "El NIT del tercero es 901.369.011-4",
+    "El tercero es una persona jurídica (ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA)",
+    "El tercero es declarante de renta (Responsabilidad 05 en el RUT)",
+    "El tercero no es autorretenedor (no se menciona en el RUT)",
+    "El tercero es responsable de IVA",
+    "El régimen tributario del tercero es ESPECIAL (Actividad Económica 9499)",
+    "El valor total de la factura es $37,200,000",
+    "La base gravable para retención en la fuente es $31,260,504.20",
+    "La tarifa de retención en la fuente aplicable es 4.0% (Servicios generales (declarantes))",
+    "La base mínima para Servicios generales (declarantes) es $100,000, la base gravable supera este valor.",
+    "El concepto del pago es Intercambio de Saberes Fase 2, contrato 0521",
+    "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+    "Aplicando tarifas convencionales",
+    "Detalle del cálculo:",
+    "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "tiempo_procesamiento_segundos": 8.833277,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "entidad_administrativa": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "es_consorcio": false,
+  "documentos_clasificados": {
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "RUT ARTESANIAS.pdf": "RUT"
+  },
+  "version": "2.0.0",
+  "timestamp": "2025-08-05T20:11:21.111300",
+  "sistema": "integrado_retefuente_estampilla"
+}

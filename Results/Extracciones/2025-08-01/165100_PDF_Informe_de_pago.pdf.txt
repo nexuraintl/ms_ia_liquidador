@@ -1,0 +1,63 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Informe_de_pago.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 16:51:00
+- Caracteres extraídos: 3487
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 193076,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 3487
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+Dia: 3 Mes: 7 Año:
+No. Factura o Cuenta de Cobro:
+Nit o C.C. o CE No. 
+Valor Total Convenio- Contrato/Orden de Servicio
+$ 81.378.000,00
+V.CONCEPTO DEL SUPERVISOR: XNo. Convenio/Contrato/Orden de Servicio 001
+Nombre del tercero/Beneficiario del Pago VIVIANA YISETH PONGUTA TORO 1024537280008-2025
+III. INFORMACION A DILIGENCIAR PARA PAGOS DERIVADOS DE CONTRATACIÓN
+(Ejecución Financiera del Contrato)
+Valor Total Pagos Ejecutados Valor Total FacturaTipologia del Pago Desembolso 1
+II. INFORMACIÓN A DILIGENCIAR UNICAMENTE PARA PAGOS DIRECTOS
+Valor Total a Autorizar Pago Directo $ 6.165.000,00CERTIFICACIÓN  PARA PAGO DE FACTURAS O CUENTAS DE COBRO
+Nota: En las celdas señaladas en color gris encontrarán comentarios que facilitarán el diligenciamiento del formato.
+I. INFORMACIÓN GENERAL
+2025 FechaCódigo FT-GPR-01
+Fecha: 05/10/2020
+Versión 02
+IV. ACTIVIDADES GENERALES DERIVADAS DE LA CONTRATACIONSaldo a Pagar Convenio-Contrato/Orden de Servicio
+Nombre del Supervisor: Jenifer Yaneth Guzmán GualterosObservaciones: Ninguna
+Certifico que he revisado el cumplimiento de las obligaciones a cargo del Contratista o Aliado, he revisado los documentos o entregables relacionados en el convenio - contrato u orden de servicios, he dado conformidad sobre los mismos, y entregados a la 
+Coordinación General Administrativa para dar trámite al pago de la factura:  informe mensual de actividades relacionados del 6 de junio al 30 de junio de 2025 aprobados por la supervisión.Pagos de aportes a los Sistemas de Salud, Riesgos Profesionales, Pensión y 
+Parafiscales
+(Se deben anexar parafiscales actualizados)
+AprobóCon mi firma en el presente documento como Supervisor del contrato u orden de servicio,  manifiesto que he verificado en cada uno de los pagos realizados por el 
+Patrimonio Autónomo, el pago por parte del Contratista o Aliado de los aportes al Sistema de salud, riesgos profesionales, pensión y parafiscales, de conformidad con el 
+artículo 50 de la Ley 789 de 2002.Relación de las actividades ejecutadas durante el período objeto del pagoPara este pago Viviana Yiseth Pongutá desarrollo actividades asociadas alarevisión documental deentregables delascontrataciones derivadas delasofertas
+mercantiles 008 y029, apoyo enlarevisión debeneficiarios delosproyectos deturismo comunitario, aglomeraciones ysostenibilidad enmipymes turísticas.
+Adicionalmente, apoyó elproceso laconstrucción deunmodelo detableros decontrol enlaherramienta Looker Studio, con elobjetivo defacilitar elmonitoreo del
+avance delosbeneficiarios enlosdiferentes proyectos, asícomo sucaracterización apartir devariables clave. Apoyo eneste período deejecución enlasreuniones de
+coordinación, evaluación y seguimiento relacionadas con las ofertas mercantiles 029 de 2023 y 008 de 2024. Estas reuniones abordaron temas técnicos, administrativos y 
+operativos clave para eldesarrollo delosproyectos, tales como revisión deactivos productivos, avances decomunicaciones, herramientas digitales, eventos
+institucionales, seguimiento a entregables, selección de proveedores y sesiones de capacitación.
+Finalmente Viviana apoyo enlarecepción delcargo delaanalista junior deEmpretur para colaborar con algunas acciones que sevenia desarrollando desde eseperfil. A
+la fecha de presentación de este corte Viviana cumplió integralmente con las actividades encomendadas y asignadas a su contrato.$ 0,00 $ 6.165.000,00 $ 75.213.000,00
+Número de Cedula : 1073231911
+Cargo: Ejecutiva de turismo
+FirmaNo Aprobó
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

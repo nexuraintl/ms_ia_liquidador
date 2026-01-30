@@ -1,0 +1,40 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "estampilla_universidad": {
+    "objeto_contrato": {
+      "tipo": "servicios_conexos_obra",
+      "aplica_estampilla": true,
+      "palabras_clave_encontradas": []
+    },
+    "valor_contrato": {
+      "valor_total_pesos": 124000000.0,
+      "valor_total_uvt": 0.0,
+      "metodo_identificacion": "porcentaje_calculado"
+    }
+  },
+  "contribucion_obra_publica": {
+    "objeto_contrato": {
+      "es_contrato_obra": false,
+      "palabras_clave_encontradas": []
+    },
+    "valor_factura": {
+      "valor_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo"
+    }
+  },
+  "observaciones": [
+    "El NIT 830.054.060-5 aplica para Estampilla Pro Universidad Nacional y Contribución a Obra Pública.",
+    "El valor total del contrato para la estampilla se calculó a partir del valor del primer pago (62.000.000) reportado en el informe de pago, indicando que corresponde al 50% del valor total del instrumento contractual (124.000.000).",
+    "Se asume que el objeto del contrato es un servicio conexo a obra por la descripcion del contrato 'diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.'"
+  ]
+}

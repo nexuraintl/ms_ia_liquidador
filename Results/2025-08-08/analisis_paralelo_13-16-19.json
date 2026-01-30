@@ -1,0 +1,153 @@
+{
+  "timestamp": "2025-08-08T13:16:19.559144",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": []
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "razon_deteccion": "El objeto del contrato es de prestación de servicios (diseño, gestión e implementación de etapa de intercambio de saberes y fortalecimiento de comunidad), lo cual aplica para la Estampilla Pro Universidad Nacional. No aplica para la Contribución a Obra Pública ya que no es un contrato de obra. El tercero administra recursos públicos."
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": true,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "prestación de servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos_obra",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": 124000000.0,
+          "valor_contrato_uvt": 2490.02,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "porcentaje_calculado",
+          "texto_referencia": "El pago es por el 30% del valor total de la prestación de servicios, y el valor total del instrumento contractual es $124.000.000. La factura DV 119 es por $37,200,000.00, que corresponde a Pago #2 por el 30% del valor total de la prestación de servicios. El informe de pago anexo indica que el valor total del instrumento contractual es $124.000.000."
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 0.0,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": "No aplica para este tipo de contrato."
+        }
+      },
+      "observaciones": [
+        "El objeto contractual indica 'diseño, gestión e implementación', lo cual se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional.",
+        "El contrato total es de $124.000.000 COP. Con la UVT de 2025 ($49.799), el valor del contrato en UVT es 2490.02 UVT. Esto se encuentra en el rango de 'Más de 157,904 UVT' para la Estampilla Pro Universidad Nacional, por lo que aplica una tarifa del 2.0%.",
+        "El valor de la factura sin IVA es $31.260.504,20.",
+        "La Contribución a Obra Pública no aplica ya que el objeto del contrato no es de obra (construcción, mantenimiento, instalación)."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": false,
+      "procesamiento_paralelo": false,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "es_consorcio": false,
+      "administra_recursos_publicos": true,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": null,
+    "observaciones": [
+      "El objeto contractual indica 'diseño, gestión e implementación', lo cual se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional.",
+      "El contrato total es de $124.000.000 COP. Con la UVT de 2025 ($49.799), el valor del contrato en UVT es 2490.02 UVT. Esto se encuentra en el rango de 'Más de 157,904 UVT' para la Estampilla Pro Universidad Nacional, por lo que aplica una tarifa del 2.0%.",
+      "El valor de la factura sin IVA es $31.260.504,20.",
+      "La Contribución a Obra Pública no aplica ya que el objeto del contrato no es de obra (construcción, mantenimiento, instalación)."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

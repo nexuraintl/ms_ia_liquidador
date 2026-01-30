@@ -1,0 +1,49 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato es de prestación de servicios de diseño, gestión e implementación, lo cual aplica para estampilla (servicios conexos). El contrato también se clasifica como obra, por lo que aplica la contribución a obra pública. El tercero administra recursos públicos."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación",
+      "intercambio de saberes",
+      "fortalecimiento de comunidad"
+    ],
+    "palabras_clave_obra_publica": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ]
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.99,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "El informe de pago indica un valor total del instrumento contractual de $124.000.000 y la factura es por $37,200,000, que corresponde al primer pago del 30% del valor total de la prestación de servicios. El valor de la factura sin IVA es $31,260,504.20."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Valor Bruto de la factura: $31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "La tarifa para la Estampilla Pro Universidad Nacional se determina por el valor total del contrato ($124.000.000), que equivale a 2489.99 UVT. Esto se encuentra en el rango de 'Más de 157,904 UVT', por lo que aplica una tarifa del 2.0%.",
+    "La Contribución a Obra Pública tiene una tarifa fija del 5%."
+  ]
+}

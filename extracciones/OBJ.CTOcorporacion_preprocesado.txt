@@ -1,0 +1,17 @@
+ARCHIVO EXCEL PREPROCESADO
+=============================
+
+Archivo original: OBJ. CTO corporacion.xlsx
+Fecha procesamiento: 2025-08-12 22:54:58
+Hojas procesadas: 1
+Filas vacías eliminadas: 0
+Columnas vacías eliminadas: 0
+Caracteres finales: 659
+
+=============================
+TEXTO ENVIADO A GEMINI:
+=============================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                                            CONTRATISTA                                                                                                                                                                                                                               OBJETO
+CONTRATO DE PRESTACIÓN DE SERVICIOS CORPORACION PARA EL DESARROLLO EMPRESARIAL PARA LA PAZ En virtud del presente contrato, EL OPERADOR se obliga con INNPULSA COLOMBIA a ejecutar la ruta de intervención del programa NUCLEO E a partir de la Estación 2 diagnóstica, intervención de las estaciones impulsa, crece y conecta

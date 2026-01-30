@@ -1,0 +1,23 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: parafiscal_audit_20250624145931.pdf
+- Método de extracción: PDF_FALLBACK_OCR_ERROR
+- Fecha y hora: 2025-07-24 14:22:32
+- Caracteres extraídos: 68
+
+METADATOS ADICIONALES:
+{
+  "error": "Error en Vision API: Bad image data."
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+Error en OCR con Google Vision: Error en Vision API: Bad image data.
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

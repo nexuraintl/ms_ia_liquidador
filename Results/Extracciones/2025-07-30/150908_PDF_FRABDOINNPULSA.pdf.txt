@@ -1,0 +1,151 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: FRA  BDO INNPULSA.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-30 15:09:08
+- Caracteres extraídos: 2697
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 70779,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 2697
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+FIDEICOMISOS SOCIEDAD
+FIDUCIARIA FIDUCOLDEX
+CL 28 13A 24 P 6
+Ciudad:
+Bogotá D.C
+Departamento:
+Bogotá D.C
+País:
+Colombia
+Factura electrónica de venta No.
+BA27709
+24/06/2025 02:42:00 PM
+24/07/2025
+30
+COP
+NIT 830054060 - 5
+Dirección:
+3275500
+Teléfono:
+Dirección Despacho:
+Cliente:
+Contacto:
+G121-QUIROZ LOPEZ PAOLA
+Fecha de emisión:
+Tasa Cambio
+Orden de compra
+Gerente:
+Socio:
+S09-RAMIREZ VARGAS VICTOR
+MANUEL
+Codigo de moneda:
+Plazo (Días):
+Fecha de vencimiento:
+Item
+Ref.
+Descripción
+Cant.
+Unidad
+de
+Medida
+Precio Unitario
+Carg. y
+Desc.
+Imptos
+Rte
+Fte
+Total
+1
+010-002-
+0014899
+SERVICIO DE REVISORIA FISCAL MES DE
+JUNIO 2025 INNPULSA COLOMBIA
+1.00
+unidad
+$ 978.638,82
+$ 0,00
+IVA(19%)
+11%
+$ 978.638,82
+Total de items:
+1
+$ 185.941,38
+$ 144.016,49
+$ 0,00
+$ 0,00
+$ 1.164.580,20
+Neto a pagar:
+$ 1.020.563,71
+Crédito
+Medio de pago:
+Transferencia Débito
+Municipio de prestación del servicio:
+Por favor absténgase de practicar retención de ICA
+en un municipio diferente
+Por favor realizar transferencia bancaria a: Beneficiario: BDO AUDIT SAS BIC -
+Cuenta No: 14104853818 - Banco: Bancolombia - Tipo: Cuenta Corriente
+Forma de pago:
+Total:
+Anticipos:
+$ 0,00
+Cargos de la factura:
+Descuentos de la factura:
+Retenciones:
+Impuestos:
+Total antes de IVA:
+$ 978.638,82
+Observaciones:
+MUNICIPIO DE PRESTACION DEL SERVICIO: BOGOTA
+Email Radicación:
+factura.electronica@fiducoldex.com.co;dquiroz@bdo.com.co
+Total IVA
+$ 185.941,38
+Total ReteFuente
+$ 107.650,27
+Total ReteIVA
+$ 27.891,21
+Total ReteICA
+$ 8.475,01
+BDO AUDIT S.A.S. BIC
++571 6230199
+Autorización de 
+numeración de facturación electrónica
+No. 18764071380860 de 27/05/2024 al 27/05/2026
+Habilita numeración de:
+No. 20001 al 30000
+Responsabilidad Fiscal: R-99-PN No Aplica - Otros
+NIT 860600063 - 9
+CR 16 97 46 P 8
+Bogotá, D.C
+Colombia
+www.bdo.com.co
+proveedores@bdo.com.co
+comercial@bdo.com.co
+cartera@bdo.com.co
+Régimen:
+Impuesto sobre las ventas - IVA
+“BDO Colombia S.A.S., una sociedad por acciones simplificada colombiana, es miembro de BDO International Limited, una compañía limitada por garantía del Reino Unido, y
+forma parte de la red internacional BDO de empresas independientes asociadas. BDO es el nombre comercial de la red BDO y de cada una de las empresas asociadas de BDO.
+Copyright © septiembre 2020. BDO en Colombia. Todos los derechos reservados. Publicado en Colombia.”
+Actividad económica 6920 Tarifa ICA 8.66
+Este documento corresponde a la representación gráfica de una factura electrónica de venta. Confirme el CUFE
+mediante lectura de este código bidimensional:
+CUFE 
+e34c2635f1216ad1922cc762b9f2c7b29767272746baba63151d24024211ee8b62ea52a26b3d2a9bf4f7d1f598207ef8
+Impreso por CENET SA. Nit 830057860 - MISFACTURAS
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

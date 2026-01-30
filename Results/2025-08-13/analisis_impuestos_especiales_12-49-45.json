@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-08-13T12:49:45.420192",
+  "tipo_analisis": "impuestos_especiales",
+  "nit_administrativo": "830.054.060-5",
+  "procesamiento_paralelo": true,
+  "analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": false,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "razon_deteccion": "El tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos, lo cual es una condición excluyente para la aplicación de ambos impuestos. Adicionalmente, el objeto del contrato 'Servicio de Revisoría Fiscal' no clasifica dentro de los objetos que aplican para ninguno de los impuestos."
+      },
+      "tercero_identificado": {
+        "nombre": "BDO AUDIT S.A.S. BIC",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "Servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo.",
+        "clasificacion_estampilla": "no_identificado",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "Revisoría Fiscal",
+          "auditoría",
+          "análisis financiero",
+          "contable",
+          "administrativo"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": 0.0,
+          "valor_contrato_uvt": 0.0,
+          "valor_factura_sin_iva": 978638.82,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": "Total antes de IVA: $ 978.638,82"
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 978638.82,
+          "metodo_identificacion": "directo",
+          "texto_referencia": "Total antes de IVA: $ 978.638,82"
+        }
+      },
+      "observaciones": [
+        "El NIT administrativo 830054060-5 de FIDUCIARIA FIDUCOLDEX es válido para la aplicación de los impuestos.",
+        "El tercero 'BDO AUDIT S.A.S. BIC' (NIT 860.600.063-9) no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Esta es una condición excluyente fundamental para la aplicación de ambos impuestos.",
+        "El objeto del contrato, identificado como 'Servicios profesionales de Revisoría Fiscal', no se clasifica dentro de las categorías de 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' (estudios, asesorías técnicas, gerencia de obra/proyectos, diseño) definidas para la aplicación de la Estampilla Pro Universidad Nacional. Tampoco es un 'Contrato de Obra' para la Contribución a Obra Pública.",
+        "Dado que el tercero no administra recursos públicos y el objeto del contrato no aplica, ambos impuestos no son liquidables en este caso."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": false,
+      "aplica_contribucion_obra_publica": false,
+      "procesamiento_paralelo": false,
+      "impuestos_detectados": []
+    },
+    "tercero_identificado": {
+      "nombre": "BDO AUDIT S.A.S. BIC",
+      "es_consorcio": false,
+      "administra_recursos_publicos": false,
+      "consorciados": []
+    },
+    "estampilla_universidad": null,
+    "contribucion_obra_publica": null,
+    "observaciones": [
+      "El NIT administrativo 830054060-5 de FIDUCIARIA FIDUCOLDEX es válido para la aplicación de los impuestos.",
+      "El tercero 'BDO AUDIT S.A.S. BIC' (NIT 860.600.063-9) no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Esta es una condición excluyente fundamental para la aplicación de ambos impuestos.",
+      "El objeto del contrato, identificado como 'Servicios profesionales de Revisoría Fiscal', no se clasifica dentro de las categorías de 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' (estudios, asesorías técnicas, gerencia de obra/proyectos, diseño) definidas para la aplicación de la Estampilla Pro Universidad Nacional. Tampoco es un 'Contrato de Obra' para la Contribución a Obra Pública.",
+      "Dado que el tercero no administra recursos públicos y el objeto del contrato no aplica, ambos impuestos no son liquidables en este caso."
+    ]
+  }
+}

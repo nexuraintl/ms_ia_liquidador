@@ -1,0 +1,67 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+      "tarifa_retencion": 11.0,
+      "base_gravable": 978638.82
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 1164580.2,
+  "iva": 185941.38,
+  "observaciones": [
+    "El tercero BDO AUDIT S.A.S. BIC es una persona jurídica (Sociedad por Acciones Simplificada), por lo tanto, el Artículo 383 del Estatuto Tributario no aplica.",
+    "El concepto de la factura 'SERVICIO DE REVISORIA FISCAL' se clasifica como 'Honorarios y comisiones por servicios (persona juridica)' según el objeto del contrato y la actividad económica del emisor.",
+    "La retención en la fuente calculada ($107,650.27) coincide con el valor de 'Total ReteFuente' indicado en la factura.",
+    "El certificado de aportes parafiscales adjunto, aunque válido, no es un requisito para la aplicación de retención en la fuente a una persona jurídica."
+  ]
+}

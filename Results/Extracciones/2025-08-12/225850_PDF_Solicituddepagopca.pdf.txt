@@ -1,0 +1,50 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Solicitudde pago pca .pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-12 22:58:50
+- Caracteres extraídos: 913
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 168585,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 913
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ 
+Nro. TIPO DE 
+IDENTIFICACIÓNNo. 
+FACTURANo. CONTRATO PROYECTO No. CUENTA ORIGEN MECANISMO DE 
+GIRO BANCO DESTINO TIPO DE 
+CUENTA 
+1 NIT 172- 2024Programa Estratégico de Comunidades Negras, 
+Afrocolombianas, Raizales y Palenqueras500-806-359173 Transferencia Bancolombia AhorrosIDENTIFICACIÓN 830.115.395-1SOLICITUD DE PAGO Nro. AÑO 2025
+P.A FONDO PARA LA VIDA Y LA BIODIVERSIDAD CÓD 117711 NOMBRE DEL NEGOCIO
+FIDEICOMITENTE
+FECHA DE RADICACIÓN 
+DIA  MES   AÑO   MINISTERIO DE AMBIENTE Y DESARROLLO SOSTENIBLE
+VALOR EN LETRAS Mil cien millones de pesos MCTE
+OBSERVACIONES2 5 2025
+RELACIÓN DE PAGOS
+RAZÓN SOCIAL /NOMBRE CONCEPTONo. CUENTA 
+DESTINOVALOR No. DE 
+IDENTIFICACIÓN
+807007783-8ASOCIACIÓN PROYECTO CULTURAL 
+AFRODESCENDIENTE —PCAPago No. 2
+TOTAL 81600002183  $                     1.100.000.000,00 
+1.100.000.000,00 $                    
+NOMBRE DEL ORDENADOR DEL GASTO
+ORDENADOR DEL PAGO
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

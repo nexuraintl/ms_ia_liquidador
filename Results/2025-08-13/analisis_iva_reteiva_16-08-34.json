@@ -1,0 +1,52 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": false,
+      "valor_iva_total": 0.0,
+      "porcentaje_iva": 0.0,
+      "detalle_conceptos_iva": [],
+      "metodo_identificacion": "iva_cero"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": false,
+      "es_responsable_iva": null,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "NO DISPONIBLE"
+    },
+    "concepto_facturado": {
+      "descripcion": "Prolene 3/0 (suturas), Monosyn 3/0 (suturas), Adrenalina (medicamento)",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": "El producto 'Adrenalina' es un medicamento y se encuentra exento de IVA según los puntos 28, 29 y 30 de la lista de Bienes Exentos de IVA. Sin embargo, 'Prolene 3/0' y 'Monosyn 3/0' son suturas quirúrgicas (dispositivos médicos) que no están listadas como bienes excluidos o exentos en las configuraciones proporcionadas. Por lo tanto, estos últimos deberían estar gravados con IVA a la tarifa general.",
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": false,
+      "bien_ubicado_colombia": true
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": false,
+      "iva_encontrado": 0.0
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": false,
+    "porcentaje_reteiva": null,
+    "tarifa_decimal": 0.0,
+    "valor_reteiva_calculado": 0.0,
+    "metodo_calculo": null
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidación Sin Finalizar",
+    "observaciones": [
+      "El RUT del tercero no está disponible, por lo que no se pudo validar su responsabilidad de IVA.",
+      "La factura no discrimina el IVA y el total facturado es igual al subtotal, lo que implica un IVA del 0%.",
+      "Existe una inconsistencia: mientras que la 'Adrenalina' es un bien exento de IVA, las suturas 'Prolene 3/0' y 'Monosyn 3/0' son dispositivos médicos que, según las listas proporcionadas, deberían estar gravados con IVA. Esta situación impide finalizar la preliquidación."
+    ]
+  }
+}

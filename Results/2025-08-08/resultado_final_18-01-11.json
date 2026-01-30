@@ -1,0 +1,88 @@
+{
+  "procesamiento_paralelo": true,
+  "aplica_estampilla_universidad": true,
+  "impuestos_procesados": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "exito": true,
+  "aplica_retencion": false,
+  "valor_total_factura": 37200000.0,
+  "iva_total": 5939495.8,
+  "valor_retencion": 0.0,
+  "concepto": "N/A",
+  "tarifa_retencion": 0.0,
+  "retefuente": {
+    "aplica": false,
+    "valor_retencion": 0.0,
+    "concepto": "N/A",
+    "tarifa_retencion": 0.0,
+    "observaciones": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+      "Aplicando tarifas convencionales",
+      "Concepto 'Prestacion de servicios' no encontrado en la tabla de retefuente"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No procesada",
+    "valor_estampilla": 0,
+    "tarifa_aplicada": 0,
+    "rango_uvt": "No calculado",
+    "valor_contrato_pesos": 0,
+    "valor_contrato_uvt": 0,
+    "observaciones": [
+      "No se pudo procesar estampilla"
+    ]
+  },
+  "contribucion_obra_publica": {
+    "aplica": true,
+    "estado": "No procesada",
+    "valor_contribucion": 0,
+    "tarifa_aplicada": 0.05,
+    "valor_factura_sin_iva": 0,
+    "observaciones": [
+      "No se pudo procesar obra pública"
+    ]
+  },
+  "es_facturacion_extranjera": false,
+  "resumen_total": {
+    "valor_total_impuestos": 0.0,
+    "impuestos_aplicables": {
+      "retefuente": false,
+      "estampilla": false,
+      "obra_publica": false
+    }
+  },
+  "observaciones": [
+    "La factura corresponde a un pago por prestación de servicios.",
+    "El RUT indica que la entidad es Persona Jurídica, Régimen Ordinario y Responsable de IVA.",
+    "El concepto se clasifica como 'Prestacion de servicios' según el diccionario y la naturaleza del contrato.",
+    "La base mínima para 'Prestacion de servicios' es de $100,000 COP. El valor de la factura supera esta base.",
+    "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+    "Aplicando tarifas convencionales",
+    "Concepto 'Prestacion de servicios' no encontrado en la tabla de retefuente"
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "tiempo_procesamiento_segundos": 6.233708,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "entidad_administrativa": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "es_consorcio": false,
+  "documentos_clasificados": {
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "RUT ARTESANIAS.pdf": "RUT"
+  },
+  "version": "2.0.0",
+  "timestamp": "2025-08-08T18:01:11.236162",
+  "sistema": "integrado_retefuente_estampilla"
+}

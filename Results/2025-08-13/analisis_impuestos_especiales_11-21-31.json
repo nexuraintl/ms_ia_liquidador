@@ -1,0 +1,42 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato 'Revisoría Fiscal' no corresponde a las categorías de 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' definidas para la aplicación de los impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "PATRIMONIO AUTONOMO INNPULSA COLOMBIA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "servicios profesionales de Revisoría Fiscal",
+    "clasificacion_estampilla": "no_identificado",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 0.0,
+      "valor_contrato_uvt": 0.0,
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "Valor de la factura sin IVA: $978.638,82 (Total antes de IVA)"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Valor de la factura sin IVA: $978.638,82 (Total antes de IVA)"
+    }
+  },
+  "observaciones": [
+    "El NIT administrativo de la Fiduciaria (830.054.060-5) es válido para la aplicación de los impuestos.",
+    "El tercero 'PATRIMONIO AUTONOMO INNPULSA COLOMBIA' administra recursos públicos.",
+    "El objeto del contrato, 'Revisoría Fiscal', no se clasifica como 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' según las definiciones proporcionadas para la aplicación de la Estampilla Pro Universidad Nacional o la Contribución a Obra Pública.",
+    "No se identifica el valor total del contrato, lo cual sería necesario para la Estampilla si el objeto aplicara.",
+    "El estado final es 'No aplica el impuesto' debido a la clasificación del objeto del contrato."
+  ]
+}

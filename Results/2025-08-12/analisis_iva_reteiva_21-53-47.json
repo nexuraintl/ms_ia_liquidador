@@ -1,0 +1,56 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 5939495.8,
+      "porcentaje_iva": 19.0,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00",
+          "valor_iva": 5939495.8,
+          "porcentaje": 19.0
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": null,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "Responsabilidades, Calidades y Atributos section of RUT. No se encontró el código 48, 49 o 53."
+    },
+    "concepto_facturado": {
+      "descripcion": "Servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": "",
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": false,
+      "iva_encontrado": 0.0
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": false,
+    "porcentaje_reteiva": null,
+    "tarifa_decimal": 0.0,
+    "valor_reteiva_calculado": 0.0,
+    "metodo_calculo": null
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidación Sin Finalizar",
+    "observaciones": [
+      "En el RUT no se identificó el código 48 (Impuesto sobre las ventas – IVA), ni los códigos 49 o 53 (No responsable de IVA). Aunque la factura muestra un IVA del 19%, la ausencia de la responsabilidad de IVA en el RUT genera una inconsistencia. Se requiere validación adicional de la responsabilidad de IVA del tercero."
+    ]
+  }
+}

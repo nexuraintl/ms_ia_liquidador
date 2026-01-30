@@ -1,0 +1,77 @@
+{
+  "procesamiento_paralelo": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "timestamp": "2025-08-12T19:05:40.878451",
+  "version": "2.0.0",
+  "retefuente": {
+    "aplica": false,
+    "valor_retencion": 0.0,
+    "concepto": "N/A",
+    "tarifa_retencion": 0.0,
+    "valor_base": 0.0,
+    "fecha_calculo": "2025-08-12T19:05:40.879862",
+    "mensajes_error": [
+      "El tercero NO es responsable de IVA - NO se le aplica retención en la fuente"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de estampilla en el análisis"
+  },
+  "contribucion_obra_publica": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de obra pública en el análisis"
+  },
+  "iva_reteiva": {
+    "aplica": false,
+    "valor_iva_identificado": 5939495.8,
+    "valor_reteiva": 0.0,
+    "porcentaje_iva": 0.19,
+    "tarifa_reteiva": 0.0,
+    "porcentaje_reteiva_texto": "0%",
+    "es_fuente_nacional": true,
+    "metodo_calculo": "no_aplica",
+    "estado_liquidacion": "No aplica",
+    "es_responsable_iva": null,
+    "observaciones": [
+      "Razón: Estado no permite liquidación: Preliquidación Sin Finalizar",
+      "Estado original: Preliquidación Sin Finalizar",
+      "No se pudo identificar la responsabilidad de IVA del tercero en el RUT (códigos 48, 49 o 53 no encontrados), a pesar de que la factura muestra IVA."
+    ],
+    "calculo_exitoso": true
+  },
+  "resumen_total": {
+    "valor_total_impuestos": 0.0,
+    "impuestos_liquidados": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_exitoso": true
+  },
+  "timestamp_procesamiento": "2025-08-12T19:05:40.883639",
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "documentos_procesados": 4,
+  "documentos_clasificados": [
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf",
+    "FRA ARTESARNIAS.pdf",
+    "RUT ARTESANIAS.pdf",
+    "OBJ. CTO LEBRIJA.xlsx"
+  ],
+  "version_sistema": "2.0.0",
+  "modulos_utilizados": [
+    "Extraccion",
+    "Clasificador",
+    "Liquidador"
+  ]
+}

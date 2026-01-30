@@ -1,0 +1,56 @@
+# Entorno virtual
+venv/
+env/
+.venv/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Git
+.git/
+.gitignore
+
+# Archivos de configuración local
+.env.local
+.env.development
+
+# Documentación
+README.md
+CHANGELOG.md
+INSTRUCCIONES_CLAUDE.md
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Archivos temporales generados por el sistema
+clasificacion_documentos.json
+analisis_factura.json
+conceptos_exportados.json
+conceptos_codigo.txt
+
+# Node modules (si los hubiera)
+node_modules/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de backup
+*.bak
+*.tmp

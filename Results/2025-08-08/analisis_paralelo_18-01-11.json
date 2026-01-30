@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-08-08T18:01:11.226647",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Prestacion de servicios",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "La factura corresponde a un pago por prestación de servicios.",
+      "El RUT indica que la entidad es Persona Jurídica, Régimen Ordinario y Responsable de IVA.",
+      "El concepto se clasifica como 'Prestacion de servicios' según el diccionario y la naturaleza del contrato.",
+      "La base mínima para 'Prestacion de servicios' es de $100,000 COP. El valor de la factura supera esta base."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": true,
+        "procesamiento_paralelo": true,
+        "razon_deteccion": "El objeto del contrato es de prestación de servicios de diseño, gestión e implementación, lo cual califica para la Estampilla Pro Universidad Nacional. El contrato es de obra, por lo tanto, también aplica la Contribución a Obra Pública del 5%. El tercero (FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX) no administra recursos públicos, por lo que ninguno de los impuestos aplica."
+      },
+      "tercero_identificado": {
+        "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos_obra",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": null,
+          "valor_contrato_uvt": null,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": "El valor total del contrato no se encuentra especificado en los documentos proporcionados."
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "directo",
+          "texto_referencia": "Total Bruto 31,260,504.20"
+        }
+      },
+      "observaciones": [
+        "El tercero 'FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, ninguno de los impuestos especiales integrados aplica.",
+        "El objeto del contrato se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional. No aplica para la Contribución a Obra Pública ya que no es un contrato de obra pura.",
+        "El valor total del contrato no se pudo determinar con la información disponible, lo que impide la liquidación de la Estampilla Pro Universidad Nacional según los rangos de UVT. Sin embargo, se ha identificado el valor de la factura sin IVA para efectos informativos."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": true,
+      "procesamiento_paralelo": true,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD",
+        "CONTRIBUCION_OBRA_PUBLICA"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+      "es_consorcio": false,
+      "administra_recursos_publicos": false,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": {},
+    "observaciones": [
+      "El tercero 'FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, ninguno de los impuestos especiales integrados aplica.",
+      "El objeto del contrato se clasifica como 'servicios conexos' para la Estampilla Pro Universidad Nacional. No aplica para la Contribución a Obra Pública ya que no es un contrato de obra pura.",
+      "El valor total del contrato no se pudo determinar con la información disponible, lo que impide la liquidación de la Estampilla Pro Universidad Nacional según los rangos de UVT. Sin embargo, se ha identificado el valor de la factura sin IVA para efectos informativos."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

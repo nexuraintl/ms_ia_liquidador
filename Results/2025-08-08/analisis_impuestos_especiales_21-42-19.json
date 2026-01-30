@@ -1,0 +1,44 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato clasifica como prestación de servicios de diseño, gestión e implementación, lo cual se considera un servicio conexo para la Estampilla Pro Universidad Nacional. Dado que el objeto también implica la implementación de una ruta que podría considerarse obra, y la factura corresponde a un contrato de prestación de servicios relacionado con la estrategia 'Mujer Rural Soberana', se aplica la contribución a obra pública."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.99758995159,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "El informe de pago indica un valor total del instrumento contractual de $124.000.000 y el pago es por el 30% del valor total de la prestación de servicios. La factura indica un pago #2 por el 30% del valor total de la prestación de servicios por $37,200,000.00. El valor total del contrato se calcula como $37,200,000.00 / 0.30 = $124,000,000.00. La tarifa del 0.5% aplica ya que el valor del contrato está entre 26 y 52,652 UVT."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Valor Bruto de la factura electrónica de venta No. DV 119."
+    }
+  },
+  "observaciones": [
+    "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de terceros que administran recursos públicos. Por lo tanto, no aplican los impuestos.",
+    "La Estampilla Pro Universidad Nacional aplica por ser un servicio conexo (diseño, gestión e implementación). La tarifa del 0.5% se aplica ya que el valor total del contrato ($124,000,000) se encuentra en el rango de 26 a 52,652 UVT (2489.99 UVT).",
+    "La Contribución a Obra Pública aplica, ya que el objeto del contrato, aunque descrito como prestación de servicios, está relacionado con la implementación de una ruta ('Mujer Rural Soberana') que puede ser considerada obra pública. La tarifa fija del 5% se aplica sobre el valor de la factura sin IVA."
+  ]
+}

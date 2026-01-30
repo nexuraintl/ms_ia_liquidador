@@ -1,0 +1,72 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: DOCSOPORTE.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 16:40:04
+- Caracteres extraídos: 2246
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 38811,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 2246
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+PONGUTA TORO VIVIANA YISETH
+NIT: 1024537280-1
+CL 14  7 22 SUR
+Bogotá, D.C. - Bogotá (CO)
+e-mail: vivianapongutag@gmail.comDOCUMENTO SOPORTE EN
+ADQUISICIONES
+EFECTUADAS A NO
+OBLIGADOS A FACTURAR
+No. CPRE339
+Fecha emisión: 2025-07-10 07:00:02-05:00
+Fecha generación: 2025-07-10T13:51:55.119-05:00
+_________________________________
+Estado DIAN: ACEPTADA
+Fecha estado: 2025-07-10 13:54:24
+SOMOS GRANDES CONTRIBUYENTES SEGÚN RESOLUCIÓN 000200 del 27/12/2024 de la DIAN. AGENTE RETENEDOR DE IVA SEGÚN ARTÍCULO 437-2 DEL ESTATUTO
+TRIBUTARIO Número de resolución 18764091773425, con vigencia desde 2025-04-09, hasta 2027-04-09, CPRE, y rango 301 .. 400.
+Cliente: FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX NIT: 830054060
+Dirección: Calle 28 13 A 24 Piso 6 Municipio: Bogotá, D.C.
+Contacto: Fiducoldex Pais: Colombia
+e-mail contacto: fiducoldex@fiducoldex.com.co Telf: 6013275500
+Fecha Desde Fecha Hasta Moneda Tasa cambio a COP Fecha cambio N. Orden
+CompraCUDS
+COP 297142b50805ff3349c2452085a457f644f14c677
+3f2b033ce9eddf0de60a326ca300131b222c75e94
+13ffbaacd6c976
+Item Código Descripción UM Cant Precio Tot. Dto. Impuestos Total Sin Imp.
+1 1 Cuenta de cobro 001 pago de honorarios
+Analista SeniorC62 1 6.165.000,00 6.165.000,00
+Total Items: 1
+Vencimientos
+Fecha Forma Pago Medio Pago Importe
+2025-07-31 CONTADO Transferencia
+Débito
+Bancaria6.165.000,00
+Total Descuentos: 0,00 Sub-Total: 6.165.000,00
+Total Cargos: 0,00 Impuestos Repercutidos: 0,00
+Total Anticipos (informativo): 0,00 Importe Total: 6.165.000,00
+INFORMACION ADICIONAL:
+El pago oportuno de esta factura evitará que se generen reportes negativos a los operadores de información financiera.  La Fiduciaria podrá efectuar
+el reporte negativo de información financiera transcurridos veinte (20) días calendario siguientes a la fecha de envío de la comunicación en la última
+dirección de domicilio del cliente que se encuentre registrada en los archivos de la Fiduciaria esto de conformidad con la Ley Hábeas Data - Ley
+1266 De 2008 (Diciembre 31) .
+ 
+Página 1 de 
+1
+Software e-FACTURA®, Sociedad de Explotación de Redes Electrónicas y Servicios de Colombia S.A.S NIT 900379787-1 Av. Cra. 9 # 127C-56 Edif. Suisse Centre, oficina 506 Bogotá C.P. 110131 - www.co.groupseres.com
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

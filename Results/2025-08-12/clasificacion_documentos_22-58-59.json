@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-12T22:58:59.000848",
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "clasificacion": {
+    "OB CTO AFRODESCENDIENTE.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "RUT PCA 2025.pdf": "RUT",
+    "Solicitudde pago pca .pdf": "ANEXO",
+    "68151fab6ea61_FacturaNoFEV193SegundoDesembolso20.pdf": "FACTURA",
+    "MUNICIPIOS ASOCIACION PROYECTOCULTURALAFRODESCENDIENTE12 (2).xlsx": "ANEXO"
+  },
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "impuestos_aplicables": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "procesamiento_paralelo": true
+}

@@ -1,0 +1,82 @@
+{
+  "procesamiento_paralelo": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "timestamp": "2025-08-12T22:59:29.015217",
+  "version": "2.0.0",
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 121000000.0,
+    "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+    "tarifa_retencion": 11.0,
+    "valor_base": 1100000000.0,
+    "fecha_calculo": "2025-08-12T22:59:29.016219",
+    "mensajes_error": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Honorarios y comisiones por servicios (persona juridica): $1,100,000,000 x 11.0% = $121,000,000"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de estampilla en el análisis"
+  },
+  "contribucion_obra_publica": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de obra pública en el análisis"
+  },
+  "iva_reteiva": {
+    "aplica": false,
+    "valor_iva_identificado": 0.0,
+    "valor_reteiva": 0.0,
+    "porcentaje_iva": 0.0,
+    "tarifa_reteiva": 0.0,
+    "porcentaje_reteiva_texto": "0%",
+    "es_fuente_nacional": true,
+    "metodo_calculo": "no_aplica",
+    "estado_liquidacion": "No aplica",
+    "es_responsable_iva": null,
+    "observaciones": [
+      "Razón: Estado no permite liquidación: Preliquidación Sin Finalizar",
+      "Estado original: Preliquidación Sin Finalizar",
+      "El servicio facturado (estructuración técnica, administrativa y financiera, y desarrollo de espacios de socialización) no se encuentra explícitamente en las listas de bienes o servicios excluidos o exentos de IVA. Por lo tanto, se considera un servicio gravado con IVA, pero la factura indica un valor de IVA del 0%.",
+      "No se pudo determinar la responsabilidad de IVA del tercero ('ASOCIACION PROYECTO CULTURAL AFRODESCENDIENTE') en el RUT, ya que no se encontraron los códigos específicos (48, 49 o 53) en la sección de 'Responsabilidades, Calidades y Atributos'."
+    ],
+    "calculo_exitoso": true
+  },
+  "resumen_total": {
+    "valor_total_impuestos": 121000000.0,
+    "impuestos_liquidados": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_exitoso": true
+  },
+  "timestamp_procesamiento": "2025-08-12T22:59:29.019141",
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "documentos_procesados": 5,
+  "documentos_clasificados": [
+    "OB CTO AFRODESCENDIENTE.xlsx",
+    "RUT PCA 2025.pdf",
+    "Solicitudde pago pca .pdf",
+    "68151fab6ea61_FacturaNoFEV193SegundoDesembolso20.pdf",
+    "MUNICIPIOS ASOCIACION PROYECTOCULTURALAFRODESCENDIENTE12 (2).xlsx"
+  ],
+  "version_sistema": "2.0.0",
+  "modulos_utilizados": [
+    "Extraccion",
+    "Clasificador",
+    "Liquidador"
+  ]
+}

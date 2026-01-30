@@ -1,0 +1,80 @@
+{
+  "procesamiento_paralelo": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "timestamp": "2025-08-12T19:12:39.930472",
+  "version": "2.0.0",
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 3438655.462,
+    "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+    "tarifa_retencion": 11.0,
+    "valor_base": 37200000.0,
+    "fecha_calculo": "2025-08-12T19:12:39.931472",
+    "mensajes_error": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Honorarios y comisiones por servicios (persona juridica): $31,260,504 x 11.0% = $3,438,655"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de estampilla en el análisis"
+  },
+  "contribucion_obra_publica": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de obra pública en el análisis"
+  },
+  "iva_reteiva": {
+    "aplica": false,
+    "valor_iva_identificado": 5939495.8,
+    "valor_reteiva": 0.0,
+    "porcentaje_iva": 0.19,
+    "tarifa_reteiva": 0.0,
+    "porcentaje_reteiva_texto": "0%",
+    "es_fuente_nacional": true,
+    "metodo_calculo": "no_aplica",
+    "estado_liquidacion": "No aplica",
+    "es_responsable_iva": false,
+    "observaciones": [
+      "Razón: Estado no permite liquidación: Preliquidación Sin Finalizar",
+      "Estado original: Preliquidación Sin Finalizar",
+      "En el RUT se identificó que el tercero no es responsable de IVA (ausencia del código 48) aunque la factura muestra un IVA."
+    ],
+    "calculo_exitoso": true
+  },
+  "resumen_total": {
+    "valor_total_impuestos": 3438655.462,
+    "impuestos_liquidados": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_exitoso": true
+  },
+  "timestamp_procesamiento": "2025-08-12T19:12:39.934471",
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "documentos_procesados": 4,
+  "documentos_clasificados": [
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf",
+    "FRA ARTESARNIAS.pdf",
+    "RUT ARTESANIAS.pdf",
+    "OBJ. CTO LEBRIJA.xlsx"
+  ],
+  "version_sistema": "2.0.0",
+  "modulos_utilizados": [
+    "Extraccion",
+    "Clasificador",
+    "Liquidador"
+  ]
+}

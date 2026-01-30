@@ -1,0 +1,100 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Solicitudde pago pca .pdf
+- Método de extracción: PDF_OCR
+- Fecha y hora: 2025-08-12 22:58:51
+- Caracteres extraídos: 985
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 168585,
+  "metodo": "PDF → Imagen → Google Vision OCR",
+  "caracteres_extraidos": 960,
+  "paginas_procesadas": 1,
+  "validacion": {
+    "paginas": 1,
+    "tamaño_bytes": 168585
+  }
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+
+--- PÁGINA 1 (OCR) ---
+Nro.
+NOMBRE DEL NEGOCIO
+FIDEICOMITENTE
+DIA
+2
+TIPO DE
+IDENTIFICACIÓN
+No. DE
+IDENTIFICACIÓN
+1
+NIT
+807007783-8
+VALOR EN LETRAS
+FECHA DE RADICACIÓN
+MES
+5
+AÑO
+2025
+RAZÓN SOCIAL/NOMBRE
+ASOCIACIÓN PROYECTO CULTURAL
+AFRODESCENDIENTE -PCA
+Mil cien millones de pesos MCTE
+SOLICITUD DE PAGO Nro.
+P.A FONDO PARA LA VIDA Y LA BIODIVERSIDAD
+MINISTERIO DE AMBIENTE Y DESARROLLO SOSTENIBLE
+CONCEPTO
+No.
+FACTURA
+No. CONTRATO
+Pago No. 2
+172-2024
+TOTAL
+RELACIÓN DE PAGOS
+PROYECTO
+Programa Estratégico de Comunidades Negras,
+Afrocolombianas, Raizales y Palenqueras
+OBSERVACIONES
+MONROY PEÑUELA Firmado digitalmente por MONROY
+JUAN CARLOS
+PEÑUELA JUAN CARLOS
+Fecha: 2025.05.02 14:20:47 -05'00'
+NOMBRE DEL ORDENADOR DEL GASTO
+ORDENADOR DEL PAGO
+No. CUENTA ORIGEN
+MECANISMO DE
+GIRO
+BANCO DESTINO
+AÑO
+2025
+CÓD
+IDENTIFICACIÓN
+117711
+830.115.395-1
+TIPO DE
+CUENTA
+No. CUENTA
+DESTINO
+VALOR
+500-806-359173
+Transferencia
+Bancolombia
+Ahorros
+81600002183
+$
+1.100.000.000,00
+$
+1.100.000.000,00
+
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

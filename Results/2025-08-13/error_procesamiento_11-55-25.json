@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-08-13T11:55:25.473555",
+  "nit_administrativo": "830.054.060-5",
+  "error_mensaje": "Error en procesamiento integrado: name 'resultados_brutos' is not defined",
+  "error_tipo": "NameError",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\USUSARIO\\Proyectos\\PRELIQUIDADOR\\main.py\", line 1368, in procesar_facturas_integrado\n    resultado = resultados_brutos[i]\n                ^^^^^^^^^^^^^^^^^\nNameError: name 'resultados_brutos' is not defined\n",
+  "archivos_recibidos": [
+    "FRA  BDO INNPULSA.pdf",
+    "OBJ. CTO BDO.xlsx",
+    "parafiscal_audit_20250624145931.pdf"
+  ],
+  "version": "2.0.0"
+}

@@ -1,0 +1,67 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+      "tarifa_retencion": 11.0,
+      "base_gravable": 1100000000.0
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 1100000000.0,
+  "iva": 0.0,
+  "observaciones": [
+    "El tercero es una Persona Jurídica, por lo tanto, no aplica el Artículo 383.",
+    "La actividad económica principal registrada en el RUT es 'Catering para eventos (5621)', sin embargo, el objeto del contrato y la descripción detallada en la factura y anexos ('Prestación de servicios para la estructuración técnica, administrativa y financieramente') corresponden a servicios profesionales, lo cual se clasifica como honorarios.",
+    "La factura indica 'Segundo pago', lo que confirma que no es el primer pago del contrato.",
+    "Los anexos (MUNICIPIOS ASOCIACION PROYECTOCULTURALAFRODESCENDIENTE12 (2).xlsx y INFORME FINANCIERO MIN AMBIENTE.xlsx) muestran un cálculo de retención del 11% y mencionan un 'anticipo' o 'retefuente pendiente' de $165,000,000. Este valor histórico no afecta el cálculo de la retención para esta factura específica, pero puede influir en el valor final a girar al proveedor."
+  ]
+}

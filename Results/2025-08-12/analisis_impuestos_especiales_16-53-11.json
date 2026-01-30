@@ -1,0 +1,43 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato describe la prestación de servicios de diseño, gestión e implementación, lo cual clasifica como servicios conexos para la Estampilla Pro Universidad Nacional. No aplica la Contribución a Obra Pública ya que no es un contrato de obra."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": null,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": null
+    }
+  },
+  "observaciones": [
+    "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de entidades que administran recursos públicos, por lo tanto, no aplican los impuestos.",
+    "No se identificó el valor total del contrato para determinar la tarifa aplicable de la Estampilla Pro Universidad Nacional. Se utilizará el valor de la factura sin IVA para el cálculo, asumiendo la tarifa más baja (0.5%) por falta de información."
+  ]
+}

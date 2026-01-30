@@ -1,0 +1,18 @@
+ARCHIVO EXCEL PREPROCESADO
+=============================
+
+Archivo original: OBJ. CTO Vass consultoria.xlsx
+Fecha procesamiento: 2025-08-01 16:30:55
+Hojas procesadas: 1
+Filas vacías eliminadas: 3
+Columnas vacías eliminadas: 0
+Caracteres finales: 1390
+
+=============================
+TEXTO ENVIADO A GEMINI:
+=============================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                               CONTRATISTA                                                                                                                                                                                                                                                                                                                                                                         OBJETO  Unnamed: 3
+CONTRATO DE PRESTACIÓN DE SERVICIOS VASS CONSULTORIA DE SISTEMAS COLOMBIA SAS CONTRATO DE PRESTACIÓN DE SERVICIOS PROFESIONALES No. FNTC-301- 2021SUSCRITO ENTRE LA FIDUCIARIA COLOMBIANA DE COMERCIO EXTERIOR S.A.FIDUCOLDEX ACTUANDO COMO VOCERA DEL PATRIMONIO AUTÓNOMO FONDONACIONAL DE TURISMO FONTUR Y VASS CONSULTORÍA DE SISTEMAS COLOMBIAS.A.S.-a Adquirir el servicio de migración Salesforce Classic, hacia experiencia Lightning y capacitación.            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                             900376503.0

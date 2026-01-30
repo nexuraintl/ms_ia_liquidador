@@ -1,0 +1,99 @@
+{
+  "timestamp": "2025-08-05T13:22:47.565529",
+  "procesamiento_paralelo": true,
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 6.0,
+        "base_gravable": 31260504.2
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ESPECIAL",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "El NIT en el RUT corresponde a ASOCIACIÓN DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "El RUT indica que es persona jurídica",
+      "El RUT indica que es régimen especial",
+      "El RUT indica que es responsable de IVA",
+      "La factura corresponde a un pago por prestación de servicios de Intercambio de Saberes Fase 2, contrato 0521.00",
+      "Se toma como base gravable el valor bruto de la factura sin IVA."
+    ]
+  },
+  "estampilla_analisis": {
+    "analisis_gemini": {
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "tipo": "servicios_conexos_obra",
+        "aplica_estampilla": false,
+        "palabras_clave_encontradas": [],
+        "descripcion": "Prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00"
+      },
+      "valor_contrato": {
+        "valor_total_pesos": 124000000,
+        "valor_total_uvt": 2490.01,
+        "metodo_identificacion": "porcentaje_calculado",
+        "texto_referencia": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00 37,200,000.00. Valor total del instrumento contractual $124.000.000"
+      },
+      "observaciones": [
+        "El NIT administrativo 830.054.060-5 es válido.",
+        "El tercero no es ninguno de los terceros válidos.",
+        "Aunque el objeto del contrato parece ser servicios conexos de obra, no aplica la estampilla porque el tercero no es uno de los terceros válidos."
+      ]
+    },
+    "analisis_contrato": 

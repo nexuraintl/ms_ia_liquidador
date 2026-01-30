@@ -1,0 +1,90 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: fra dianFEVS23897.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 12:11:03
+- Caracteres extraídos: 2751
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 67717,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 2751
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+Medio de Pago Transferencia BBVA COLOMBIA
+Número de cuenta 20 dígitos: 00130187000100008438
+Código Swift GEROCOBB
+Nombre: VASS CONSULTORIA DE SISTEMAS COLOMBIA SAS
+Nit 900.376.503-1
+País: Colombia
+Firma Digital:  z+251rktgJ0StybvaUwvmB/atXAZTvjJUm4g6+Al9rayUgRaVi1CAZdkmzK6WLH1
+tuNVMCGOwqQP31qBrUaDPXs5fpc7Ibn2RkwNKXNwMME4SlfK4+
+waJI/mDL8/UCU8 3xedSo+kKXcKJQ3mfecBjMIp4wabDS8IjwYnuEGW+FdbMONvP4U/pBQ3pxgkckWZ fOvjO3+1tMivwJF4KupHuUMqOEeWiDfBmNP
+86j2fei5TMdANwEwa76KzY0ARZ/+e 6B6xwSrXERJQLQw8TbI+EcxpElpYnVH2A5TTZ25g/hU9tnkphjsN0+0zkra0Ooo9 NmQ9hPWsdb9WCRu1S/s5
+CA==
+Esta factura es un título valor de acuerdo al art. 774 del C.C. y una vez aceptada declara haber recibido los bienes y servicios a
+satisfacción.
+Representación Gráfica de la Factura de Venta Electrónica.
+VASS CONSULTORIA DE SISTEMAS COLOMBIA S.A.S
+NIT: 900376503-1
+Régimen: Responsable del impuesto sobre las ventas –IVA
+Tipo de persona: Jurídica
+CL 98 22 64 P 12, Bogotá D.C., Bogotá, Colombia
+Tel. 6017423051
+Autorización facturación electrónica No. 18764050631021 válida desde 2023-06-20 hasta 2024-06-20 rango desde FEVS23001 hasta FEVS25000
+Grandes contribuyentes SHD resolución DDI-023769 del 29 de noviembre de 2021.
+ICA 6201 Tarifa 9,66 x 1000 Bogotá DC.
+Favor practicar retención en la fuente del 3,5% en virtud del artículo 1.2.4.3.1 párrafo 1 del decreto 1625 de 2016
+DATOS DEL CLIENTE
+NIT: 900649119
+Cliente: PATRIMONIO AUTONOMO FONDO NACIONAL DEL
+TURISMO FONTUR
+Dirección: CL 28 13 A 24 TO B P 6, Bogotá, D.C., Bogot??,
+Colombia
+Teléfono:
+Email: factura.electronica@fiducoldex.com.coFACTURA ELECTRÓNICA DE VENTA
+No. de Factura FEVS23897
+Fecha Emisión 15/12/2023 12:29:34
+Fecha Vencimiento 15/12/2023
+Moneda COP Colombia, Pesos
+Forma de Pago: Crédito
+Medio de Pago: Acuerdo mutuo
+Fecha de Pago: 14/01/2024
+Total de Lineas: 1
+# Código Descripción U. Medida Cantidad Precio U. IVA Dcto. Total
+10001 SERVICIOS DE CONSULTORIA EN
+INFORMATICA
+servicio de migración Salesforce Classic, hacia
+experiencia Lightning y capacitación
+FNTC-301- 202194 1,00 $63.025.000,00 19,00 0,00 $63.025.000,00
+Impuesto Base Tarifa Importe
+Impuestos
+01 IVA $63.025.000,00 19,00% $11.974.750,00
+Retenciones
+05 ReteIVA $11.974.750,00 15,00% $1.796.212,50
+06 ReteRenta $63.025.000,00 3,50% $2.205.875,00
+07 ReteICA $63.025.000,00 0,966% $608.821,50Subtotal: $63.025.000,00
+Cargos: $0.00
+Descuento: $0.00
+IVA: $11.974.750,00
+Total: $74.999.750,00
+ReteIVA: $1.796.212,50
+ReteRenta: $2.205.875,00
+ReteICA: $608.821,50
+Neto Factura: $70.388.841,00
+CUFE: fae3be9e58543a709d0a342af98942e7dd23bda936c55e053bf6a899f00fa3e86c30e8da35ab97a48d0457d336e35274
+Total con letra: (setenta y cuatro millones novecientos noventa y nueve mil setecientos cincuenta pesos )
+Powered by TCPDF (www.tcpdf.org)
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

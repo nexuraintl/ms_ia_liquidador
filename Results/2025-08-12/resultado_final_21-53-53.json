@@ -1,0 +1,80 @@
+{
+  "procesamiento_paralelo": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "timestamp": "2025-08-12T21:53:53.852224",
+  "version": "2.0.0",
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 1250420.168,
+    "concepto": "Servicios generales (declarantes)",
+    "tarifa_retencion": 4.0,
+    "valor_base": 37200000.0,
+    "fecha_calculo": "2025-08-12T21:53:53.853897",
+    "mensajes_error": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta planilla de seguridad social, falta cuenta de cobro",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de estampilla en el análisis"
+  },
+  "contribucion_obra_publica": {
+    "aplica": false,
+    "estado": "No aplica el impuesto",
+    "razon": "No se detectó información de obra pública en el análisis"
+  },
+  "iva_reteiva": {
+    "aplica": false,
+    "valor_iva_identificado": 5939495.8,
+    "valor_reteiva": 0.0,
+    "porcentaje_iva": 19.0,
+    "tarifa_reteiva": 0.0,
+    "porcentaje_reteiva_texto": "0%",
+    "es_fuente_nacional": true,
+    "metodo_calculo": "no_aplica",
+    "estado_liquidacion": "No aplica",
+    "es_responsable_iva": null,
+    "observaciones": [
+      "Razón: Estado no permite liquidación: Preliquidación Sin Finalizar",
+      "Estado original: Preliquidación Sin Finalizar",
+      "En el RUT no se identificó el código 48 (Impuesto sobre las ventas – IVA), ni los códigos 49 o 53 (No responsable de IVA). Aunque la factura muestra un IVA del 19%, la ausencia de la responsabilidad de IVA en el RUT genera una inconsistencia. Se requiere validación adicional de la responsabilidad de IVA del tercero."
+    ],
+    "calculo_exitoso": true
+  },
+  "resumen_total": {
+    "valor_total_impuestos": 1250420.168,
+    "impuestos_liquidados": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_exitoso": true
+  },
+  "timestamp_procesamiento": "2025-08-12T21:53:53.867060",
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "documentos_procesados": 4,
+  "documentos_clasificados": [
+    "FRA ARTESARNIAS.pdf",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf",
+    "RUT ARTESANIAS.pdf",
+    "OBJ. CTO LEBRIJA.xlsx"
+  ],
+  "version_sistema": "2.0.0",
+  "modulos_utilizados": [
+    "Extraccion",
+    "Clasificador",
+    "Liquidador"
+  ]
+}

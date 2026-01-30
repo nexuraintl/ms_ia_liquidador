@@ -1,0 +1,199 @@
+{
+  "timestamp": "2025-08-13T14:00:49.346837",
+  "procesamiento_paralelo": true,
+  "impuestos_analizados": [
+    "retefuente",
+    "impuestos_especiales",
+    "iva_reteiva"
+  ],
+  "resultados_analisis": {
+    "retefuente": {
+      "conceptos_identificados": [
+        {
+          "concepto": "Servicios generales (declarantes)",
+          "tarifa_retencion": 4.0,
+          "base_gravable": 31260504.2
+        }
+      ],
+      "naturaleza_tercero": {
+        "es_persona_natural": false,
+        "es_declarante": true,
+        "regimen_tributario": "ORDINARIO",
+        "es_autorretenedor": false,
+        "es_responsable_iva": true
+      },
+      "articulo_383": {
+        "aplica": false,
+        "condiciones_cumplidas": {
+          "es_persona_natural": false,
+          "concepto_aplicable": false,
+          "es_primer_pago": false,
+          "planilla_seguridad_social": false,
+          "cuenta_cobro": false
+        },
+        "deducciones_identificadas": {
+          "intereses_vivienda": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "dependientes_economicos": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "medicina_prepagada": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "rentas_exentas": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          }
+        },
+        "calculo": {
+          "ingreso_bruto": 0.0,
+          "aportes_seguridad_social": 0.0,
+          "total_deducciones": 0.0,
+          "deducciones_limitadas": 0.0,
+          "base_gravable_final": 0.0,
+          "base_gravable_uvt": 0.0,
+          "tarifa_aplicada": 0.0,
+          "valor_retencion_art383": 0.0
+        }
+      },
+      "es_facturacion_exterior": false,
+      "valor_total": 37200000.0,
+      "iva": 5939495.8,
+      "observaciones": [
+        "El RUT del tercero indica '05- Impto. renta y compl. régimen ordinario', por lo que se clasifica como 'ORDINARIO' para fines de retención, a pesar de su nombre 'ASOCIACION' y actividad económica 9499 (asociaciones n.c.p.) que podrían sugerir Régimen Especial.",
+        "La factura indica 'Pago # 2', confirmando que no es el primer pago del contrato."
+      ]
+    },
+    "impuestos_especiales": {
+      "analisis_gemini": {
+        "deteccion_automatica": {
+          "aplica_estampilla_universidad": false,
+          "aplica_contribucion_obra_publica": false,
+          "procesamiento_paralelo": false,
+          "razon_deteccion": "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)', lo cual es una condición excluyente para la aplicación de ambos impuestos."
+        },
+        "tercero_identificado": {
+          "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+          "es_consorcio": false,
+          "administra_recursos_publicos": false,
+          "consorciados": []
+        },
+        "objeto_contrato": {
+          "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+          "clasificacion_estampilla": "servicios_conexos",
+          "clasificacion_obra_publica": "no_aplica",
+          "palabras_clave_estampilla": [
+            "diseño",
+            "gestión",
+            "implementación",
+            "intercambio de saberes",
+            "fortalecimiento de comunidad"
+          ],
+          "palabras_clave_obra_publica": []
+        },
+        "valores_identificados": {
+          "estampilla_universidad": {
+            "valor_contrato_pesos": 124000000.0,
+            "valor_contrato_uvt": 2489.9797,
+            "valor_factura_sin_iva": 31260504.2,
+            "metodo_identificacion": "directo",
+            "texto_referencia": "Valor total del instrumento contractual $124.000.000 (Informe de Aprobación de Pago No. 1_ 052-2024)"
+          },
+          "contribucion_obra_publica": {
+            "valor_factura_sin_iva": 31260504.2,
+            "metodo_identificacion": "directo",
+            "texto_referencia": "Total Bruto 31,260,504.20 (Factura Principal)"
+          }
+        },
+        "observaciones": [
+          "El NIT administrativo '830.054.060-5' de FIDUCOLDEX es un NIT válido para la aplicación de los impuestos.",
+          "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Esta es una condición excluyente y prioritaria para la aplicación de ambos impuestos, por lo tanto, no se liquidan.",
+          "Aunque el objeto del contrato fue identificado como 'servicios_conexos' (aplicable a estampilla) y 'no_aplica' para obra pública, y los valores críticos fueron correctamente extraídos, la condición del tercero prevalece para determinar la no aplicación de los impuestos."
+        ]
+      },
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": false,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "impuestos_detectados": []
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "estampilla_universidad": null,
+      "contribucion_obra_publica": null,
+      "observaciones": [
+        "El NIT administrativo '830.054.060-5' de FIDUCOLDEX es un NIT válido para la aplicación de los impuestos.",
+        "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Esta es una condición excluyente y prioritaria para la aplicación de ambos impuestos, por lo tanto, no se liquidan.",
+        "Aunque el objeto del contrato fue identificado como 'servicios_conexos' (aplicable a estampilla) y 'no_aplica' para obra pública, y los valores críticos fueron correctamente extraídos, la condición del tercero prevalece para determinar la no aplicación de los impuestos."
+      ]
+    },
+    "iva_reteiva": {
+      "analisis_iva": {
+        "iva_identificado": {
+          "tiene_iva": true,
+          "valor_iva_total": 5939495.8,
+          "porcentaje_iva": 19.0,
+          "detalle_conceptos_iva": [
+            {
+              "concepto": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00",
+              "valor_iva": 5939495.8,
+              "porcentaje": 19.0
+            }
+          ],
+          "metodo_identificacion": "total_factura"
+        },
+        "responsabilidad_iva_rut": {
+          "rut_disponible": true,
+          "es_responsable_iva": null,
+          "codigo_encontrado": "no_encontrado",
+          "texto_referencia": "Responsabilidades, Calidades y Atributos section of RUT"
+        },
+        "concepto_facturado": {
+          "descripcion": "Servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+          "aplica_iva": true,
+          "razon_exencion_exclusion": "",
+          "categoria": "gravado"
+        }
+      },
+      "analisis_fuente_ingreso": {
+        "validaciones_fuente": {
+          "uso_beneficio_colombia": true,
+          "ejecutado_en_colombia": true,
+          "asistencia_tecnica_colombia": false,
+          "bien_ubicado_colombia": false
+        },
+        "es_fuente_nacional": true,
+        "validacion_iva_extranjero": {
+          "es_extranjero": false,
+          "iva_esperado_19": false,
+          "iva_encontrado": 0.0
+        }
+      },
+      "calculo_reteiva": {
+        "aplica_reteiva": false,
+        "porcentaje_reteiva": null,
+        "tarifa_decimal": null,
+        "valor_reteiva_calculado": 0.0,
+        "metodo_calculo": null
+      },
+      "estado_liquidacion": {
+        "estado": "Preliquidación Sin Finalizar",
+        "observaciones": [
+          "No se pudo determinar la responsabilidad de IVA del tercero en el RUT, ya que no se encontró el código 48, 49 o 53 en la sección de 'Responsabilidades, Calidades y Atributos'."
+        ]
+      }
+    }
+  }
+}

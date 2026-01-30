@@ -1,0 +1,28 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: OBJ. CTO LEBRIJA.xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-08-05 13:22:41
+- Caracteres extraídos: 1423
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 1,
+  "total_filas": 1,
+  "tamaño_archivo_bytes": 9913,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                                                  CONTRATISTA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       OBJETO
+CONTRATO DE PRESTACIÓN DE SERVICIOS ASOCIACIÓN DE \nARTESANAS-OS Y AGRICULTORES HECHO EN LEBRIJA En virtud del presente contrato LA CONTRATISTA se obliga a prestar el servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende. CLÁUSULA SEGUNDA - ALCANCE DEL OBJETO: Para el desarrollo del objeto contractual, LACONTRATISTA realizará como mínimo las actividades y entregables, de acuerdo con lo contemplado en los términos de referencia, la propuesta presentada el 31 de octubre 2024, en adelante “la Propuesta”, documentos que hacen parte integral del presente contrato.
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

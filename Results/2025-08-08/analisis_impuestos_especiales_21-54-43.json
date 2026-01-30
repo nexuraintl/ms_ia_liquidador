@@ -1,0 +1,42 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato es 'diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad', lo cual aplica para estampilla como servicios conexos. No aplica para obra pública ya que no es un contrato de obra. El tercero administra recursos públicos y el NIT administrativo es válido."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 124000000.0,
+      "valor_contrato_uvt": 2489.98,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "El informe de pago indica que el valor total del instrumento contractual es $124.000.000 y la factura DV 116 es por $37,200,000, que corresponde al primer pago del 50% del valor total de la prestación del servicio. Sin embargo, la factura principal indica que el pago #2 es por el 30% del valor total de la prestación de servicios por $37,200,000. El valor total del contrato se infiere de la información del informe de pago No. 1, que menciona un valor total del instrumento contractual de $124.000.000. La factura principal indica un pago #2 por el 30% del valor total de la prestación de servicios por $37,200,000. El valor total del contrato se infiere del informe de pago No. 1, que indica un valor total del instrumento contractual de $124.000.000. El valor de la factura sin IVA es $31,260,504.20.  Para la estampilla, se debe considerar el valor total del contrato para determinar la tarifa. Con un valor total de contrato de $124,000,000 COP y una UVT de $49,799, el contrato está en el rango de 26 a 52,652 UVT (124,000,000 / 49,799 = 2489.98 UVT). La tarifa aplicable es del 0.5%."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 0.0,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "El objeto del contrato no corresponde a un contrato de obra, por lo tanto, no aplica la contribución a obra pública."
+    }
+  },
+  "observaciones": [
+    "El valor total del contrato se ha inferido del informe de pago No. 1 ($124.000.000 COP).",
+    "Para la Estampilla Pro Universidad Nacional, se aplicará la tarifa del 0.5% sobre el valor de la factura sin IVA ($31,260,504.20), ya que el valor total del contrato (2489.98 UVT) se encuentra en el primer rango tarifario.",
+    "No aplica la Contribución a Obra Pública ya que el objeto del contrato no es un contrato de obra."
+  ]
+}

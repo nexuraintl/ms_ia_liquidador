@@ -1,0 +1,68 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 31260504.2
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "El tercero es una persona jurídica, por lo tanto, no aplica el Artículo 383.",
+    "Se identifica como concepto principal 'Servicios generales (declarantes)' dado que el objeto del contrato es la prestación de servicios y la factura no detalla un concepto más específico. La base mínima para este concepto es de $498,000 pesos, la cual es superada por el valor de la factura.",
+    "La tarifa de retención para 'Servicios generales (declarantes)' es del 2.5% si se considera como compra general, pero al ser prestación de servicios, se aplica la tarifa de servicios generales que es del 4.0% para declarantes.",
+    "Se verifica en el RUT que la 'ASOCIACIÓN DE ARTESANAS-OS HECHO EN LEBRIJA' tiene como actividad principal 'Actividad económica 9499 Actividades de otras asociaciones n.c.p.', lo cual se clasifica como régimen ordinario y responsable de IVA. No se observa que sea autorretenedor.",
+    "El valor total de la factura es de $37,200,000.00, el cual supera la base mínima de $100,000 para servicios generales."
+  ]
+}

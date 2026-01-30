@@ -1,0 +1,32 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: OBJ. CTO Vass consultoria.xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-08-01 16:30:53
+- Caracteres extraídos: 2761
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 1,
+  "total_filas": 5,
+  "tamaño_archivo_bytes": 10939,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                               CONTRATISTA                                                                                                                                                                                                                                                                                                                                                                         OBJETO  Unnamed: 3
+CONTRATO DE PRESTACIÓN DE SERVICIOS VASS CONSULTORIA DE SISTEMAS COLOMBIA SAS CONTRATO DE PRESTACIÓN DE SERVICIOS PROFESIONALES No. FNTC-301- 2021SUSCRITO ENTRE LA FIDUCIARIA COLOMBIANA DE COMERCIO EXTERIOR S.A.FIDUCOLDEX ACTUANDO COMO VOCERA DEL PATRIMONIO AUTÓNOMO FONDONACIONAL DE TURISMO FONTUR Y VASS CONSULTORÍA DE SISTEMAS COLOMBIAS.A.S.-a Adquirir el servicio de migración Salesforce Classic, hacia experiencia Lightning y capacitación.            
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                             900376503.0
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

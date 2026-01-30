@@ -1,0 +1,398 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: RUT COR DE YPAZ2024.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-25 11:20:45
+- Caracteres extraídos: 11830
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 5,
+  "tamaño_archivo_bytes": 676490,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 11830
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+27. Fecha expedición
+  
+Exportadores
+ 
+Para uso exclusivo de la DIAN
+5. Número de Identificación Tributaria (NIT) 6. DV
+    
+ 
+ 
+984. Nombre51. Código38. País
+  
+56. Tipo
+985. Cargo50. Código  4. Número de formulario
+36. Nombre comercial 37. Sigla
+53. Código
+59. Anexos          SI NO 61. Fecha55. Forma
+57. Modo
+58. CPC
+60. No. de Folios:Ocupación
+123456789101112131415161718
+ 
+ 
+Actividad secundaria Otras actividades
+49. Fecha inicio actividad 48. Código 1 2Lugar de expedición 28.  País
+Actividad principalActividad económica
+47. Fecha inicio actividad 46. Código
+1 2 335. Razón social
+31. Primer apellido  32. Segundo apellido
+33. Primer nombre
+52. Número 
+establecimientos24. Tipo de contribuyente
+12. Dirección seccional 14. Buzón electrónico
+34. Otros nombres25. Tipo de documento
+29. Departamento26. Número de Identificación
+39. Departamento
+Firma del solicitante:2. Concepto
+1920212223242526
+12345678910
+54. Código
+11121314151617181920Responsabilidades, Calidades y Atributos
+IMPORTANTE: Sin perjuicio de las actualizaciones a que haya lugar, la inscripción en el Registro Único Tributario -RUT-, tendrá vigencia indefinida y en consecuencia no se exigirá su renovación    40. Ciudad/Municipio
+Sin perjuicio de las verificaciones que la DIAN realice.  
+Firma autorizada:IDENTIFICACIÓN
+41. Dirección principal
+Exportadores Usuarios aduanerosUBICACIÓN30. Ciudad/Municipio
+42. Correo electrónico
+44. Teléfono 1 43. Código postal 45. Teléfono 2 
+CLASIFICACIÓNActualización02
+14971226617
+     9003408854Impuestos de Cali  5
+Persona jurídica 1                               
+           
+ 
+CORPORACION PARA EL DESARROLLO EMPRESARIAL Y PARA LA PAZ
+ CORDEYPAZ
+COLOMBIA 169Valle del Cauca 76Cali 001
+CR 26   2 A   04
+vnelsy@yahoo.es
+                   5580273       3102681340
+949920100211855120150120 8559             
+04- Impto  renta y compl. régimen especial4 
+07- Retención en la fuente a título de  rent7 
+09- Retención en la fuente en el impuesto 9 
+14- Informante de exogena14
+42- Obligado a llevar contabilidad 42
+48 - Impuesto sobre las ventas - IVA48
+52 - Facturador electrónico52
+55 - Informante de Beneficiarios Finales55                                    
+                              
+                                   
+      
+ X   0 2024 - 01 - 10 / 10 : 59: 24
+MEZA PERCIA CARMEN ALICIA 
+Representante legal Certificado
+Fecha generación documento PDF: 10-01-2024 10:59:59AM
+
+--- PÁGINA 2 ---
+67. Sociedades y organismos 
+extranjerosPágina                           de
+95. Número de Identificación Tributaria (NIT) de la 
+Matriz o Controlante   Espacio reservado para la DIAN
+68. Sin personería jurídica
+93. Vinculación 
+económica
+81. Hasta80. Desde79. Ciudad/Municipio78. Departamento77. No. Matrícula mercantil76. Fecha de registro75. Entidad de registro74. Número de notaría73. Fecha72. Número71. Clase70. Beneficio64. Entidades o institutos de derecho público de orden nacional, departamental, 
+municipal y descentralizados
+69. Otras organizaciones no clasificadas66. Cooperativas63. Formas asociativas
+65. Fondos62. Naturaleza
+94. Nombre del grupo económico y/o empresarial4. Número de formulario
+88. Entidad de vigilancia y control
+97. Nombre o razón social de la matriz o controlante96. DV.82. Nacional %
+83. Nacional público %
+84. Nacional privado%
+85. Extranjero %
+86. Extranjero público %
+87. Extranjero privado %Hoja 2
+5. Número de Identificación Tributaria (NIT) 6. DV
+173. Nombre o razón social de la sociedad o natural del exterior con EP 
+ -
+ 
+ -
+ 
+ -
+ 
+ -
+ 
+ -
+ 589. Estado actual 90. Fecha cambio de estado
+1Item
+2
+3
+4
+Vinculación económicaCaracterísticas y formas de las organizaciones
+170. Número de identificación tributaria 
+otorgado en el exterior171. País
+172. Número de identificación tributaria 
+sociedad o natural del exterior con EPDocumento 2. Reforma 1. ConstituciónConstitución, Registro y Última Reforma Composición del Capital
+ Vigencia
+Entidad de vigilancia y control
+91. Número de Identificación Tributaria (NIT)                  92. DVEstado y Beneficio12. Dirección seccional 14. Buzón electrónico
+14971226617
+     9003408854Impuestos de Cali  52 5
+ 2     
+      
+   8  2
+04 01
+0         4         
+20091130 20150210
+    
+03 03
+20100216 20150216
+11651-50  11651-50  
+76 76
+8     8     
+20091130         
+99991231              100
+     0.0
+   100.0
+       0
+     0.0
+     0.0
+Gobernación  9
+81 
+   
+   
+   
+   20180502
+        
+        
+        
+                     
+             
+             
+             
+              
+ 
+ 
+ 
+ 
+                
+    
+Fecha generación documento PDF: 10-01-2024 10:59:59AM
+
+--- PÁGINA 3 ---
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                         98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal
+1
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                        98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal2
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                         98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal3
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                          98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal4
+103. Número de tarjeta profesional
+102. DV 101. Número de identificación                                                                        98. Representación
+100. Tipo de documento 99. Fecha inicio ejercicio representación
+104. Primer apellido  105. Segundo apellido  106. Primer nombre
+108. Número de Identificación Tributaria (NIT)107. Otros nombres
+109. DV 110. Razón social representante legal5Página                           de
+   Espacio reservado para la DIAN 4. Número de formularioHoja 3
+5. Número de Identificación Tributaria (NIT) 6. DV
+12. Dirección seccional 14. Buzón electrónico
+Representación14971226617
+     9003408854Impuestos de Cali  53 5
+REPRS LEGAL PRIN 18
+  
+  
+  
+  20180628
+        
+        
+        
+        Cédula de Ciudadaní 13
+  
+  
+  
+  23089758            
+                    
+                    
+                    
+                     
+ 
+ 
+ 
+         
+        
+        
+        
+        MEZA
+PERCIA
+CARMEN
+ALICIA
+              
+              
+              
+              
+               
+ 
+ 
+ 
+ 
+Fecha generación documento PDF: 10-01-2024 10:59:59AM
+
+--- PÁGINA 4 ---
+114. Nacionalidad 112. Número de identificación                                                                                                     
+120. Valor capital del socio 121. % Participación
+122. Fecha de ingreso
+123. Fecha de retiro
+116. Segundo apellido  117. Primer nombre113. DV 111. Tipo de documento
+118. Otros nombres 115. Primer apellido  
+119. Razón socialPágina                           de
+   Espacio reservado para la DIAN 4. Número de formularioHoja 4
+5. Número de Identificación Tributaria (NIT) 6. DV
+12. Dirección seccional 14. Buzón electrónico
+ 114. Nacionalidad 112. Número de identificación                                                                                                    
+120. Valor capital del socio 121. % Participación
+122. Fecha de ingreso
+123. Fecha de retiro
+116. Segundo apellido  117. Primer nombre113. DV 111. Tipo de documento
+118. Otros nombres 115. Primer apellido  
+119. Razón social
+ 114. Nacionalidad 112. Número de identificación                                                                                                    
+120. Valor capital del socio 121. % Participación
+122. Fecha de ingreso
+123. Fecha de retiro
+116. Segundo apellido  117. Primer nombre113. DV 111. Tipo de documento
+118. Otros nombres 115. Primer apellido  
+119. Razón social
+ 114. Nacionalidad 112. Número de identificación                                                                                                    
+120. Valor capital del socio 121. % Participación
+122. Fecha de ingreso
+123. Fecha de retiro
+116. Segundo apellido  117. Primer nombre113. DV 111. Tipo de documento
+118. Otros nombres 115. Primer apellido  
+119. Razón social1
+2
+3
+4
+ 114. Nacionalidad 112. Número de identificación                                                                                                    
+120. Valor capital del socio 121. % Participación
+122. Fecha de ingreso
+123. Fecha de retiro
+116. Segundo apellido  117. Primer nombre113. DV 111. Tipo de documento
+118. Otros nombres 115. Primer apellido  
+119. Razón social5
+ 
+Socios y/o Miembros de Juntas Directivas, Consorcios, Uniones Temporales14971226617
+     9003408854Impuestos de Cali  54 5
+Cédula de Ciudada 13
+Cédula de Ciudada 13
+Cédula de Ciudada 13
+  
+  33338243            
+23089758            
+1130636508          
+                    
+                     
+ 
+ 
+ 
+ COLOMBIA 169
+COLOMBIA 169
+COLOMBIA 169
+   
+   MEZA
+MEZA
+DIAZ
+PERSIA
+PERCIA
+ARTUNDUAGA
+ALBA
+CARMEN
+DERLY
+LUZ
+ALICIA
+KATHERINE
+ 
+ 
+ 
+ 
+         
+        
+        
+        
+        20141127
+20141127
+20141127
+        
+                
+        
+        
+        
+        
+Fecha generación documento PDF: 10-01-2024 10:59:59AM
+
+--- PÁGINA 5 ---
+127. Número de tarjeta profesional 125. Número de identificación                                                                                     
+132. Número de Identificación Tributaria (NIT)    
+144. Número de Identificación Tributaria (NIT)           
+147. Fecha de nombramiento
+156. Número de Identificación Tributaria (NIT)                  148. Tipo de documento124. Tipo de documento
+135. Fecha de nombramiento
+159. Fecha de nombramiento
+152. Primer apellido  140. Primer apellido  128. Primer apellido  129. Segundo apellido  
+141. Segundo apellido  
+153. Segundo apellido130. Primer nombre
+142. Primer nombre
+154. Primer nombre131. Otros nombres
+143. Otros nombres
+155. Otros nombres133. DV
+145. DV
+157. DV126. DVRevisor fiscal principalRevisor Fiscal y Contador
+136. Tipo de documento134. Sociedad o firma designada
+146. Sociedad o firma designada
+149. Número de identificación                                                                                            150. DV 151. Número de tarjeta profesional
+158. Sociedad o firma designada
+137. Número de identificación                                                                                          138. DV 139. Número de tarjeta profesionalRevisor fiscal suplente Contador
+Página                           de
+   Espacio reservado para la DIAN 4. Número de formularioHoja 5
+5. Número de Identificación Tributaria (NIT) 6. DV
+12. Dirección seccional 14. Buzón electrónico
+14971226617
+     9003408854Impuestos de Cali  55 5
+                               
+ 
+               
+        
+                               
+ 
+               
+        
+Cédula de Ciudadanía 1316823186             32982   
+GARCES MOSQUERA HECTOR MANUEL
+               
+20200701
+Fecha generación documento PDF: 10-01-2024 10:59:59AM
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

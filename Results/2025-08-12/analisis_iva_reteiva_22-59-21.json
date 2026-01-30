@@ -1,0 +1,57 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 0.0,
+      "porcentaje_iva": 0.0,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Prestación de servicios para la estructuración técnica, administrativa y financieramente, así como para el desarrollo los espacios de socialización de la Ruta de implementación del Decreto 1384 de 2023 y del artículo 2.2.5.1 1.5.8 del Decreto 1396 de 2023, en cumplimiento del Acuerdo NT4-138 -Reglamentación, socialización del Decreto 1384 de 2023 (Capitulo IV , Ley 70/93), Plan Nacional de Desarrollo 2022 – 2026.",
+          "valor_iva": 0.0,
+          "porcentaje": 0.0
+        }
+      ],
+      "metodo_identificacion": "iva_cero"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": null,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "No se encontraron los códigos 48, 49 o 53 en la sección 'Responsabilidades, Calidades y Atributos' del RUT."
+    },
+    "concepto_facturado": {
+      "descripcion": "Prestación de servicios para la estructuración técnica, administrativa y financieramente, así como para el desarrollo los espacios de socialización de la Ruta de implementación del Decreto 1384 de 2023 y del artículo 2.2.5.1 1.5.8 del Decreto 1396 de 2023, en cumplimiento del Acuerdo NT4-138 -Reglamentación, socialización del Decreto 1384 de 2023 (Capitulo IV , Ley 70/93), Plan Nacional de Desarrollo 2022 – 2026.",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": "",
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": false,
+      "iva_encontrado": 0.0
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": false,
+    "porcentaje_reteiva": null,
+    "tarifa_decimal": 0.0,
+    "valor_reteiva_calculado": 0.0,
+    "metodo_calculo": null
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidación Sin Finalizar",
+    "observaciones": [
+      "El servicio facturado (estructuración técnica, administrativa y financiera, y desarrollo de espacios de socialización) no se encuentra explícitamente en las listas de bienes o servicios excluidos o exentos de IVA. Por lo tanto, se considera un servicio gravado con IVA, pero la factura indica un valor de IVA del 0%.",
+      "No se pudo determinar la responsabilidad de IVA del tercero ('ASOCIACION PROYECTO CULTURAL AFRODESCENDIENTE') en el RUT, ya que no se encontraron los códigos específicos (48, 49 o 53) en la sección de 'Responsabilidades, Calidades y Atributos'."
+    ]
+  }
+}

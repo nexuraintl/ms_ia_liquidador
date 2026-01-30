@@ -1,0 +1,57 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 5939495.8,
+      "porcentaje_iva": 0.19,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Prestación de servicios Intercambio de Saberes Fase 2",
+          "valor_iva": 5939495.8,
+          "porcentaje": 0.19
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": null,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "El RUT proporcionado no contiene la sección de 'Responsabilidades, Calidades y Atributos' completa para determinar la responsabilidad de IVA."
+    },
+    "concepto_facturado": {
+      "descripcion": "Prestación de servicios Intercambio de Saberes Fase 2",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": "Servicio gravado con IVA.",
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": true,
+      "iva_encontrado": 0.19
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": true,
+    "porcentaje_reteiva": "15%",
+    "tarifa_decimal": 0.15,
+    "valor_reteiva_calculado": 890924.37,
+    "metodo_calculo": "fuente_nacional"
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidado",
+    "observaciones": [
+      "La responsabilidad de IVA del tercero no pudo ser confirmada en el RUT proporcionado. Se asume que es responsable de IVA para proceder con el cálculo. Se recomienda validar el RUT.",
+      "El servicio prestado, 'Intercambio de Saberes Fase 2', se considera de fuente nacional ya que tiene uso y beneficio económico en Colombia, y la actividad se ejecuta en el país. La tarifa de ReteIVA aplicada es del 15%."
+    ]
+  }
+}

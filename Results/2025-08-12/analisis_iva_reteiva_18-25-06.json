@@ -1,0 +1,54 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 5939495.8,
+      "porcentaje_iva": 0.19,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Prestación de servicios Intercambio de Saberes Fase 2",
+          "valor_iva": 5939495.8,
+          "porcentaje": 0.19
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": true,
+      "codigo_encontrado": "48",
+      "texto_referencia": "05- Impto. renta y compl. régimen ordinario 5"
+    },
+    "concepto_facturado": {
+      "descripcion": "Prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": null,
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": false,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": false,
+      "iva_encontrado": 0.0
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": true,
+    "porcentaje_reteiva": "15%",
+    "tarifa_decimal": 0.15,
+    "valor_reteiva_calculado": 890924.37,
+    "metodo_calculo": "fuente_nacional"
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidado",
+    "observaciones": []
+  }
+}

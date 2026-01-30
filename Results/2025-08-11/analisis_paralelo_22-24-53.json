@@ -1,0 +1,156 @@
+{
+  "timestamp": "2025-08-11T22:24:53.368651",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "aplica_iva_reteiva": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA",
+      "IVA_RETEIVA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_iva": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "El RUT indica que la entidad es Persona Jurídica, con actividad económica 9499 y responsable de IVA. Se clasifica como declarante de renta por tener la responsabilidad 05 - Impto. renta y compl. régimen ordinario. No se identifica como autorretenedor.",
+      "La factura corresponde a la prestación de servicios, y el valor supera la base mínima de $100,000 pesos para servicios generales (declarantes). La tarifa aplicada es del 4.0%."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "razon_deteccion": "El objeto del contrato (diseño, gestión e implementación de la etapa de intercambio de saberes) aplica para estampilla por ser un servicio conexo a obra. No aplica para contribución a obra pública ya que el objeto no es un contrato de obra."
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos_obra",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": null,
+          "valor_contrato_uvt": null,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": "La factura menciona un pago por el 30% del valor total de la prestación de servicios, pero el valor total del contrato no se especifica de forma clara para determinar la tarifa de la estampilla."
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 0.0,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": "No aplica para este impuesto."
+        }
+      },
+      "observaciones": [
+        "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, no se liquidan los impuestos.",
+        "Para la Estampilla Pro Universidad Nacional, no se pudo determinar el valor total del contrato para aplicar la tarifa por rangos UVT, ya que la información proporcionada en la factura y anexos no permite calcularlo con certeza. Se requiere información adicional sobre el valor total del contrato para poder liquidar este impuesto. El estado es 'Preliquidación sin finalizar' para la Estampilla Pro Universidad Nacional."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": false,
+      "procesamiento_paralelo": false,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "es_consorcio": false,
+      "administra_recursos_publicos": false,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": null,
+    "observaciones": [
+      "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, no se liquidan los impuestos.",
+      "Para la Estampilla Pro Universidad Nacional, no se pudo determinar el valor total del contrato para aplicar la tarifa por rangos UVT, ya que la información proporcionada en la factura y anexos no permite calcularlo con certeza. Se requiere información adicional sobre el valor total del contrato para poder liquidar este impuesto. El estado es 'Preliquidación sin finalizar' para la Estampilla Pro Universidad Nacional."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

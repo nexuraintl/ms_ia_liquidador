@@ -1,0 +1,22 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 978638.82
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 1164580.2,
+  "iva": 185941.38,
+  "observaciones": [
+    "El valor de la base gravable para 'Servicios generales (declarantes)' corresponde al valor del servicio de Revisoría Fiscal (978638.82).",
+    "La factura indica que el cliente no desea retención de ICA en un municipio diferente."
+  ]
+}

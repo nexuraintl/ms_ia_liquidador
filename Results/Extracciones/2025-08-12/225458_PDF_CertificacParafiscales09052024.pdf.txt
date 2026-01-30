@@ -1,0 +1,66 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: CertificacParafiscales09052024.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-12 22:54:58
+- Caracteres extraídos: 1327
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 136417,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 1327
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ 
+ 
+ 
+ 
+CERTIFICACION  PARAFISCALES  
+ 
+ 
+Nosotros, CARMEN ALICIA MEZA PERCIA , identificada con el número de cédula de ciudadanía 
+23.089.758 de San Juan de Nepomuceno (Bolívar) y NUBIA PATRICIA GONZALEZ MIRA , 
+identificada con la cédula de ciudadanía No. 66.839.378 de CALI (Valle), en calidad de 
+Representante Legal y Contador de la Corporación para el Desarrollo Empresarial y para la paz 
+“CORDEYPAZ” con NIT No. 900.340.885 -4, certificamos que durante los últimos seis (6) meses 
+calendario legalmente exigibles, la empresa ha realizado el pago de los aportes al sistema de 
+Seguridad Social y Parafiscales exigidos por la Ley y se encuentra al día y a paz y salvo por todo 
+concepto relacionado con dichos aportes. Lo anterior, en cumplimiento de lo dispuesto en el 
+artículo 50 de la Ley 789 de 2002 y el artículo 23 de la Ley 1150 de 2007.  
+ 
+ 
+Se firma la presente en la ciudad de Santiago de Cali, a los nueve  (09) días del mes de mayo de 
+2024.  
+ 
+ 
+ 
+ 
+ 
+CARMEN  ALICIA  MEZA  PERCIA  NUBIA  PATRICIA  GONZALEZ  MIRA  
+C.C. No. 23.089.758  San Juan  (Bolívar)  C.C. No. 66.839.378  
+T.P. No. 96618 -T 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Carrera  26 No. 2 A – 04 – Barrio  San Fernando  _Cali  (Valle) 
+Tel 602 4007436 – 3147738260  
+Email:  corporacioncordepaz@gmail.com  - web:  www.corporacioncordeypaz.com
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

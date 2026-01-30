@@ -1,0 +1,76 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: MUNICIPIOS ASOCIACION PROYECTOCULTURALAFRODESCENDIENTE12 (2).xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-08-12 22:58:51
+- Caracteres extraídos: 12521
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 2,
+  "total_filas": 46,
+  "tamaño_archivo_bytes": 428068,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: ASOCIACION PROYECTO CULTURAL AF ---
+     Unnamed: 0                                                                 Unnamed: 1      Unnamed: 2               Unnamed: 3             Unnamed: 4        Unnamed: 5       Unnamed: 6            Unnamed: 7     Unnamed: 8          Unnamed: 9 Unnamed: 10        Unnamed: 11  Unnamed: 12   Unnamed: 13  Unnamed: 14  Unnamed: 15
+                                                                                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                                                          
+FACTURA FEV 193                                                                                            Norte de santader cucuta vichada Puerto carreño Monteria-Cordoba  Sucre San Marcos La Guajira Hato Nuevo Putumayo Mocoa Soacha Cundinamarca San Andres  Meta villavicencio                                                     
+  NIT 807007783                                                                   CONCEPTO  TARIFA RETEICA                       10                     10                10              9.6                    10              0                  10           0                  6                      TOTAL                          
+                servicios para la estructuración técnica, administrativa y\nfinancierament      1100000000                269738759              129276211         127086253         88208771              99158562      106781448           101562175    64172644          114015178          0.0    1100000001          1.0     0.111111
+                                                                                       IVA               0                        0                      0                 0                                                                                                                   0.0             0          0.0             
+                                                                                RTEFTE 11%       121000000                        0                      0                 0                                                                                                                   0.0             0 -121000000.0             
+       13849004                                                      RETEFUENTE PENDIENTE        165000000                                                                                                                                                                                                                                
+                                                                                    RTEIVA               0                        0                      0                 0                                                                                                                   0.0             0          0.0             
+                                                                       RETEICA A DESCONTAR    8799114.8696               2697387.59             1292762.11        1270862.53      846804.2016             991585.62              0          1015621.75           0         684091.068          0.0  8799114.8696          0.0             
+                                                                                                         0                                                                                                                                                                                                                                
+                                                                                     TOTAL  805200885.1304             267041371.41           127983448.89      125815390.47                                                                                                                   0.0  520840210.77                          
+                                                                                                                                                                                                                                                                                                    520840210.77                          
+                                                                                                                                                                                                                                                                                                                                          
+                                                                                                 935000000                                                                                                                                                                                                                                
+
+--- HOJA: INFORME FINANCIERO MIN AMBIENTE ---
+ Unnamed: 0  Unnamed: 1  Unnamed: 2                                  Unnamed: 3     Unnamed: 4       Unnamed: 5       Unnamed: 6  Unnamed: 7    Unnamed: 8   Unnamed: 9   Unnamed: 10   Unnamed: 11 Unnamed: 12    Unnamed: 13
+                                             DESPLIEGUE TERRIROTIAL 9 ASAMBLEAS           base Agente retenedor           Tarifa     reteica retencion 11%     anticipo valor a girar                                         
+                                    Asamblea Territorial del Norte de Santander   $353.500.000               SI          10*1000  $3.535.000  $121.000.000 $165.000.000  $802.468.520                    0.2452   $269.738.759
+                                               Asamblea Territorial del Vichada   $169.420.000               SI          10*1000  $1.694.200                                                             0.1175   $129.276.211
+                                                Asamblea Territorial de Córdoba   $166.550.000               SI          10*1000  $1.665.500                                                             0.1155   $127.086.253
+                                                  Asamblea Territorial de Sucre   $115.600.000               SI         9,6*1000  $1.109.760                                                             0.0802    $88.208.771
+                                             Asamblea Territorial de La Guajira   $129.950.000               SI          10*1000  $1.299.500                                                             0.0901    $99.158.562
+                                              Asamblea Territorial del Putumayo   $139.940.000               NO                           $0                                                             0.0971   $106.781.448
+                                           Asamblea Territorial de Cundinamarca   $133.100.000               SI          10*1000  $1.331.000                                                             0.0923   $101.562.175
+                                        Asamblea Territorial de San Andres Isla    $84.100.000               NO                           $0                                                             0.0583    $64.172.644
+                                                  Asamblea Territorial del Meta   $149.420.000               SI           6*1000    $896.520                                                             0.1037   $114.015.178
+                                                                         VALOR  $1.441.580.000                                   $11.531.480  $121.000.000 $165.000.000  $802.468.520                           $1.100.000.000
+                                                                 VALOR FACTURA  $1.100.000.000                                                                                                                                
+                                                                     DIFERENCIA   $341.580.000                                                                                                                                
+                                                                                                                                                                                                                              
+                                                                                                                                                                                                                              
+                                             DESPLIEGUE TERRIROTIAL 9 ASAMBLEAS     Nueva base  porcentaje base Agente retenedor      Tarifa       reteica    retencion      anticipo valor a girar                           
+                                    Asamblea Territorial del Norte de Santander   $269.738.759             0.25               SI     10*1000    $2.697.388 $121.000.000  $165.000.000  $805.200.885                           
+                                               Asamblea Territorial del Vichada   $129.276.211             0.12               SI     10*1000    $1.292.762                                                                    
+                                                Asamblea Territorial de Córdoba   $127.086.253             0.12               SI     10*1000    $1.270.863                                           $2.732.365               
+                                                  Asamblea Territorial de Sucre    $88.208.771             0.08               SI    9,6*1000      $846.804                                                                    
+                                             Asamblea Territorial de La Guajira    $99.158.562             0.09               SI     10*1000      $991.586                                                                    
+                                              Asamblea Territorial del Putumayo   $106.781.448              0.1               NO                        $0                                                                    
+                                           Asamblea Territorial de Cundinamarca   $101.562.175             0.09               SI     10*1000    $1.015.622                                                                    
+                                        Asamblea Territorial de San Andres Isla    $64.172.644             0.06               NO                        $0                                                                    
+                                                  Asamblea Territorial del Meta   $114.015.178              0.1               SI      6*1000      $684.091                                                                    
+                                                                 VALOR FACTURA  $1.100.000.000                                                  $8.799.115 $121.000.000  $165.000.000  $805.200.885                           
+                                                                                                                                                                                                                              
+                                                                                                                                                                                                                              
+                                                                                                                                                                                                                              
+                                                                                $1.650.000.000      $16.500.000
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

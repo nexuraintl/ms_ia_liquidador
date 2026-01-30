@@ -1,0 +1,37 @@
+{
+  "es_facturacion_extranjera": true,
+  "pais_proveedor": null,
+  "tiene_convenio_doble_tributacion": false,
+  "validacion_fuente_nacional": {
+    "pregunta_1_uso_beneficio_colombia": true,
+    "pregunta_2_actividad_en_colombia": false,
+    "pregunta_3_asistencia_tecnica_colombia": false,
+    "pregunta_4_bien_ubicado_colombia": true,
+    "es_fuente_nacional": true,
+    "justificacion": "Los bienes (insumos médicos) serán utilizados y tendrán un beneficio económico en Colombia, ya que el destinatario es 'Aesthetic body center' en Cali. Además, los bienes están destinados a ser ubicados y utilizados en Colombia."
+  },
+  "conceptos_identificados": [
+    {
+      "concepto": "CONCEPTO_NO_IDENTIFICADO",
+      "tarifa_normal": 0.0,
+      "tarifa_convenio": 0.0,
+      "tarifa_aplicada": 0.0,
+      "base_gravable": 0.0
+    }
+  ],
+  "calculo_retencion": {
+    "aplica_retencion": false,
+    "valor_retencion": 0.0,
+    "tarifa_aplicada_porcentaje": 0.0,
+    "razon_aplicacion": "Aunque la transacción se considera de fuente nacional según las preguntas de validación, el concepto de 'venta de bienes/insumos médicos' no se encuentra listado entre los conceptos de retención en la fuente para pagos al exterior proporcionados. Por lo tanto, no aplica retención bajo los conceptos definidos en la lista."
+  },
+  "valor_total": 4843200.0,
+  "moneda_original": "COP",
+  "tasa_cambio": null,
+  "iva": 0.0,
+  "observaciones": [
+    "El país de origen del proveedor no se puede determinar a partir de la factura.",
+    "La factura muestra precios unitarios en Euros (€) pero el subtotal y total final están en Pesos Colombianos ($), sin especificar la tasa de cambio utilizada para la conversión.",
+    "La factura no menciona la aplicación de IVA."
+  ]
+}

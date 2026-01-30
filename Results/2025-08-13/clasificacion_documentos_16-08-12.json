@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-08-13T16:08:12.972889",
+  "nit_administrativo": "830.054.060-5",
+  "nombre_entidad": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "clasificacion": {
+    "Factura17.xlsx - Factura.pdf": "FACTURA"
+  },
+  "es_consorcio": false,
+  "es_facturacion_extranjera": true,
+  "impuestos_aplicables": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "IVA_RETEIVA"
+  ],
+  "procesamiento_paralelo": true
+}

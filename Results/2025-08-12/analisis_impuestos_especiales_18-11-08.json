@@ -1,0 +1,43 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato corresponde a 'prestación de servicios' y 'diseño, gestión e implementación', lo que aplica para Estampilla Pro Universidad Nacional (servicios conexos). No aplica para Contribución a Obra Pública ya que no es un contrato de obra (construcción, mantenimiento, instalación). El tercero no administra recursos públicos."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "No se encontró el valor total del contrato en la factura ni en los anexos."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de entidades que administran recursos públicos, por lo tanto, no aplican ninguno de los impuestos.",
+    "No se pudo determinar el valor total del contrato para aplicar la tarifa por rangos de UVT de la Estampilla Pro Universidad Nacional. Se reporta el valor de la factura sin IVA para fines informativos, pero la preliquidación de la estampilla no puede finalizar."
+  ]
+}

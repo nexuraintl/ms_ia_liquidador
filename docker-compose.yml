@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  preliquidador:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: preliquidador-app
+    ports:
+      - "8000:8000"
+    environment:
+      # API Keys (cargar desde .env del host)
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Google Vision (opcional)
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/google-credentials.json
+      
+      # Configuración del servidor
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=False
+      
+      # Configuración de archivos
+      - MAX_FILE_SIZE_MB=50
+      - TIMEOUT_GEMINI_SEGUNDOS=30
+      
+    volumes:
+      # Volumen para credenciales de Google (opcional)
+      - ./credentials:/app/credentials:ro
+      
+      # Volumen para datos persistentes (JSONs generados)
+      - ./data:/app/data
+      
+      # Volumen para logs (opcional)
+      - ./logs:/app/logs
+    
+    restart: unless-stopped
+    
+    # Health check para verificar que el servicio esté funcionando
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.get(\"http://localhost:8000/health\", timeout=5)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Límites de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+# Redes (opcional para futura expansión)
+networks:
+  default:
+    name: preliquidador-network

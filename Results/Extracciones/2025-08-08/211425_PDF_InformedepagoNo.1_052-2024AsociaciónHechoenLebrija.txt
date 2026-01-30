@@ -1,0 +1,117 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-08 21:14:25
+- Caracteres extraídos: 4638
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 2,
+  "tamaño_archivo_bytes": 199467,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 4638
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+      
+ 
+    
+ 
+INFORME DE APROBACIÓN DE PAGO  
+FACTURAS/CUENTAS DE COBRO  
+ 
+ 
+DATOS GENERALES  
+Fecha de diligenciamiento:  21/02/2025  
+Tipología Contractual   
+Orden De Servicio ☐ 
+ Factura Directa ☐  Contrato ☒ Convenio ☐ Cofinanciación ☐ Caja Menor ☐ 
+No. Orden/Contrato/Convenio  052-2024  No. Factura/Cuenta de 
+cobro  DV 116  
+Fecha Factura / Cuenta de Cobro  19/02/2025  
+Nombre del Tercero/beneficiario del 
+Pago   
+ ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+NIT o Documento de Identificación   
+ NIT 901.369.011 -4 
+Departamento de prestación del servicio  
+(aplica únicamente para Contratos  – para 
+Convenios  o recursos entregados en 
+administración  indicar NA )  Santander  Municipio de prestación 
+del Servicio  Lebrija  Valor del servicio prestado por 
+municipio  (desagregar el valor 
+por cada municipio cuando 
+señale  más de u no) $ 62.000.000  
+Forma de pago/Desembolsos  Único Pago  ☐ Desembolso aportes  ☐ No. desembolso   Pago ☒ No. de pago  1 
+ 
+INFORMACIÓN FINANCIERA  
+(valores con IVA incluido si aplica)  
+ 
+Valor total del instrumento 
+contractual  Valor total de pagos realizados  (a la fecha)  Valor total de la factura/cuenta de cobro  (actual)  Saldo del instrumento contractual  (incluyendo 
+factura/cuenta de cobro actual)  
+$124.000.000 $ 0 $62.000.000  $62.000.000  
+$522.032.000  $ 0 $ 0 $522.032.000  
+$646.032.000  $ 0 $62.000.000  $ 584.032.000  
+INFORMACIÓN TÉCNICA  
+
+--- PÁGINA 2 ---
+      
+ 
+ 
+Concepto del pago:  Primer pago correspondiente al cincuenta por ciento (50%) del valor total de la prestación del servicio  contra la entrega y recibo a satisfac ción y aprobación, por 
+parte de la supervisora designada por el FONDO MUJER, de  los entregables asociados a la actividad de 2.1. alistamiento de rutas y territorios para el 
+intercambio de saberes y la comunidad , en el marco del contrato 052 -2024 firmado con la Asociacion de Artesanas -os y Agricultores Hecho en Lebrija.  
+.  
+Justificación de la Necesidad  del pago  
+ En cumplimiento de los establecido en el Contrato No. 0 52- 2024, suscrito con Asociacion de Artesanas -os y Agricultores Hecho en Lebrija. , la entidad contratista 
+solicita el primer  pago  que corresponde a la entrega satisfactoria y aprobación, por parte de la supervisora designada por el FONDO MUJER, del l os entregables 
+asociados a la actividad de 2.1. alistamiento de rutas y territorios para el intercambio de saberes y la comunidad , para la implementación de la ruta Mujer 
+Rural Soberana  
+Descripción del cumplimiento del objeto 
+(Entrega del bien o prestación del 
+servicio, incluir evidencias fotográficas si 
+aplica)  
+  La entidad contratista  en cumplimiento de lo establecido en el Contrato No. 0 52 -2024 , remite  los entregable s asociado primer  pago  del proceso la ejecución de la 
+fase de alistamiento de rutas y territorios para el intercambio de saberes y la comunidad  y sus correspondientes anexos, los cuales  cuentan con visto bueno 
+para su pago  por parte de la supervisión del FONDO MUJER , previa presentación de la respectiva factura . Estos entregables son:  
+ 
+• Plan de trabajo, que debe incluir como mínimo: etapas, actividades por etapa, responsables, entregables, indicadores, y crono grama, que debe mostrar 
+visualmente las semanas asignadas a cada actividad.  
+• Relatoría de los espacios de armonización táctica y estratégica, con las principales conclusiones y acuerdos generados en las  reuniones.  
+• Propuesta metodológica que detalle el diseño de la metodología para el intercambio de saberes y el fortalecimiento de comunid ad. 
+ 
+Entregables (listar los entregables 
+adjuntos al presente informe)  Anexo 1. Factura NO. DV 116  - ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+Anexo 2. Certificado bancario ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+Anexo 3. RUT ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+Anexo 4. Certificado pago aportes SSS ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+Anexo 5. Cámara  de Comercio ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA  
+Anexo 6. Entregables Factura NO. DV 116 
+• Plan de trabajo  
+• Relatoria de los espacios de Armonización.  
+• Propuesta Metodologica  
+Pago de aportes a los sistemas de salud, 
+riesgos profesionales, pensión y 
+parafiscales  ☐      SI                               ☐             NO                  No aplica, la entidad operado ra remite certificación en este sentido.  
+Como responsable del trámite, aprueba el 
+pago  ☒      SI                               ☐             NO 
+Observaciones  N/A 
+ 
+ 
+ 
+Paula Andrea Sánchez  
+Coordinadora de Desarrollo Rural  
+SUPERVISOR  
+FONDO MUJER LIBRE Y PRODUCTIVA
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

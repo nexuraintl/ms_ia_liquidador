@@ -1,0 +1,42 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El tercero 'CORPORACION PARA EL DESARROLLO EMPRESARIAL Y PARA LA PAZ CORDEYPAZ' (NIT 900340885-4) no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS', por lo tanto, no aplica ninguno de los impuestos especiales."
+  },
+  "tercero_identificado": {
+    "nombre": "CORPORACION PARA EL DESARROLLO EMPRESARIAL Y PARA LA PAZ CORDEYPAZ",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "ejecutar la ruta de intervención del programa NUCLEO E a partir de la Estación 2 diagnóstica, intervención de las estaciones impulsa, crece y conecta",
+    "clasificacion_estampilla": "interventoria",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "intervención"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 241596638.0,
+      "valor_contrato_uvt": 4851.98,
+      "valor_factura_sin_iva": 120798319.0,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "Un segundo pago del cincuenta porciento (50%) del valor total de la intervención"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 120798319.0,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Subtotal $120,798,319"
+    }
+  },
+  "observaciones": [
+    "Según las instrucciones, si el tercero no administra recursos públicos, no se liquidan ninguno de los dos impuestos. El tercero 'CORPORACION PARA EL DESARROLLO EMPRESARIAL Y PARA LA PAZ CORDEYPAZ' no se encuentra en la lista de entidades que administran recursos públicos.",
+    "A pesar de la no aplicación de los impuestos, se identificó el objeto del contrato como 'interventoría' y se calculó el valor total del contrato en $241,596,638.00 (4851.98 UVT) basándose en que la factura representa el 50% del valor total.",
+    "La clasificación del objeto como 'interventoría' implicaría que, de aplicar los impuestos, solo la Estampilla Pro Universidad Nacional sería relevante (no la Contribución a Obra Pública, que es solo para contrato de obra)."
+  ]
+}

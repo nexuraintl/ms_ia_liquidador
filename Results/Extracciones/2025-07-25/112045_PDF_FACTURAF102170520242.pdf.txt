@@ -1,0 +1,69 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: FACTURA F102170520242 .pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-25 11:20:45
+- Caracteres extraídos: 2243
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 32208,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 2243
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+Servicio 1 $33,823,529 1 $33,823,529 Segundo pagodel50%deltotaldelaintervencion
+enlaEstacionImpulsa,correspondiente alcontrato
+060-2021 AC1
+Servicio 2 $48,319,328 1 $48,319,328 Segundo pagodel50%deltotaldelaintervencion
+enlaEstacion Crece,correspondiente alcontrato
+060-2021 AC1
+Servicio 3 $38,655,462 1 $38,655,462 Segundo pagodel50%deltotaldelaintervencion
+enlaEstacionImpulsa,correspondiente alcontrato
+060-2021 AC1Unidad IDDIRECCIÓN
+TELÉFONO NITFECHA DEL DOCUMENTO (DD/MM/AA)
+FECHA DE VENCIMIENTO
+Ítem Precio Cantidad Descuento Total
+ELABORADO POR ACEPTADA, FIRMA Y/O SELLO Y FECHA
+Proveedor tecnológico: Soluciones Alegra S.A.S  -  Software: Alegra  -  NIT 900.559.088-2SEÑOR(ES)
+CL 28 13 A 24 P 6, Colombia, Bogotá, D.C., Bogotá D.C.
+830054060-5FIDEICOMISO SOCIEDAD FIDUCIARIA FIDUCOLDEX
+601 3275500Responsable de IVACORPORACION PARA EL DESARROLLO EMPRESARIAL Y PARA LA PAZ CORDEYPAZ
+NIT 900340885-4
+CR 26 2A 04, Cali, Valle del Cauca, 
+Tel: +57 3013603652
+contabilidad.cordeypaz@gmail.com ; 
+Representación gráfica de factura de venta electrónicaMoneda: COP
+Generado: 2024-05-17 15:48:32-05:00
+Validación DIAN: 2024-05-17 15:49:33-05:00
+Tipo de operación: Estándar Forma de pago: Crédito
+CUFE: 875fe88d928861536370e95b0dfc0b918c8b408da1bf16373a4e3ccbfca7f97079ca30e71ce7eadd058025809b0ecccbUnsegundopagodelcincuenta porciento(50%)delvalortotaldela
+intervención delasestaciones impulsa, creceyconecta, unavez
+finalizada laestación Diagnostica yrecibidos asatisfacción los
+entregables definidos paraestaestación, conforme elnumeral
+2.2.1.1.Estación 2.Diagnostica, literalD.entregables, presentada la
+facturaenformalegalypreviovistobuenodelainterventoría.” 
+ContratoBienesyServicios No.068-2021 INNPULSA17/05/2024
+16/06/2024No. F102
+Autorización de numeración de facturación N°18764063489729 de 2024-01-09 Modalidad Factura Electrónica Desde N° F101 hasta F150 con vigencia
+hasta 2025-01-09Estafacturaseasimilaentodossusefectosaunaletradecambiode
+conformidad conelArt.774delcódigodecomercio. Autorizoqueen
+casodeincumplimiento deestaobligación seareportado alas
+centrales deriesgo,secobraranintereses pormora.FACTURA ELECTRÓNICA DE
+VENTA
+Subtotal $120,798,319
+IVA (19.00%) $22,951,681
+Total $143,750,000
+Total de lineas: 3
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

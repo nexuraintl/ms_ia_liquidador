@@ -1,0 +1,28 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: OBJ. CTO corporacion.xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-07-25 10:48:03
+- Caracteres extraídos: 659
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 1,
+  "total_filas": 1,
+  "tamaño_archivo_bytes": 10871,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                                            CONTRATISTA                                                                                                                                                                                                                               OBJETO
+CONTRATO DE PRESTACIÓN DE SERVICIOS CORPORACION PARA EL DESARROLLO EMPRESARIAL PARA LA PAZ En virtud del presente contrato, EL OPERADOR se obliga con INNPULSA COLOMBIA a ejecutar la ruta de intervención del programa NUCLEO E a partir de la Estación 2 diagnóstica, intervención de las estaciones impulsa, crece y conecta
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

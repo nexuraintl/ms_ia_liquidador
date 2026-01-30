@@ -1,0 +1,54 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 185941.38,
+      "porcentaje_iva": 19.0,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "SERVICIO DE REVISORIA FISCAL MES DE JUNIO 2025 INNPULSA COLOMBIA",
+          "valor_iva": 185941.38,
+          "porcentaje": 19.0
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": false,
+      "es_responsable_iva": true,
+      "codigo_encontrado": "no_encontrado",
+      "texto_referencia": "Régimen: Impuesto sobre las ventas - IVA"
+    },
+    "concepto_facturado": {
+      "descripcion": "SERVICIO DE REVISORIA FISCAL MES DE JUNIO 2025 INNPULSA COLOMBIA",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": "",
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": true,
+      "iva_encontrado": 19.0
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": true,
+    "porcentaje_reteiva": "15%",
+    "tarifa_decimal": 0.15,
+    "valor_reteiva_calculado": 27891.21,
+    "metodo_calculo": "fuente_nacional"
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidado",
+    "observaciones": []
+  }
+}

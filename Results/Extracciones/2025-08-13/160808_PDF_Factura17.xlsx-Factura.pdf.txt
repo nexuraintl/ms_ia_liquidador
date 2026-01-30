@@ -1,0 +1,39 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Factura17.xlsx - Factura.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-13 16:08:08
+- Caracteres extraídos: 484
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 52042,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 484
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+INSUMOS MEDICOS FACTURA
+N.º DE FACTURA FECHA
+17 03/03/2025
+FACTURAR A
+Aesthetic body center
+Cl. 5b 4 #37-130, San Fernando, Cali, Valle del Cauca
+Cali, Valle del Cauca
+DESCRIPCIÓN CANT. PRECIO UNITARIO TOTAL
+Prolene 3/0.  34 cajas408 - 7.900,00 €-                   $3.223.200
+Monosyn 3/0 4  cajas48 - 15.000,00 €-                 $720.000
+Adrenalina 6 cajas 600 - 1.500,00 €-                   $900.000
+Gracias por su confianza SubTotal  $4.843.200
+TOTAL  $4.843.200
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

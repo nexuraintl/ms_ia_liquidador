@@ -1,0 +1,58 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Distribuion por municipiosv2.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-12 22:54:58
+- Caracteres extraídos: 1680
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 55559,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 1680
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ITEMS DESCRIPCION CANTIDAD VR UNITARIO IVA VR TOTAL
+1Segundo pago del 50% del total de la intervencion en la 
+Estacion Impulsa, correspondiente al contrato 068-2021 1 33.823.529 $              6.426.471 $                  40.250.000 $                
+2Segundo pago del 50% del total de la intervencion en la 
+Estacion Crece, correspondiente al contrato 068-2021 1 48.319.328 $              9.180.672 $                  57.500.000 $                
+3Segundo pago del 50% del total de la intervencion en la 
+Estacion Impulsa, correspondiente al contrato 068-2021 1 38.655.462 $              7.344.538 $                  46.000.000 $                
+120.798.319 $            22.951.681 $                143.750.000 $              
+DEPTO MUNICIPIO # ORGANIZ VALOR TOTAL POR DEPTO
+BAHIA SOLANO 3 18.750.000 $                
+CONDOTO 1 6.250.000 $                  
+MURINDO 1 6.250.000 $                  
+B/ TURA 2 12.500.000 $                
+CANDELARIA 1 6.250.000 $                  
+DAGUA 1 6.250.000 $                  
+TULUA 1 6.250.000 $                  
+CAJIBIO 4 25.000.000 $                
+CALDONO 1 6.250.000 $                  
+SUAREZ 1 6.250.000 $                  
+MERCADERES 1 6.250.000 $                  
+ROSAS 1 6.250.000 $                  
+PATIA 2 12.500.000 $                
+SILVIA 1 6.250.000 $                  
+SUCRE 1 6.250.000 $                  
+TIMBIO 1 6.250.000 $                  
+TOTAL ORGANIZACIONES 13 143.750.000 $        143.750.000 $        TOTAL
+CHOCO
+VALLE
+CAUCALIQUIDACION PARA FACTURA DEL SEGUNDO DESEMBOLSO DE CONTRATO 068-2021  - CORPORACION CORDEYPAZ
+31.250.000 $                
+31.250.000 $                
+81.250.000 $
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

@@ -1,0 +1,72 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 37200000.0
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "El tercero es una persona jurídica.",
+    "El concepto principal de la factura es 'prestación de servicios' que corresponde a 'Servicios generales (declarantes)'.",
+    "La factura no indica si el tercero es declarante de renta o no declarante, se asume declarante por defecto.",
+    "Se debe verificar en el RUT si el tercero es responsable de IVA. Asumiendo que sí para aplicar retención.",
+    "El RUT indica que la actividad principal es 9499 (Otras asociaciones n.c.p.), lo cual no define directamente si es declarante o no declarante. Sin embargo, la naturaleza de 'Asociación' y su actividad económica sugieren un tratamiento como declarante de renta.",
+    "El RUT indica '05- Impto. renta y compl. régimen ordinario', lo cual confirma que es un contribuyente del régimen ordinario y por lo tanto declarante y sujeto a retención.",
+    "El RUT indica '07- Retención en la fuente a título de renta', reforzando que es sujeto de retención.",
+    "El RUT indica '52 - Facturador electrónico', lo cual es una responsabilidad administrativa.",
+    "El RUT indica '07- Retención en la fuente a título de renta', lo cual confirma que es sujeto de retención."
+  ]
+}

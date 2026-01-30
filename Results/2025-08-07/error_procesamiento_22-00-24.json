@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-07T22:00:24.115067",
+  "error_type": "server_error",
+  "error_message": "'ValueError' object has no attribute 'keys'",
+  "user_message": "Error interno del servidor durante el procesamiento",
+  "tiempo_procesamiento_segundos": 7.77406,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\USUSARIO\\Proyectos\\PRELIQUIDADOR\\main.py\", line 855, in procesar_facturas\n    logger.info(f\"🔍 Estructura de análisis recibida: {list(analisis_impuestos_especiales.keys()) if analisis_impuestos_especiales else 'None'}\")\n                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'ValueError' object has no attribute 'keys'\n"
+}

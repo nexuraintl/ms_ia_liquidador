@@ -1,0 +1,67 @@
+.env
+.env.*
+*.json
+!requirements.txt
+fiducoldex-gemini-api-*.json
+
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+Results/
+extracciones/
+*.xlsx
+*.xls
+PDFS/
+*.pdf
+*.tmp
+clasificacion_documentos.json
+analisis_factura.json
+analisis_consorcio.json
+# ARCHIVOS DE SISTEMA
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.vscode/
+.idea/
+*.iml
+.ipynb_checkpoints
+
+# LOGS
+logs/
+*.log
+
+# BACKUPS Y COMPRIMIDOS
+*.zip
+*.bak
+*.backup
+*~
+
+# BASE DE DATOS LOCAL
+*.db
+*.sqlite
+*.sqlite3
+
+# CONFIGURACIÓN LOCAL
+config.local.py
+local_settings.py
+
+INSTRUCCIONES_CLAUDE_v2.md
+
+docs/
+
+CLAUDE.md
+
+tests/
+
+8710f8efdc27d463afcb10e88d10d9fc.xml
+9e9f6eb6167b551a7344b2c6a3bd4875.xml
+Conversor/QUICKSTART.md
+Muestra_Facturas_11-08-2025/

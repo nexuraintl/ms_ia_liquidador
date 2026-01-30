@@ -1,0 +1,41 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "Los impuestos no aplican porque el tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos. Adicionalmente, el objeto del contrato 'Revisoría Fiscal' no clasifica dentro de las categorías de 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' aplicables a estos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "BDO AUDIT S.A.S. BIC",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "El REVISOR FISCAL se obliga a prestar los servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo de acuerdo con lo previsto en las normas vigentes sobre Revisoría Fiscal, y aquellas que las modifiquen, en especial lo establecido, en los artículos 207 y subsiguientes del Código de Comercio, la Ley 43 de 1990, la Ley 222 de 1995, la Ley 1314 de 2009 reglamentada por el Decreto 2420 de 2015 modificado por los Decretos 2496 de 2015, 2131 de 2016 y 2170 de 2017, mediante los cuales se incorporaron las normas de auditoría y de aseguramiento de información (NAI), que están conformadas por el Código de Ética emitido por el IESBA, las normas internacionales de auditoria (NIA), las normas internacionales de control de calidad (NICC), las normas internacionales de trabajos de revisión (NITR), las normas internacionales de trabajos para atestiguar (ISAE) y las normas internacionales de servicios relacionados (NISR), todas emitidas por el IAASB.",
+    "clasificacion_estampilla": "no_identificado",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 0.0,
+      "valor_contrato_uvt": 0.0,
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    }
+  },
+  "observaciones": [
+    "El NIT administrativo 830.054.060-5 es válido para la aplicación de los impuestos.",
+    "El tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS', lo cual es una condición excluyente para la aplicación de ambos impuestos.",
+    "El objeto del contrato 'Revisoría Fiscal' no se clasifica dentro de las categorías de 'Contrato de Obra', 'Interventoría' o 'Servicios Conexos' (estudios, asesorías técnicas, gerencia de obra/proyectos, diseño) requeridas para la aplicación de la Estampilla Pro Universidad Nacional o la Contribución a Obra Pública.",
+    "El valor total del contrato para la Estampilla Pro Universidad Nacional no pudo ser identificado, ya que la factura corresponde a un servicio mensual y no indica un porcentaje de un contrato mayor."
+  ]
+}

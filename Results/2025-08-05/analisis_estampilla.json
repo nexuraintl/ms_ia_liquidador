@@ -1,0 +1,25 @@
+{
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS -OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "tipo": "servicios_conexos_obra",
+    "aplica_estampilla": false,
+    "palabras_clave_encontradas": [],
+    "descripcion": "Prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00"
+  },
+  "valor_contrato": {
+    "valor_total_pesos": 124000000,
+    "valor_total_uvt": 2490.01,
+    "metodo_identificacion": "porcentaje_calculado",
+    "texto_referencia": "Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00 37,200,000.00. Valor total del instrumento contractual $124.000.000"
+  },
+  "observaciones": [
+    "El NIT administrativo 830.054.060-5 es válido.",
+    "El tercero no es ninguno de los terceros válidos.",
+    "Aunque el objeto del contrato parece ser servicios conexos de obra, no aplica la estampilla porque el tercero no es uno de los terceros válidos."
+  ]
+}

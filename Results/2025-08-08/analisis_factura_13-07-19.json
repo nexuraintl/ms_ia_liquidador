@@ -1,0 +1,67 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 37200000.0
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "El RUT indica que la entidad es \"Persona jurídica\" y su actividad económica es \"9499 - Actividades de otras asociaciones n.c.p.\", lo que la clasifica como un régimen especial.",
+    "La factura describe el concepto como \"Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00\". Dado que se trata de una prestación de servicios por parte de una entidad jurídica, se aplica el concepto 'Servicios generales (declarantes)' ya que no se especifica un servicio particular que corresponda a otra tarifa.",
+    "El NIT 901.369.011-4 en el RUT está asociado a la actividad económica 9499, que es \"Otras asociaciones n.c.p.\", lo que indica un régimen especial (entidades sin ánimo de lucro).",
+    "Según el RUT, la entidad es \"Responsable de IVA\"."
+  ]
+}

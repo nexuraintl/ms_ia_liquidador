@@ -1,0 +1,102 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: Pago_SS.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-01 17:05:53
+- Caracteres extraídos: 2519
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 52422,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 2519
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+SOACHA|AUTOLIQUIDACION
+CONSOLIDADA
+ Forma PresentaciónCC1024537280PAGADO 30/06/2025 EN HORARIO EXTENDIDOFecha creación reporte: 2025-07-01, 10:28:54 AM Numéro Planilla:
+junio de 2025 junio de 20251073684678
+Periodo Cotización: Periodo Servicio:
+ DepartamentoVIVIANA YISETH PONGUTA TORO
+ Documento Razón Social
+ÚNICOCL 14 SUR #7 - 22 BARRIO VILLA FLOR
+ Teléfono  Tipo de Empresa
+ Total Afiliados Ciudad I. DATOS DEL APORTANTE
+INDEPENDIENTE 3144162460 Dirección
+CUNDINAMARCA
+ Identificación Tipo Persona
+1NATURAL
+ Representante Legal
+ING SaludRETAporte
+CajaTAEAporte
+SaludAdministradora Aporte
+SENADias ARP ESAP ParafiscalesIGEAdministradora TOTAL
+IBC
+PensiónAdministradora Aporte
+MinisterioRiesgosVCTAporte
+ICBFPensiones Novedades
+Dias AFPII. DETALLE DEL APORTANTE
+IBC
+SaludSLNTDPDatos del Afiliado Identificacion
+LMAVSP
+Dias CCFDias EPSAVPAporte
+RiesgosIBC
+CajaVACTDE
+VSTIBC
+RiesgosTAPAdministradora Aporte
+PensiónCajasCorrecciones Nombres y Apellidos
+IRP
+ Tipo Planilla: I: PLANILLA INDEPENDIENTES
+SEGUROS BOLIVAR  ARPPAGOSIMPLERET PRET
+CORAdministradoraTAEApellidos y Nombres
+VCTTDEIBC
+PensiónDías CCFVSTTAPTDP
+Días AFP Identificación
+AVPIGEING
+VACAdministradoraVSP
+Días ARPIRPAporte
+PensiónSLNDatos del Afiliado
+Aporte
+MinisterioIBC
+CajaAporte
+SaludIBC
+RiesgosAporte
+CajaAporte
+Riesgos ESAP Aporte
+SENAAporte
+ICBFAdministradora Tarifa II. DETALLE DEL APORTANTE
+IBC
+SaludPensiones  Salud Riesgos Cajas  Parafiscales
+Tipo
+CotizanteSubtipo
+CotizanteTotalTotalLMA
+Días EPSNovedades
+0,522 $ 12.900 (NIN-CC) NINGUNA CCF $ 0 $ 0 $ 0 $ 0 $ 0 $ 0 CC 1024537280 00 (230301) PORVENIR $ 2.466.000 $ 394.600 (EPS005) EPS SANITAS $ 2.466.000 $ 308.300 $ 2.466.000VIVIANA YISETH PONGUTA
+TORO3030 030 59 0 $ 715.800
+$ 715.800Aportes
+ESAPAportes
+Min Educación(Incapacidades,
+Licencias, Saldos
+a Favor) EPSAportes PensiónSUBTOTAL SIN
+INTERESES DE
+MORAIBC Pensión Aportes Cajas III.TOTALES
+$ 0 $ 715.800Incapacidades
+ARP IBC Riesgos TOTAL FINAL IBC Cajas
+$ 0Aportes Riesgos Aportes ICBF Aportes Salud IBC SaludTOTAL
+INTERESES
+DE MORAAportes Sena
+$ 0 $ 2.466.000 $ 2.466.000 $ 2.466.000 $ 0 $ 394.600 $ 308.300 $ 12.900 $ 0 $ 0 $ 0 $ 0 $ 0
+Líneas de Servicio FonoSIMPLE: Bogotá 601 4446634 - Cali: 602 5540577 - Medellín: 604 5146669 - Bucaramanga: 607 6438000 - Cartagena: 605 6945444 - Pereira: 606 3402582 - Barranquilla: 605 3618850 - Resto del País: 018000 971 971 - ¡Más que Fácil, SIMPLE! 1 Página 1 de
+ Antes de imprimir, asegúrese que sea realmente necesario. Proteger el medio ambiente está en nuestras manos.
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

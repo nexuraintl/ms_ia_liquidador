@@ -1,0 +1,201 @@
+{
+  "timestamp": "2025-08-13T12:14:57.909686",
+  "procesamiento_paralelo": true,
+  "impuestos_analizados": [
+    "retefuente",
+    "impuestos_especiales",
+    "iva_reteiva"
+  ],
+  "resultados_analisis": {
+    "retefuente": {
+      "conceptos_identificados": [
+        {
+          "concepto": "Honorarios y comisiones por servicios (persona juridica)",
+          "tarifa_retencion": 11.0,
+          "base_gravable": 978638.82
+        }
+      ],
+      "naturaleza_tercero": {
+        "es_persona_natural": false,
+        "es_declarante": true,
+        "regimen_tributario": "ORDINARIO",
+        "es_autorretenedor": false,
+        "es_responsable_iva": true
+      },
+      "articulo_383": {
+        "aplica": false,
+        "condiciones_cumplidas": {
+          "es_persona_natural": false,
+          "concepto_aplicable": false,
+          "es_primer_pago": false,
+          "planilla_seguridad_social": false,
+          "cuenta_cobro": false
+        },
+        "deducciones_identificadas": {
+          "intereses_vivienda": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "dependientes_economicos": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "medicina_prepagada": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          },
+          "rentas_exentas": {
+            "valor": 0.0,
+            "tiene_soporte": false,
+            "limite_aplicable": 0.0
+          }
+        },
+        "calculo": {
+          "ingreso_bruto": 0.0,
+          "aportes_seguridad_social": 0.0,
+          "total_deducciones": 0.0,
+          "deducciones_limitadas": 0.0,
+          "base_gravable_final": 0.0,
+          "base_gravable_uvt": 0.0,
+          "tarifa_aplicada": 0.0,
+          "valor_retencion_art383": 0.0
+        }
+      },
+      "es_facturacion_exterior": false,
+      "valor_total": 1164580.2,
+      "iva": 185941.38,
+      "observaciones": [
+        "El tercero BDO AUDIT S.A.S. BIC es una persona jurídica (Sociedad por Acciones Simplificada), por lo tanto, el Artículo 383 del Estatuto Tributario no aplica.",
+        "El concepto de la factura 'SERVICIO DE REVISORIA FISCAL' se clasifica como 'Honorarios y comisiones por servicios (persona juridica)' según el objeto del contrato y la actividad económica del emisor.",
+        "La retención en la fuente calculada ($107,650.27) coincide con el valor de 'Total ReteFuente' indicado en la factura.",
+        "El certificado de aportes parafiscales adjunto, aunque válido, no es un requisito para la aplicación de retención en la fuente a una persona jurídica."
+      ]
+    },
+    "impuestos_especiales": {
+      "analisis_gemini": {
+        "deteccion_automatica": {
+          "aplica_estampilla_universidad": false,
+          "aplica_contribucion_obra_publica": false,
+          "procesamiento_paralelo": false,
+          "razon_deteccion": "Los impuestos no aplican debido a que el tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos y el objeto del contrato 'Revisoría Fiscal' no corresponde a las categorías de obra, interventoría o servicios conexos definidas para la aplicación de estos impuestos."
+        },
+        "tercero_identificado": {
+          "nombre": "BDO AUDIT S.A.S. BIC",
+          "es_consorcio": false,
+          "administra_recursos_publicos": false,
+          "consorciados": []
+        },
+        "objeto_contrato": {
+          "descripcion_identificada": "Servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo de acuerdo con lo previsto en las normas vigentes sobre Revisoría Fiscal.",
+          "clasificacion_estampilla": "no_identificado",
+          "clasificacion_obra_publica": "no_aplica",
+          "palabras_clave_estampilla": [
+            "Revisoría Fiscal",
+            "servicios profesionales"
+          ],
+          "palabras_clave_obra_publica": [
+            "Revisoría Fiscal",
+            "servicios profesionales"
+          ]
+        },
+        "valores_identificados": {
+          "estampilla_universidad": {
+            "valor_contrato_pesos": 0.0,
+            "valor_contrato_uvt": 0.0,
+            "valor_factura_sin_iva": 978638.82,
+            "metodo_identificacion": "no_identificado",
+            "texto_referencia": "Total antes de IVA: $ 978.638,82"
+          },
+          "contribucion_obra_publica": {
+            "valor_factura_sin_iva": 978638.82,
+            "metodo_identificacion": "directo",
+            "texto_referencia": "Total antes de IVA: $ 978.638,82"
+          }
+        },
+        "observaciones": [
+          "El NIT administrativo 830.054.060-5 de FIDUCIARIA FIDUCOLDEX es un NIT válido para la aplicación de los impuestos.",
+          "El tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos (PATRIMONIO AUTONOMO INNPULSA COLOMBIA, PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA, PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE), lo cual es una condición excluyente para la aplicación de ambos impuestos.",
+          "El objeto del contrato, 'Revisoría Fiscal', no se clasifica dentro de las categorías de 'contrato de obra', 'interventoría' o 'servicios conexos' para la Estampilla Pro Universidad Nacional, ni como 'contrato de obra' para la Contribución a Obra Pública del 5%. Esta es una segunda razón por la cual los impuestos no aplican.",
+          "La factura corresponde a un servicio mensual de 'Revisoría Fiscal' y no se proporciona información que permita determinar el valor total del contrato para la aplicación de los rangos UVT de la Estampilla Pro Universidad Nacional."
+        ]
+      },
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": false,
+        "aplica_contribucion_obra_publica": false,
+        "procesamiento_paralelo": false,
+        "impuestos_detectados": []
+      },
+      "tercero_identificado": {
+        "nombre": "BDO AUDIT S.A.S. BIC",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "estampilla_universidad": null,
+      "contribucion_obra_publica": null,
+      "observaciones": [
+        "El NIT administrativo 830.054.060-5 de FIDUCIARIA FIDUCOLDEX es un NIT válido para la aplicación de los impuestos.",
+        "El tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos (PATRIMONIO AUTONOMO INNPULSA COLOMBIA, PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA, PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE), lo cual es una condición excluyente para la aplicación de ambos impuestos.",
+        "El objeto del contrato, 'Revisoría Fiscal', no se clasifica dentro de las categorías de 'contrato de obra', 'interventoría' o 'servicios conexos' para la Estampilla Pro Universidad Nacional, ni como 'contrato de obra' para la Contribución a Obra Pública del 5%. Esta es una segunda razón por la cual los impuestos no aplican.",
+        "La factura corresponde a un servicio mensual de 'Revisoría Fiscal' y no se proporciona información que permita determinar el valor total del contrato para la aplicación de los rangos UVT de la Estampilla Pro Universidad Nacional."
+      ]
+    },
+    "iva_reteiva": {
+      "analisis_iva": {
+        "iva_identificado": {
+          "tiene_iva": true,
+          "valor_iva_total": 185941.38,
+          "porcentaje_iva": 19.0,
+          "detalle_conceptos_iva": [
+            {
+              "concepto": "SERVICIO DE REVISORIA FISCAL MES DE JUNIO 2025 INNPULSA COLOMBIA",
+              "valor_iva": 185941.38,
+              "porcentaje": 19.0
+            }
+          ],
+          "metodo_identificacion": "total_factura"
+        },
+        "responsabilidad_iva_rut": {
+          "rut_disponible": false,
+          "es_responsable_iva": true,
+          "codigo_encontrado": "no_encontrado",
+          "texto_referencia": "Régimen: Impuesto sobre las ventas - IVA"
+        },
+        "concepto_facturado": {
+          "descripcion": "SERVICIO DE REVISORIA FISCAL MES DE JUNIO 2025 INNPULSA COLOMBIA",
+          "aplica_iva": true,
+          "razon_exencion_exclusion": "",
+          "categoria": "gravado"
+        }
+      },
+      "analisis_fuente_ingreso": {
+        "validaciones_fuente": {
+          "uso_beneficio_colombia": true,
+          "ejecutado_en_colombia": true,
+          "asistencia_tecnica_colombia": true,
+          "bien_ubicado_colombia": false
+        },
+        "es_fuente_nacional": true,
+        "validacion_iva_extranjero": {
+          "es_extranjero": false,
+          "iva_esperado_19": true,
+          "iva_encontrado": 19.0
+        }
+      },
+      "calculo_reteiva": {
+        "aplica_reteiva": true,
+        "porcentaje_reteiva": "15%",
+        "tarifa_decimal": 0.15,
+        "valor_reteiva_calculado": 27891.21,
+        "metodo_calculo": "fuente_nacional"
+      },
+      "estado_liquidacion": {
+        "estado": "Preliquidado",
+        "observaciones": []
+      }
+    }
+  }
+}

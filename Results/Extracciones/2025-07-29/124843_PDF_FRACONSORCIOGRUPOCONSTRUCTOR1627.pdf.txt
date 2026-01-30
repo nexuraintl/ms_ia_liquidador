@@ -1,0 +1,88 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: FRA CONSORCIO GRUPO CONSTRUCTOR 1627.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-29 12:48:43
+- Caracteres extraídos: 3046
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 1,
+  "tamaño_archivo_bytes": 1310133,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 3046
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+Responsable del IVA
+ 
+ 
+ Resolución  autorizada No.18764080922591 desde GC1605 hasta 
+GC2000 Vigencia desde 03/10/2024 hasta 03/04/2026
+ Autorretenedores de ICA en: Pereira Acuerdo 041-2012, en  
+Calarcá Acuerdo 008-2020
+ Dosquebradas Acuerdo 028-2017, Chinchiná Acuerdo 019-2018, 
+Santa Rosa de Cabal 
+ Acuerdo 026-2021, La Tebaida Acuerdo  019-2019, Circasia 
+Acuerdo 018-2021
+CONSORCIO GRUPO CONSTRUCTOR AUTOPISTAS DEL CAFÉ
+900.032.839-4
+CL  24A 59 42 TO 3 PI 10
+cdelgado@odinsa.com
+TEL. 3280062
+Bogotá D.C. - Colombia
+CUFE : f58d43aaf1234266fb83ec3a13c7e9f9f4f25ce65c365ea608d8f2044f6c168fff0f92fba475c1503247e6238dad1e19REPRESENTACIÓN GRAFICA DE FACTURA ELECTRÓNICA DE VENTA
+FACTURA ELECTRÓNICA DE 
+VENTA No.GC1627
+CLIENTE FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX
+NIT / CC. 830054060-5 TEL. 6013275500
+CL 28 13 A 24 P 6 Email:  
+factura.electronica@fiducoldex.com.co
+Bogotá D.C. - ColombiaORDEN DE COMPRA FECHA EMISIÓN 13/03/2025-15:43:52
+REMISIÓN FECHA VENCIMIENTO 21/03/2025
+PLAZO 1 PEDIDO
+ELABORADO POR CDR MEDIO DE PAGO
+DESCRIPCIÓN CANTIDAD VALOR UNITAR SUB TOTAL REFERENCIA DCTOS
+10023 1 WSD 163,867,624.37 163,867,624.37 1.  CONTROL Y ASEGURAMIENTO DE LA CALIDAD EN MANTEMIENTO OT 15
+ Consorciados: Fondo Capital Privado por Compartimiento Odinsa Vias 
+Compartimiento Nit: 901588599_59.67136%, Megaproyectos SA-(Usufructo 
+a favor de Inversiones Borealis SAS) Nit: 900328533_21.7592%, Concay SA 
+Nit:860077014_3.52776%, Sominfra SAS Nit:901546738_3.26384%, JP 
+Uricoechea SAS Nit:860350628_2.93752%, Termotécnica Coindustrial 
+SAS-Nit:890903035_3.55552%, Latinco SA-Nit:800233881_1.63192%, 
+Muvek SAS-Nit:830081204_1.5%, Ester Judith 
+Nicholls-Nit:21252270_1.5%, Luis Ernesto Escobar (Usufructo a favor de 
+Grupo Escobar Esiza SAS)-Nit: 900564325_0.32640%, Carmen 
+Carne-Nit:26655906_0.32632%, Inversiones UC 
+SAS-Nit:830080062_0.00008%, CI Grodco S EN 
+SA-Nit:860506688_0.00008%
+TOTAL NRO LINEAS:  1
+MONEDA COP
+163,867,624 TOTAL BRUTO
+0 DESCUENTOS
+163,867,624 TOTAL BASE GRAVABLE
+IVA 19% 31,134,848.630
+OTROS CARGOSOBSERVACIONES:
+Nota:-No retener por impuesto de ICA en Bogotá, ya que corresponde a ingresos generados por ejecución de obras en los 
+siguientes municipios: Armenia: 5.002%; Manizales: 13,671%; Calarcá 5,492%; Pereira 15.446%; Chinchiná: 8,581%; Salento; 
+5,762%; Circasia 5.762%; Santa Rosa 11,156%; Dosquebradas 6,081%; Sevilla 3,040%; Filandia 2,697%; Zarzal 9,611%; La 
+Tebaida 7,699%.
+VALOR LETRAS: Ciento Noventa Y Cinco Millones Dos Mil Cuatrocientos Setenta Y Tres Pesos Con Tres Diezmilésimos VALOR TOTAL 195,002,473.0003
+TOTAL UNIDADES:  1
+INFORMACION BANCARIA:
+Páguese en el Banco de Occidente cuenta de ahorros No: 219849486 a nombre del Consorcio Grupo Constructor Autopistas del Café Nit: 900.032.839-4
+FECHA: RECIBIDO
+NOMBRE: C.C: 
+Firma y Sello
+V 1.1Página 1 de 1
+UBL2.1-1.7R - V-2.2 - SUMM02_FA 3/13/2025   3:46:30PMFecha Validación DIAN:  2025-03-13 15:46:26-05:00Proveedor Tecnológico: Carvajal Tecnología y Servicios S.A.S BIC - Nombre del SW: CEN-Financiero - Nit: 890.321.151-0
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

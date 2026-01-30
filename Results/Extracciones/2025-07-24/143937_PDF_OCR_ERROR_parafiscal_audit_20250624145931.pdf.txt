@@ -1,0 +1,23 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: parafiscal_audit_20250624145931.pdf
+- Método de extracción: PDF_OCR_ERROR
+- Fecha y hora: 2025-07-24 14:39:37
+- Caracteres extraídos: 51
+
+METADATOS ADICIONALES:
+{
+  "error": "Conversión PDF → Imagen falló"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+No se pudieron convertir páginas del PDF a imágenes
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

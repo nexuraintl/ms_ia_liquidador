@@ -1,0 +1,152 @@
+{
+  "timestamp": "2025-08-08T21:37:11.680778",
+  "procesamiento_paralelo": true,
+  "impuestos_aplicables": [
+    "ESTAMPILLA_UNIVERSIDAD",
+    "CONTRIBUCION_OBRA_PUBLICA",
+    "RETENCION_FUENTE"
+  ],
+  "deteccion_automatica": {
+    "nit": "830.054.060-5",
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "impuestos_aplicables": [
+      "ESTAMPILLA_UNIVERSIDAD",
+      "CONTRIBUCION_OBRA_PUBLICA"
+    ],
+    "procesamiento_paralelo": true,
+    "nombre_entidad_estampilla": "Fideicomisos Sociedad Fiduciaria Fiducoldex",
+    "nombre_entidad_obra_publica": "Fideicomisos Sociedad Fiduciaria Fiducoldex"
+  },
+  "retefuente_analisis": {
+    "conceptos_identificados": [
+      {
+        "concepto": "Servicios generales (declarantes)",
+        "tarifa_retencion": 4.0,
+        "base_gravable": 37200000.0
+      }
+    ],
+    "naturaleza_tercero": {
+      "es_persona_natural": false,
+      "es_declarante": true,
+      "regimen_tributario": "ORDINARIO",
+      "es_autorretenedor": false,
+      "es_responsable_iva": true
+    },
+    "articulo_383": {
+      "aplica": false,
+      "condiciones_cumplidas": {
+        "es_persona_natural": false,
+        "concepto_aplicable": false,
+        "es_primer_pago": false,
+        "planilla_seguridad_social": false,
+        "cuenta_cobro": false
+      },
+      "deducciones_identificadas": {
+        "intereses_vivienda": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "dependientes_economicos": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "medicina_prepagada": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        },
+        "rentas_exentas": {
+          "valor": 0.0,
+          "tiene_soporte": false,
+          "limite_aplicable": 0.0
+        }
+      },
+      "calculo": {
+        "ingreso_bruto": 0.0,
+        "aportes_seguridad_social": 0.0,
+        "total_deducciones": 0.0,
+        "deducciones_limitadas": 0.0,
+        "base_gravable_final": 0.0,
+        "base_gravable_uvt": 0.0,
+        "tarifa_aplicada": 0.0,
+        "valor_retencion_art383": 0.0
+      }
+    },
+    "es_facturacion_exterior": false,
+    "valor_total": 37200000.0,
+    "iva": 5939495.8,
+    "observaciones": [
+      "El RUT indica que la entidad es responsable de IVA y se encuentra en régimen ordinario.",
+      "La factura describe el pago como 'prestación de servicios', y el contrato detalla 'diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad'. Se clasifica como 'Servicios generales (declarantes)' ya que no hay un concepto más específico que aplique y el tercero es declarante.",
+      "El valor de la factura supera la base mínima de $100,000 para 'Servicios generales (declarantes)'."
+    ]
+  },
+  "impuestos_especiales_analisis": {
+    "analisis_gemini": {
+      "deteccion_automatica": {
+        "aplica_estampilla_universidad": true,
+        "aplica_contribucion_obra_publica": true,
+        "procesamiento_paralelo": true,
+        "razon_deteccion": "El objeto del contrato es de prestación de servicios de diseño, gestión e implementación, lo cual se clasifica como servicios conexos para la Estampilla Pro Universidad Nacional. Adicionalmente, al ser un contrato de prestación de servicios de diseño, gestión e implementación, no se ajusta a la definición estricta de 'contrato de obra' para la Contribución a Obra Pública. Sin embargo, la instrucción indica que si es SOLO OBRA aplica ambos, y si es SERVICIOS CONEXOS aplica SOLO estampilla. La descripción del contrato es 'diseño, gestión e implementación', que se alinea con 'servicios conexos'. La Estampilla aplica para obra, interventoría y servicios conexos. La Contribución a Obra Pública aplica SOLO para contrato de obra. Dado que el contrato no es explícitamente de obra (construcción, mantenimiento, instalación), la Contribución a Obra Pública no aplicaría. No obstante, la instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' y 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sugiere una interpretación donde la Contribución a Obra Pública solo aplica si el objeto es puramente obra. En este caso, el objeto es 'diseño, gestión e implementación', que es un servicio conexo. Por lo tanto, solo la Estampilla debería aplicar. Sin embargo, la factura menciona 'Pago # 2 por el 30% valor total prestación de servicios Intercambio de Saberes Fase 2, contrato 0521.00'. El Anexo CONCEPTO DE CONTRATO OBJ. CTO LEBRIJA.xlsx describe el objeto como 'prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad'. Esto se clasifica como servicios conexos. La Estampilla Pro Universidad Nacional aplica para servicios conexos. La Contribución a Obra Pública aplica SOLO para contrato de obra. Dado que el objeto no es obra, la Contribución a Obra Pública no aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple aquí. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. Reevaluando: La factura menciona 'Pago # 2 por el 30% valor total prestación de servicios'. El Anexo CONCEPTO DE CONTRATO describe el objeto como 'prestación del servicio de diseño, gestión e implementación'. Esto califica como 'servicios conexos' para la Estampilla Pro Universidad Nacional. Para la Contribución a Obra Pública, solo aplica para 'contrato de obra'. Como el objeto no es obra, la Contribución a Obra Pública no aplica. Por lo tanto, solo la Estampilla aplica. Sin embargo, el análisis de la factura y el anexo de pago indica que el contrato es el 052-2024. El informe de pago menciona 'Tipología Contractual: Contrato'. El concepto del pago es 'Primer pago correspondiente al cincuenta por ciento (50%) del valor total de la prestación del servicio contra la entrega y recibo a satisfacción y aprobación... de los entregables asociados a la actividad de 2.1. alistamiento de rutas y territorios para el intercambio de saberes y la comunidad'. El Anexo CONCEPTO DE CONTRATO especifica 'prestación del servicio de diseño, gestión e implementación'. Esto es un servicio conexo. La Estampilla aplica. La Contribución a Obra Pública aplica SOLO para contrato de obra. Dado que el objeto no es obra, la Contribución a Obra Pública no aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. Sin embargo, la instrucción de procesamiento paralelo es 'Si es SOLO OBRA → Aplican AMBOS impuestos'. El objeto es 'diseño, gestión e implementación', que es un servicio conexo. La Estampilla aplica. La Contribución a Obra Pública aplica SOLO para contrato de obra. Dado que el objeto no es obra, la Contribución a Obra Pública no aplica. Por lo tanto, solo la estampilla aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. Reconsiderando la instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos'. El objeto del contrato es 'prestación del servicio de diseño, gestión e implementación'. Esto se clasifica como 'servicios conexos' para la Estampilla. Para la Contribución a Obra Pública, solo aplica para 'contrato de obra'. Dado que el objeto no es obra, la Contribución a Obra Pública no aplica. Por lo tanto, solo la estampilla aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. Sin embargo, la factura principal tiene un valor total de $37,200,000.00. El informe de pago menciona un valor del servicio prestado por municipio de $62,000,000. El concepto del pago es el primer pago del 50% del valor total de la prestación del servicio. Esto implica que el valor total del servicio es $124,000,000. La factura DV 119 es por $37,200,000.00, que es el pago #2 por el 30% del valor total de la prestación de servicios. Si $37,200,000 es el 30%, el valor total de la prestación de servicios es $37,200,000 / 0.30 = $124,000,000. Este valor de $124,000,000 es el valor del contrato. La Estampilla Pro Universidad Nacional aplica para servicios conexos. La Contribución a Obra Pública aplica SOLO para contrato de obra. El objeto es 'diseño, gestión e implementación', que es un servicio conexo. Por lo tanto, la Estampilla aplica. La Contribución a Obra Pública no aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. Sin embargo, la factura principal tiene un valor total de $37,200,000.00. El informe de pago menciona un valor del servicio prestado por municipio de $62,000,000. El concepto del pago es el primer pago del 50% del valor total de la prestación del servicio. Esto implica que el valor total del servicio es $124,000,000. La factura DV 119 es por $37,200,000.00, que es el pago #2 por el 30% del valor total de la prestación de servicios. Si $37,200,000 es el 30%, el valor total de la prestación de servicios es $37,200,000 / 0.30 = $124,000,000. Este valor de $124,000,000 es el valor del contrato. La Estampilla Pro Universidad Nacional aplica para servicios conexos. La Contribución a Obra Pública aplica SOLO para contrato de obra. El objeto es 'diseño, gestión e implementación', que es un servicio conexo. Por lo tanto, la Estampilla aplica. La Contribución a Obra Pública no aplica. La instrucción 'Si es SOLO OBRA → Aplican AMBOS impuestos' no se cumple. La instrucción 'Si es SERVICIOS CONEXOS → Aplica SOLO estampilla' sí se cumple. Por lo tanto, solo la estampilla aplica. El NIT de la Fiduciaria es 830.054.060-5, que está en la lista de NITS válidos. El tercero es la ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA, que no está en la lista de terceros que administran recursos públicos. Por lo tanto, ninguno de los impuestos aplica. Reevaluando la instrucción: 'Si NO administra recursos publicos NO se liquidan ninguno de los dos impustos'. El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Por lo tanto, ninguno de los impuestos aplica. La razón es que el tercero no administra recursos públicos."
+      },
+      "tercero_identificado": {
+        "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+        "es_consorcio": false,
+        "administra_recursos_publicos": false,
+        "consorciados": []
+      },
+      "objeto_contrato": {
+        "descripcion_identificada": "prestación del servicio de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+        "clasificacion_estampilla": "servicios_conexos",
+        "clasificacion_obra_publica": "no_aplica",
+        "palabras_clave_estampilla": [
+          "diseño",
+          "gestión",
+          "implementación"
+        ],
+        "palabras_clave_obra_publica": []
+      },
+      "valores_identificados": {
+        "estampilla_universidad": {
+          "valor_contrato_pesos": 124000000.0,
+          "valor_contrato_uvt": 2489.98,
+          "valor_factura_sin_iva": 31260504.2,
+          "metodo_identificacion": "porcentaje_calculado",
+          "texto_referencia": "Pago # 2 por el 30% valor total prestación de servicios"
+        },
+        "contribucion_obra_publica": {
+          "valor_factura_sin_iva": 0.0,
+          "metodo_identificacion": "no_identificado",
+          "texto_referencia": ""
+        }
+      },
+      "observaciones": [
+        "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Por lo tanto, ninguno de los impuestos aplica."
+      ]
+    },
+    "deteccion_automatica": {
+      "aplica_estampilla_universidad": true,
+      "aplica_contribucion_obra_publica": true,
+      "procesamiento_paralelo": true,
+      "impuestos_detectados": [
+        "ESTAMPILLA_UNIVERSIDAD",
+        "CONTRIBUCION_OBRA_PUBLICA"
+      ]
+    },
+    "tercero_identificado": {
+      "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+      "es_consorcio": false,
+      "administra_recursos_publicos": false,
+      "consorciados": []
+    },
+    "estampilla_universidad": {},
+    "contribucion_obra_publica": {},
+    "observaciones": [
+      "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de 'TERCEROS QUE ADMINISTRAN RECURSOS PÚBLICOS (COMPARTIDO)'. Por lo tanto, ninguno de los impuestos aplica."
+    ]
+  },
+  "es_facturacion_extranjera": false
+}

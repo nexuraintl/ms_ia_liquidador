@@ -1,0 +1,63 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: FRA ARTESARNIAS.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-08-04 21:54:34
+- Caracteres extraídos: 1720
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 2,
+  "tamaño_archivo_bytes": 257568,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 1720
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA
+NIT 901.369.01 1-4
+Finca Mi Luz V ereda San Nicolas Alto
+Tel: (037) 3182364601
+Lebríja - Colombia
+hechoenlebrija1@gmail.comFactura electrónica de venta
+No. DV 1 19
+Señores FIDEICOMISOS SOCIEDAD FIDUCIARIA  FIDUCOLDEX
+NIT 830.054.060-5 Teléfono (601) 3275500 - Ext. 000
+Dirección Calle 28 No. 13 A 24 Torre B Piso 6° Ciudad Bogotá - ColombiaFecha y hora Factura
+Generación 22/05/2025, 15:18
+Expedición 22/05/2025, 15:18
+Vencimiento 22/05/2025
+Ítem Descripción Cantidad Vr. Total
+1Pago # 2 por el 30% valor total prestación de servicios Intercambio
+de Saberes Fase 2, contrato 0521.00 37,200,000.00
+22/5/25, 15:20 Factura - iSiigo
+about:blank 1/2
+
+--- PÁGINA 2 ---
+A esta factura de venta aplican las normas relativas a la letra de cambio (artículo 5 Ley 1231 de 2008). Con esta el Comprador declara haber recibido real y materialmente las
+mercancías o prestación de servicios descritos en este título - V alor. Número Autorización Electrónica 18764068269737 aprobado en 20240402 prefijo DV desde el número 101 al
+500 V igencia: 24 Meses
+- Actividad Económica 9499  Actividades de otras asociaciones n.c.p. Tarifa
+CUFE: 0aead206d3c100842ca1 11d682eceb649b5019eb2aa71829ba51ab2058eb37b2cc0ed48d57ba6abdd2d7460a42122925Total items: 1
+Valor en Letras:
+Treinta y siete millones doscientos mil pesos m/cte
+Forma de pago:
+Contado
+Medio de pago:
+Desembolso Crédito plus (CCD+) - Transferencia $ 37,200,000.00
+Observaciones:
+Favor consignar a la cuenta corriente # 30200003678 a nombre de la Asociación de artesanas Hecho en Lebrija de
+Bancolombia.Total Bruto 31,260,504.20
+IVA 19% 5,939,495.80
+Total a Pagar 37,200,000.0022/5/25, 15:20 Factura - iSiigo
+about:blank 2/2
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

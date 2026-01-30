@@ -1,0 +1,45 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El objeto del contrato corresponde a prestación de servicios de diseño y gestión, lo cual aplica para la Estampilla Pro Universidad Nacional (servicios conexos), pero no para la Contribución a Obra Pública que solo aplica a contratos de obra."
+  },
+  "tercero_identificado": {
+    "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "No se identifica el valor total del contrato en la factura ni en los anexos."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El valor total del contrato no se encuentra especificado en la documentación proporcionada, lo cual impide la correcta liquidación de la Estampilla Pro Universidad Nacional según los rangos de UVT.",
+    "El NIT del tercero 'FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX' (830.054.060-5) se encuentra en la lista de NITs válidos para ambos impuestos.",
+    "El objeto del contrato, que incluye 'diseño' y 'gestión', clasifica como servicios conexos para la Estampilla Pro Universidad Nacional.",
+    "La Contribución a Obra Pública no aplica ya que el objeto del contrato no es un contrato de obra (construcción, mantenimiento, instalación)."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-08-08T21:42:15.454049",
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "clasificacion": {
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "RUT ARTESANIAS.pdf": "RUT",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO"
+  },
+  "es_consorcio": false,
+  "es_facturacion_extranjera": false,
+  "textos_extraidos": {
+    "FRA ARTESARNIAS.pdf": 1720,
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": 4638,
+    "RUT ARTESANIAS.pdf": 2320,
+    "OBJ. CTO LEBRIJA.xlsx": 1423
+  }
+}

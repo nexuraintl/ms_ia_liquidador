@@ -1,0 +1,70 @@
+{
+  "conceptos_identificados": [
+    {
+      "concepto": "Servicios generales (declarantes)",
+      "tarifa_retencion": 4.0,
+      "base_gravable": 37200000.0
+    }
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ORDINARIO",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "articulo_383": {
+    "aplica": false,
+    "condiciones_cumplidas": {
+      "es_persona_natural": false,
+      "concepto_aplicable": false,
+      "es_primer_pago": false,
+      "planilla_seguridad_social": false,
+      "cuenta_cobro": false
+    },
+    "deducciones_identificadas": {
+      "intereses_vivienda": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "dependientes_economicos": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "medicina_prepagada": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      },
+      "rentas_exentas": {
+        "valor": 0.0,
+        "tiene_soporte": false,
+        "limite_aplicable": 0.0
+      }
+    },
+    "calculo": {
+      "ingreso_bruto": 0.0,
+      "aportes_seguridad_social": 0.0,
+      "total_deducciones": 0.0,
+      "deducciones_limitadas": 0.0,
+      "base_gravable_final": 0.0,
+      "base_gravable_uvt": 0.0,
+      "tarifa_aplicada": 0.0,
+      "valor_retencion_art383": 0.0
+    }
+  },
+  "es_facturacion_exterior": false,
+  "valor_total": 37200000.0,
+  "iva": 5939495.8,
+  "observaciones": [
+    "La factura corresponde a un pago de prestación de servicios para el contrato 0521.00.",
+    "Se identifica el concepto 'Servicios generales (declarantes)' ya que la actividad económica principal de la entidad es 'Actividades de otras asociaciones n.c.p.' y el objeto del contrato es 'prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad'.",
+    "El RUT indica que la entidad es 'Persona jurídica' y tiene como responsabilidad principal '05- Impto. renta y compl. régimen ordinario', lo que confirma que es declarante y no aplica régimen simple.",
+    "No se encontraron indicadores de que la entidad sea autorretenedora.",
+    "La factura no especifica si el tercero es responsable de IVA, pero dado que es una asociación y no se indica lo contrario, se asume que sí lo es para efectos de la retención.",
+    "La base para retención es el valor total de la factura de $37,200,000.00, la cual supera la base mínima de $100,000 para servicios generales declarantes.",
+    "La tarifa de retención aplicada es del 4.0%."
+  ]
+}

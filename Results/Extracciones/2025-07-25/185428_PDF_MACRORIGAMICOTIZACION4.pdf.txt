@@ -1,0 +1,342 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: MACRO RIGAMI COTIZACION4.pdf
+- Método de extracción: PDF
+- Fecha y hora: 2025-07-25 18:54:28
+- Caracteres extraídos: 13226
+
+METADATOS ADICIONALES:
+{
+  "total_paginas": 4,
+  "tamaño_archivo_bytes": 209500,
+  "metodo": "PyPDF2",
+  "caracteres_extraidos": 13226
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- PÁGINA 1 ---
+ 
+Bucaramanga, 27 de febrero 2025                  VIGENCIA COTIZACION: 15 DIAS  
+ 
+Señores  
+ASOCIACION DE ARTESANAS -OS Y AGRICULTORES HECHO EN LEBRIJA  
+ 
+ 
+Mediante la presente, MACRORIGAMI S.A.S., Se permite hacer llegar a ustedes de manera  formal cotización 
+correspondiente a lo solicitado , por los siguientes valores, incluido IVA, así:  
+ 
+PERSONAL: TALLERISTAS Y MENTORAS  
+ítem  Concepto  Cant  Unidad   Valor 
+unitario   Valor total  
+1 Mentoras Experta en Bisuteria:  Mujeres mentoras 
+competentes y con experiencia en artesanias - Bisuteria 
+(técnica ensartado)  8 TALLERES   $     
+595.000   $      
+4.760.000  
+2 Mentoras Experta en Trabajo AsociativoRural:  Mujeres 
+mentoras competentes y con experiencia en proyectos 
+asociativos Rurales y trabajo en comunidad Rural.  8 TALLERES   $     
+595.000   $      
+4.760.000  
+3 Profesional  Experto - Talleres Virtuales: Desarrollo de 
+talleres virtuales para las 124 asociaciones en los siguientes 
+temas:                      1 - Impulsa tus ventas con confianza y 
+creatividad.                                                                                             
+2- Lider ando mi Vida.                                                  3 - El Arte 
+de Vender Nuestra Cultura.                         4 - Mujeres que 
+Inspiran.      16 TALLERES   $  
+1.000.000   $   
+16.000.000  
+TOTAL   $   
+25.520.000  
+ENTREGABLES APOYO INCURSION EN CAMPO  
+4 Kit bisuteria creativa:  Kit Compuesto por Un (01) paño de 
+tela o material goma -espuma o similar, de dimensiones de 
+29 cm x 21 cm aprox, superficie de textura suave y no 
+abrasiva que evita que las cuentas o piedras de trabajo 
+artesanal rueden aun en superficies con algun grado de  
+desnivel; Una (01) Aguja para trabajo con cristales Delica 
+Miyuki; elemento metalico unico para labores artesales de 
+tecnica Delica Miyuki; Una (01) Tijera de una mano, 
+elemento liviano y ergonomicamente diseñado para 
+trabajo artesa nal; Un (01) Cono de Hilo poliamida para 
+trabajo artesanal; Un (01) Ovillo de Hilo Coreano usado en 
+elaboracion de elementos artesanles; Un (01) Patron de 
+Diseño Personalizado para la elaboracion de producto 
+artesanal; Una (01) Etiqueta en papel carton o s imilar 
+biodegradable con diseño personalizado; Una 
+(01)Perforadora manual ergonomica suave al contacto 
+con la piel;   Un (01) Kit de Marcadores acuarela de tres 
+(03) unidades, elemento adecuado para trabajo 
+artesanal; Un (01) Costurero de fabricacion artes anal en 
+madera identificado con el logo -simbolo del Fondo mujer 
+y el nombre de la estrategia.  620 KIT  $     
+229.000   $ 
+141.980.000  
+5 Kit Muestra Artesanal : Kit Compuesto por: Una (01)Caja de 
+Madera o material similar de fabricacion artesanal de 
+cuatro (04) compartimientos internos con tapa protectora 
+dezlizable con dimensiones de 17 cm x 1 5 cm aprox 
+marcada con logo -simbolo del Fondo Mujer e identificada 
+con el nombre de la estrategia, con cama de fibra natural 
+decorativa; Un (01)  Llavero tejido a mano en Hilo de 
+algodon por mujeres artesanas, producto de color vistoso 
+y diseño personalizad o que resalta la riqueza agricola de 
+la nacion , Un (01) Par de Aretes fabricados a mano con 
+Cristales Delica Miyuki de gran calidad por mujeres 
+artesanas, producto de excelente acabado, de color y 310 KIT  $     
+198.000   $   
+61.380.000  
+
+--- PÁGINA 2 ---
+ 
+diseño personalizado que resalta la riqueza en 
+biodiversidad que ostenta el pais a nivel mundial; Una (01) 
+Mermelada fabricada a mano por mujeres artesanas con 
+receta ancestral, Una (01) Pulsera fabricada a mano con 
+Cristales Delica Miyuki de gran calidad por mujeres 
+artesanas, producto de excelente acabado, de color y 
+diseño personalizado con el logo simbolo del Fondo Mujer.  
+6 Kit Cuaderno Estudio:  Elemento de papeleria Cuaderno 
+personalizado con logo -simbolo del Fondo Mujer, 
+cuaderno formato agenda, libreta o similar, dimensiones 
+aprox 15 cm x 12 cm, pasta dura resistente a salpicaduras 
+y rasgado por abrasion moderada. Incluye Un (01) kit 
+colores y  un (01) resaltador  372 UND   $       
+32.800   $   
+12.201.600  
+7 Diploma Reconocimiento: Documento de reconocimiento 
+participacion en las actividades, elemento tipo diploma 
+diseño personalizado alusivo al fondo mujer  124 UND   $       
+13.500   $      
+1.674.000  
+8 Sistema de Identificación Personal Participante:  Elemento 
+que permite la correcta identificacion del personal 
+participante en cada actividad, lo cual facilita la 
+interaccion en reuniones y/o actividades grupales. 
+Escarapela fabricada en material papel biodegradable 
+con logo -simbolo del Fondo Mujer, dise ño personalizado 
+con la tematica de la estrategia, protector de material 
+plastico o similar reciclable, cordon sujetador liviano y de 
+suave contacto con la piel con ajuste al cuello del usuario.  372 UND   $          
+7.700   $      
+2.864.400  
+TOTAL   $ 
+220.100.000  
+ALQUILER Y LOGISTICA  
+9 Alquiler mobiliario Sillas: Elemento mobiliario de alquiler 
+tipo silla plastica para adulto debidamente lavadas y 
+desinfectadas, elemento disponible en sitio desde un dia 
+antes del evento, incluye: Transporte, cargue y descargue 
+de las sillas en sitio de reunion junto a su dispersion  o 
+ubicacion en el lugar de reunion  372 UND   $          
+3.900   $      
+1.450.800  
+10 Alquiler mobiliario - Mesas: elemento mobiliario de alquiler 
+tipo mesa, estructura estable y rigida que soporta peso 
+moderado y provee una superficie plana lo cual facilita 
+labores manueales diversas, elemento disponible en sitio 
+desde un dia antes del evento, incluye: Transporte, car gue 
+y descargue de las mesas en sitio de reunion junto a su 
+dispersion o ubicacion en el lugar de reunion  100 UND   $       
+65.000   $      
+6.500.000  
+11 Servicio de alquiler techo liviano: Elemento mobiliario de 
+alquiler tipo techo, estructura modular  robusta y solida 
+que ofrece proteccion y resguarda al publico en general 
+de las adversidades del clima, elemento disponible en sitio 
+con un dia de anterioridad con un area de cobertura de 
+hasta 16 mts2, incluye: Transporte, cargue,  descargue e 
+instalacion de las estructuras tipo techo en sitio de reunion 
+junto a su dispersion o ubicacion en el lugar de reunion  20 UND   $     
+205.000   $      
+4.100.000  
+12 Servicio de alquiler de elementos de Sonido:  Alquiler de 
+Sonido Portable inlambrico, capacidad 1.100 Watts aprox, 
+adecuado para espacios abiertos o cerrados, estructura 
+de gran calidad resistente a la humedad no sumergible, 
+carcasa rigida y liviana lo cual facilta su traslado e 
+instalacion; Equipo d e bateria recargable con autonomia 
+de hasta 8 horas uso aprox; Incluye: Estructura para 
+instalacion segura en Altura, Dos (02) microfonos de 
+conexión inalambrica de amplio Alcance, conexion 
+consola sonido Profesi onal linea array o similar  1 MES  $  
+2.870.000   $      
+2.870.000  
+
+--- PÁGINA 3 ---
+ 
+13 Servicio de Alquiler Equipo Generador de Energia:  Alquiler 
+maquinaria tipo planta eléctrica de hasta 1.5 KW aprox 
+acoplada sobre chasis tubular o similar como soporte 
+seguro para su traslado, equipo alternativo generador de 
+electricidad con sistema AVR, inigcion manual o 
+electronica, Autonomia de uso con  full capacidad e 
+tanque de hasta 8 horas aprox  1 MES  $  
+1.870.000   $      
+1.870.000  
+14 Alquiler Recinto Eventos: Servicio de Alquiler de 
+infraestructura fisica adecuada para la realizacion de los 
+eventos presenciales en capitales nodos con aforo de 
+hasta 200 personas  4 EVENTO   $  
+5.250.000   $   
+21.000.000  
+TOTAL   $   
+37.790.800  
+ALIMENTACION, ALOJAMIENTO Y TRANSPORTE PERSONAL  
+15 Alimentacion personal - Desayuno:  Desayuno compuesto 
+por huevos al gusto, Un (01) pan o arepa y Una (01)  
+bebida café, chocolate u otro de 200 ml aprox 
+previamente refrigereda conservada a temperatura 
+fresca para su consumo; alimentos empacados 
+individualmente o servidos en sitio bajo par ametros  de 
+inocuidad y salubridad adecuados  372 UND   $       
+16.800   $      
+6.249.600  
+16 Alimentacion personal - Almuerzo: Almuerzo compuesto 
+por proteina de carne de res, cerdo, pollo u otro de 150 
+grs aprox; alimento energetico farinaceo 80 grs aprox; 
+ensalada o verduras frescas 60 grs aprox u otro menu 
+disponible + postre o dulce individual + bebida 200 ml 
+aprox previamente  refrigereda conservada a temperatura 
+fresca para su consumo; alimentos empacados 
+individualmente o servidos en sitio bajo parametros  de 
+inocuidad y salubridad adecuados  372 UND   $       
+36.800   $   
+13.689.600  
+17 Alimentacion personal - Cena: Cena compuesto por 
+proteina de carne de res, cerdo, pollo u otro de 150 grs 
+aprox; alimento energetico farinaceo 80 grs aprox; 
+ensalada o verduras frescas 60 grs aprox u otro menu 
+disponible + postre o dulce individual + bebida 200 ml 
+aprox previamente ref rigereda conservada a temperatura 
+fresca para su consumo; alimentos empacados 
+individualmente o servidos en sitio bajo parametros  de 
+inocuidad y salubridad adecuados  372 UND   $       
+36.800   $   
+13.689.600  
+18 Bebida Refrescante:  Bedida Agua Natural Filtrada de 180 
+ml aprox, previamente refrigereda conservada a 
+tenperatura fresca para su consumo; alimentos 
+empacados individualmente o servidos en sitio bajo 
+parametros  de inocuidad y salubridad adecuados  372 UND   $          
+1.990   $         
+740.280  
+19 Refrigerio: Compuesto por Un (01 ) Alimento solido fresco 
+sandwich, croissant, flauta o similar de 100 grs aprox y Una 
+(01) bebida de 180 ml aprox y Una (01) fruta fresca  372 UND   $       
+19.200   $      
+7.142.400  
+20 Servicio Alojamiento personal: Servicio Alojamiento cama 
+individual personal participante en actividades, hospedaje 
+en instalaciones adecuadas para descanso de la 
+poblacion convocada, cambio diario de ropa cama y/o 
+baño  372 UND   $     
+220.000   $   
+81.840.000  
+21 Servicio Transporte Personal Intermunicipal Servicio 
+Expreso:  Transporte  Expreso Terrestre de personal desde 
+sitio de partida en provincia hasta la ciudad capital 
+cabecera de Nodo destino y su correspondiente retorno a 
+sitio partida inicial, Vehiculo lavado y desinfectado.  372 PASAJERO   $     
+232.000   $   
+86.304.000  
+22 Servicio transporte urbano de Personal: Servicio de 
+Transporte de personal en el area de Urbana capital Nodo 
+con disponibilidad permanente del automotor durante el 
+desarrollo de las actividades según sea necesario, 
+traslados internos casos requeridos  372 PASAJERO   $       
+29.900   $   
+11.122.800  
+
+--- PÁGINA 4 ---
+ 
+TOTAL   $ 
+220.778.280  
+OFICINA Y PAPELERIA  
+23 Tabla Registro Datos:  Elemento Fabricado en acrilico o 
+similar, Material liviano y resistente a impactos moderados, 
+lamina rectangular de orillas redondeadas evitando asi 
+laseraciones leves a la piel del usuario,  tamaño oficio 
+standar, dispone en su parte superior de un clip metalico 
+debidamente acoplado con gran capacidad de sujecion 
+de hojas de papel. Incluye Dos (02) Lapiceros negros y un 
+Kit de Tres (03) estiligrafos (Distintos colores), elemento que 
+facilita el registro y toma de información en campo  20 UND   $       
+19.200   $         
+384.000  
+24 Resma de Papel: Elemento de papel - Resma papel 
+reciclable tamaño Carta  10 RESMA   $       
+19.000   $         
+190.000  
+25 Portaminas: Producto de Oficina para la escritura o dibujo  400 UND   $          
+2.000   $         
+800.000  
+26 Lapicero: Producto de Oficina para la escritura, 
+instrumento que deja marca de tinta al ser usado  400 UND   $          
+2.500   $      
+1.000.000  
+27 Cartulina:  Elemento de papeleria en presentacion de 
+pliego, colores variados  400 PLIEGO   $          
+3.300   $      
+1.320.000  
+28 Marcadores: Elemento de papeleria utilizador en labores 
+varias de uso diario  100 UND   $          
+4.500   $         
+450.000  
+29 KIT Pintura Vinilica: Compuesto por Producto UN (01) Tarro 
+de 150 ml de pintura Vinilo de uso variado a base de agua 
+y de secado rapido; Un (01) set Pinceles; Un )01) 
+Recipiente Plastico mediano de lavado o mezcla  400 UND   $       
+42.620   $   
+17.048.000  
+30 Impresion formatos preestablecidos: Servicio de Impresión 
+de formatos de registro, documentos talleres etc  1000  UND   $             
+200   $         
+200.000  
+31 Diseño e Impresión Directorio Actores Clavez: Elemento 
+Tipografico - Impreso tipo Cartilla, de diseño personalizado 
+con logo simbolo de la entidad Fondo Mujer  130 UND   $       
+19.800   $      
+2.574.000  
+32 Diseño e Impresión Directorio Asociaciones Beneficiarias: 
+Elemento Tipografico - Impreso tipo Cartilla, de diseño 
+personalizado con logo simbolo de la entidad Fondo Mujer  130 UND   $       
+19.800   $      
+2.574.000  
+TOTAL   $   
+26.540.000  
+JUEGOS E INSTRUMENTOS MUSICALES  
+33 Maracas:  Intrumento Musical de percusion, utilizado en la 
+musica tradicional colombiana  20 PARES   $       
+48.000   $         
+960.000  
+34 Xilofono:  Intrumento Musical de percusion ,  utilizado en la 
+musica tradicional colombiana  20 UND   $       
+48.000   $         
+960.000  
+TOTAL   $      
+1.920.000  
+VALOR TOTAL   $ 
+532.649.080  
+ 
+ 
+Cordialmente,  
+ 
+ 
+ 
+ 
+Macrorigami S.A.S.  
+NIT: 900.991.246 -0 
+Monica Marcela Diaz Forero  
+63536004  
+Correo electrónico: sistemas @macrorigami.com
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

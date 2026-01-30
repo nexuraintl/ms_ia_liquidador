@@ -1,0 +1,64 @@
+{
+  "analisis_iva": {
+    "iva_identificado": {
+      "tiene_iva": true,
+      "valor_iva_total": 22951681.0,
+      "porcentaje_iva": 19.0,
+      "detalle_conceptos_iva": [
+        {
+          "concepto": "Segundo pago del 50% del total de la intervencion en la Estacion Impulsa, correspondiente al contrato 060-2021 AC1",
+          "valor_iva": 6426471.0,
+          "porcentaje": 19.0
+        },
+        {
+          "concepto": "Segundo pago del 50% del total de la intervencion en la Estacion Crece, correspondiente al contrato 060-2021 AC1",
+          "valor_iva": 9180672.0,
+          "porcentaje": 19.0
+        },
+        {
+          "concepto": "Segundo pago del 50% del total de la intervencion en la Estacion Impulsa, correspondiente al contrato 060-2021 AC1",
+          "valor_iva": 7344538.0,
+          "porcentaje": 19.0
+        }
+      ],
+      "metodo_identificacion": "total_factura"
+    },
+    "responsabilidad_iva_rut": {
+      "rut_disponible": true,
+      "es_responsable_iva": true,
+      "codigo_encontrado": "48",
+      "texto_referencia": "48 - Impuesto sobre las ventas - IVA48"
+    },
+    "concepto_facturado": {
+      "descripcion": "Servicios de intervención y ejecución de la ruta del programa NUCLEO E, incluyendo las estaciones diagnóstica, impulsa, crece y conecta, conforme al contrato 068-2021 INNPULSA. Estos servicios se distribuyen en varios municipios de Chocó, Valle y Cauca.",
+      "aplica_iva": true,
+      "razon_exencion_exclusion": null,
+      "categoria": "gravado"
+    }
+  },
+  "analisis_fuente_ingreso": {
+    "validaciones_fuente": {
+      "uso_beneficio_colombia": true,
+      "ejecutado_en_colombia": true,
+      "asistencia_tecnica_colombia": true,
+      "bien_ubicado_colombia": false
+    },
+    "es_fuente_nacional": true,
+    "validacion_iva_extranjero": {
+      "es_extranjero": false,
+      "iva_esperado_19": null,
+      "iva_encontrado": null
+    }
+  },
+  "calculo_reteiva": {
+    "aplica_reteiva": true,
+    "porcentaje_reteiva": "15%",
+    "tarifa_decimal": 0.15,
+    "valor_reteiva_calculado": 3442752.15,
+    "metodo_calculo": "fuente_nacional"
+  },
+  "estado_liquidacion": {
+    "estado": "Preliquidado",
+    "observaciones": []
+  }
+}

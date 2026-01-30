@@ -1,0 +1,28 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: OBJ. CTO BDO.xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-07-24 19:56:17
+- Caracteres extraídos: 2299
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 1,
+  "total_filas": 1,
+  "tamaño_archivo_bytes": 10028,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO    CONTRATISTA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           OBJETO
+CONTRATO DE PRESTACIÓN DE SERVICIOS BDO AUDIT S.A. El REVISOR FISCAL se obliga a prestar los servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo de acuerdo con lo previsto en las normas vigentes sobre Revisoría Fiscal, y aquellas que las modifiquen, en especial lo establecido, en los artículos 207 y subsiguientes del Código de Comercio, la Ley 43 de 1990, la Ley 222 de 1995, la Ley 1314 de 2009 reglamentada por el Decreto 2420 de 2015 modificado por los Decretos 2496 de 2015, 2131 de 2016 y 2170 de 2017, mediante los cuales se incorporaron las normas de auditoría y de aseguramiento de información (NAI), que están conformadas por el Código de Ética emitido por el IESBA, las normas internacionales de auditoria (NIA), las normas internacionales de control de calidad (NICC), las normas internacionales de trabajos de revisión (NITR), las normas internacionales de trabajos para atestiguar (ISAE) y las normas internacionales de servicios relacionados (NISR), todas emitidas por el IAASB.
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

@@ -1,0 +1,41 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "estampilla_universidad": {
+    "objeto_contrato": {
+      "tipo": "servicios_conexos_obra",
+      "aplica_estampilla": true,
+      "palabras_clave_encontradas": []
+    },
+    "valor_contrato": {
+      "valor_total_pesos": 124000000.0,
+      "valor_total_uvt": 0.0,
+      "metodo_identificacion": "porcentaje_calculado"
+    }
+  },
+  "contribucion_obra_publica": {
+    "objeto_contrato": {
+      "es_contrato_obra": false,
+      "palabras_clave_encontradas": []
+    },
+    "valor_factura": {
+      "valor_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo"
+    }
+  },
+  "observaciones": [
+    "El NIT 830.054.060-5 aplica para Estampilla Pro Universidad y Contribución a Obra Pública.",
+    "El objeto del contrato es prestación de servicios (Intercambio de Saberes), que se considera un servicio conexo a obra, por lo tanto aplica estampilla.",
+    "El valor total del contrato se calcula a partir del valor del primer pago (62.000.000) y el porcentaje que representa (50%), dando como resultado 124.000.000.",
+    "La contribución de obra pública no aplica porque el objeto del contrato no es exclusivamente de obra."
+  ]
+}

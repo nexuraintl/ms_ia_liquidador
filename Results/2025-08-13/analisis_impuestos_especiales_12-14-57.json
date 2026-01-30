@@ -1,0 +1,47 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "Los impuestos no aplican debido a que el tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos y el objeto del contrato 'Revisoría Fiscal' no corresponde a las categorías de obra, interventoría o servicios conexos definidas para la aplicación de estos impuestos."
+  },
+  "tercero_identificado": {
+    "nombre": "BDO AUDIT S.A.S. BIC",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "Servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo de acuerdo con lo previsto en las normas vigentes sobre Revisoría Fiscal.",
+    "clasificacion_estampilla": "no_identificado",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "Revisoría Fiscal",
+      "servicios profesionales"
+    ],
+    "palabras_clave_obra_publica": [
+      "Revisoría Fiscal",
+      "servicios profesionales"
+    ]
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 0.0,
+      "valor_contrato_uvt": 0.0,
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    }
+  },
+  "observaciones": [
+    "El NIT administrativo 830.054.060-5 de FIDUCIARIA FIDUCOLDEX es un NIT válido para la aplicación de los impuestos.",
+    "El tercero 'BDO AUDIT S.A.S. BIC' no se encuentra en la lista de entidades que administran recursos públicos (PATRIMONIO AUTONOMO INNPULSA COLOMBIA, PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA, PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE), lo cual es una condición excluyente para la aplicación de ambos impuestos.",
+    "El objeto del contrato, 'Revisoría Fiscal', no se clasifica dentro de las categorías de 'contrato de obra', 'interventoría' o 'servicios conexos' para la Estampilla Pro Universidad Nacional, ni como 'contrato de obra' para la Contribución a Obra Pública del 5%. Esta es una segunda razón por la cual los impuestos no aplican.",
+    "La factura corresponde a un servicio mensual de 'Revisoría Fiscal' y no se proporciona información que permita determinar el valor total del contrato para la aplicación de los rangos UVT de la Estampilla Pro Universidad Nacional."
+  ]
+}

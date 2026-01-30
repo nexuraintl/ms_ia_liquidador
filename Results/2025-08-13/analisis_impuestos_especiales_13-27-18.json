@@ -1,0 +1,47 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false,
+    "razon_deteccion": "El tercero que emite la factura (BDO AUDIT S.A.S. BIC) no se encuentra en la lista de entidades que administran recursos públicos, lo cual es una condición crítica para la aplicación de ambos impuestos. Adicionalmente, el objeto del contrato 'Revisoría Fiscal' no se clasifica dentro de las categorías específicas (obra, interventoría, servicios conexos) para la aplicación de la Estampilla Pro Universidad Nacional, ni para la Contribución a Obra Pública."
+  },
+  "tercero_identificado": {
+    "nombre": "BDO AUDIT S.A.S. BIC",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "El REVISOR FISCAL se obliga a prestar los servicios profesionales de Revisoría Fiscal para el patrimonio autónomo patrimonio autónomo, y en este sentido adelantar el proceso de auditoría y de análisis financiero, contable y administrativo de acuerdo con lo previsto en las normas vigentes sobre Revisoría Fiscal.",
+    "clasificacion_estampilla": "no_identificado",
+    "clasificacion_obra_publica": "no_aplica",
+    "palabras_clave_estampilla": [
+      "Revisoría Fiscal",
+      "auditoría",
+      "análisis financiero",
+      "contable",
+      "administrativo"
+    ],
+    "palabras_clave_obra_publica": []
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": 0.0,
+      "valor_contrato_uvt": 0.0,
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 978638.82,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total antes de IVA: $ 978.638,82"
+    }
+  },
+  "observaciones": [
+    "El NIT administrativo de FIDUCOLDEX (830054060-5) es válido para la aplicación de los impuestos.",
+    "A pesar de que el servicio es prestado a 'INNPULSA COLOMBIA' (que sí administra recursos públicos), la instrucción indica que la verificación de administración de recursos públicos debe realizarse sobre el 'tercero que emite la factura', que en este caso es BDO AUDIT S.A.S. BIC.",
+    "El objeto del contrato 'Revisoría Fiscal' no se ajusta a las categorías específicas (contrato de obra, interventoría, o servicios conexos definidos como estudios, asesorías técnicas, gerencia de obra/proyectos, diseño) para la aplicación de la Estampilla Pro Universidad Nacional.",
+    "Debido a que el objeto del contrato no es 'contrato de obra', la Contribución a Obra Pública del 5% no aplica."
+  ]
+}

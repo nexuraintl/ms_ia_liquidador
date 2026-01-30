@@ -1,0 +1,42 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "estampilla_universidad": {
+    "objeto_contrato": {
+      "tipo": "servicios_conexos_obra",
+      "aplica_estampilla": true,
+      "palabras_clave_encontradas": []
+    },
+    "valor_contrato": {
+      "valor_total_pesos": 124000000.0,
+      "valor_total_uvt": 0.0,
+      "metodo_identificacion": "porcentaje_calculado"
+    }
+  },
+  "contribucion_obra_publica": {
+    "objeto_contrato": {
+      "es_contrato_obra": false,
+      "palabras_clave_encontradas": []
+    },
+    "valor_factura": {
+      "valor_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo"
+    }
+  },
+  "observaciones": [
+    "El NIT 830.054.060-5 aplica para estampilla pro Universidad Nacional.",
+    "El contrato 052-2024 es de prestación de servicios, específicamente diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende. Aunque no es directamente obra, se considera un servicio conexo a obra.",
+    "El valor total del instrumento contractual es $124.000.000 (Anexo Informe de Pago). La factura DV 119 corresponde al 30% de ese valor, es decir, $37.200.000.",
+    "El valor sin IVA de la factura es $31.260.504,20 (Factura).",
+    "El FONDO MUJER LIBRE Y PRODUCTIVA administra recursos públicos, pero no es el tercero/beneficiario directo del pago."
+  ]
+}

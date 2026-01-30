@@ -1,0 +1,39 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": false,
+    "aplica_contribucion_obra_publica": false,
+    "procesamiento_paralelo": false
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "estampilla_universidad": {
+    "objeto_contrato": {
+      "tipo": "no_identificado",
+      "aplica_estampilla": false,
+      "palabras_clave_encontradas": []
+    },
+    "valor_contrato": {
+      "valor_total_pesos": 0.0,
+      "valor_total_uvt": 0.0,
+      "metodo_identificacion": "no_identificado"
+    }
+  },
+  "contribucion_obra_publica": {
+    "objeto_contrato": {
+      "es_contrato_obra": false,
+      "palabras_clave_encontradas": []
+    },
+    "valor_factura": {
+      "valor_sin_iva": 0.0,
+      "metodo_identificacion": "no_identificado"
+    }
+  },
+  "observaciones": [
+    "El NIT del pagador (830.054.060-5) aplica para Estampilla Pro Universidad Nacional, pero el objeto del contrato es de prestación de servicios, no de obra, interventoría o servicios conexos de obra.",
+    "El NIT del pagador (830.054.060-5) aplica para Contribución a Obra Pública 5%, pero el objeto del contrato es de prestación de servicios, no de obra."
+  ]
+}

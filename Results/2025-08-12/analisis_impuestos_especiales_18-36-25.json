@@ -1,0 +1,45 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto contractual incluye 'diseño', lo que aplica para Estampilla Pro Universidad Nacional. Además, el objeto contractual puede interpretarse como obra por la mención de 'implementación', lo que también aplica para la Contribución a Obra Pública 5%."
+  },
+  "tercero_identificado": {
+    "nombre": "ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA",
+    "es_consorcio": false,
+    "administra_recursos_publicos": false,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": [
+      "implementación"
+    ]
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "no_identificado",
+      "texto_referencia": "No se identifica el valor total del contrato en la factura ni en los anexos proporcionados. La factura menciona 'Pago # 2 por el 30% valor total prestación de servicios', pero no se proporciona el valor total del contrato."
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "El tercero 'ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA' no se encuentra en la lista de terceros que administran recursos públicos, por lo tanto, ninguno de los impuestos aplica.",
+    "No se pudo determinar el valor total del contrato para la liquidación de la Estampilla Pro Universidad Nacional, lo que impide calcular la tarifa aplicable. El estado es 'Preliquidación sin finalizar' para la Estampilla.",
+    "La Contribución a Obra Pública 5% se puede liquidar con el valor de la factura sin IVA, ya que el objeto contractual incluye 'implementación', que podría considerarse obra."
+  ]
+}

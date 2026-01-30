@@ -1,0 +1,79 @@
+{
+  "procesamiento_paralelo": true,
+  "aplica_estampilla_universidad": true,
+  "impuestos_procesados": [
+    "RETENCION_FUENTE",
+    "ESTAMPILLA_UNIVERSIDAD"
+  ],
+  "exito": true,
+  "aplica_retencion": true,
+  "valor_total_factura": 37200000.0,
+  "iva_total": 5939495.8,
+  "valor_retencion": 1250420.168,
+  "concepto": "Servicios generales (declarantes)",
+  "tarifa_retencion": 4.0,
+  "retefuente": {
+    "aplica": true,
+    "valor_retencion": 1250420.168,
+    "concepto": "Servicios generales (declarantes)",
+    "tarifa_retencion": 4.0,
+    "observaciones": [
+      "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+      "Aplicando tarifas convencionales",
+      "Detalle del cálculo:",
+      "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+    ]
+  },
+  "estampilla_universidad": {
+    "aplica": false,
+    "estado": "No procesada",
+    "valor_estampilla": 0,
+    "tarifa_aplicada": 0,
+    "rango_uvt": "No calculado",
+    "valor_contrato_pesos": 0,
+    "valor_contrato_uvt": 0,
+    "observaciones": [
+      "No se pudo procesar estampilla"
+    ]
+  },
+  "es_facturacion_extranjera": false,
+  "resumen_total": {
+    "valor_total_impuestos": 1250420.168,
+    "impuestos_aplicables": {
+      "retefuente": true,
+      "estampilla": false
+    }
+  },
+  "observaciones": [
+    "El NIT del tercero es 901.369.011-4 y es una persona jurídica (ASOCIACION DE ARTESANAS-OS HECHO EN LEBRIJA).",
+    "El tercero es declarante de renta (responsabilidad 05 en el RUT).",
+    "El tercero pertenece al régimen especial (Actividad Económica 9499 en el RUT).",
+    "El tercero es responsable de IVA.",
+    "La base gravable se calculó restando el IVA del valor total de los items.",
+    "Art. 383 no aplica: no es persona natural, concepto no aplica para Art. 383, falta cuenta de cobro, falta planilla de seguridad social",
+    "Aplicando tarifas convencionales",
+    "Detalle del cálculo:",
+    "  • Servicios generales (declarantes): $31,260,504 x 4.0% = $1,250,420"
+  ],
+  "naturaleza_tercero": {
+    "es_persona_natural": false,
+    "es_declarante": true,
+    "regimen_tributario": "ESPECIAL",
+    "es_autorretenedor": false,
+    "es_responsable_iva": true
+  },
+  "tiempo_procesamiento_segundos": 6.87681,
+  "archivos_procesados": 4,
+  "nit_administrativo": "830.054.060-5",
+  "entidad_administrativa": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+  "es_consorcio": false,
+  "documentos_clasificados": {
+    "FRA ARTESARNIAS.pdf": "FACTURA",
+    "Informe de pago No. 1_ 052-2024 Asociación Hecho en Lebrija IntSaberes MRS.pdf": "ANEXO",
+    "OBJ. CTO LEBRIJA.xlsx": "ANEXO CONCEPTO DE CONTRATO",
+    "RUT ARTESANIAS.pdf": "RUT"
+  },
+  "version": "2.0.0",
+  "timestamp": "2025-08-05T18:57:15.421069",
+  "sistema": "integrado_retefuente_estampilla"
+}

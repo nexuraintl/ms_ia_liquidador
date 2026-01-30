@@ -1,0 +1,48 @@
+{
+  "deteccion_automatica": {
+    "aplica_estampilla_universidad": true,
+    "aplica_contribucion_obra_publica": true,
+    "procesamiento_paralelo": true,
+    "razon_deteccion": "El objeto del contrato (prestación de servicios de diseño, gestión e implementación) aplica para la Estampilla Pro Universidad Nacional (servicios conexos). Adicionalmente, dado que se trata de un contrato de prestación de servicios que incluye diseño y gestión, y la factura principal menciona 'Pago # 2 por el 30% valor total prestación de servicios', se interpreta que hay un componente de obra subyacente o que la naturaleza del servicio está ligada a una obra, lo que permitiría aplicar la Contribución a Obra Pública. El NIT de la Fiduciaria es válido y administra recursos públicos."
+  },
+  "tercero_identificado": {
+    "nombre": "FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX",
+    "es_consorcio": false,
+    "administra_recursos_publicos": true,
+    "consorciados": []
+  },
+  "objeto_contrato": {
+    "descripcion_identificada": "prestación de servicios de diseño, gestión e implementación de la etapa de intercambio de saberes entre pares y fortalecimiento de comunidad de la ruta Mujer Rural Soberana de la estrategia Mujer Emprende.",
+    "clasificacion_estampilla": "servicios_conexos_obra",
+    "clasificacion_obra_publica": "contrato_obra",
+    "palabras_clave_estampilla": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ],
+    "palabras_clave_obra_publica": [
+      "diseño",
+      "gestión",
+      "implementación"
+    ]
+  },
+  "valores_identificados": {
+    "estampilla_universidad": {
+      "valor_contrato_pesos": null,
+      "valor_contrato_uvt": null,
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "porcentaje_calculado",
+      "texto_referencia": "Pago # 2 por el 30% valor total prestación de servicios"
+    },
+    "contribucion_obra_publica": {
+      "valor_factura_sin_iva": 31260504.2,
+      "metodo_identificacion": "directo",
+      "texto_referencia": "Total Bruto 31,260,504.20"
+    }
+  },
+  "observaciones": [
+    "No se identifica el valor total del contrato para determinar la tarifa de la Estampilla Pro Universidad Nacional. Se ha utilizado el valor de la factura sin IVA para el cálculo de la estampilla, asumiendo que la tarifa aplicable se basa en este valor o que la información del contrato total no está disponible en los documentos proporcionados.",
+    "La factura indica 'Pago # 2 por el 30% valor total prestación de servicios'. Para la Estampilla Pro Universidad Nacional, se requiere el valor total del contrato para aplicar las tarifas por rangos de UVT. Dado que este valor no está explícito, se procede con la información disponible, pero se marca la necesidad de validación del valor total del contrato.",
+    "Para la Contribución a Obra Pública, se aplica el 5% sobre el valor de la factura sin IVA, ya que el objeto del contrato, si bien es de servicios, incluye elementos de diseño y gestión que pueden estar asociados a una obra pública."
+  ]
+}

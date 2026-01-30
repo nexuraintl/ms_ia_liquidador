@@ -1,0 +1,28 @@
+EXTRACCIÓN DE TEXTO - PRELIQUIDADOR v2.0
+============================================
+
+INFORMACIÓN DEL ARCHIVO:
+- Archivo original: OB CTO AFRODESCENDIENTE.xlsx
+- Método de extracción: EXCEL
+- Fecha y hora: 2025-08-12 22:58:50
+- Caracteres extraídos: 705
+
+METADATOS ADICIONALES:
+{
+  "total_hojas": 1,
+  "total_filas": 1,
+  "tamaño_archivo_bytes": 9589,
+  "metodo": "pandas.read_excel"
+}
+
+============================================
+TEXTO EXTRAÍDO:
+============================================
+
+--- HOJA: Hoja1 ---
+                   TIPO DE CONTRATO                                        CONTRATISTA                                                                                                                                                                                                                                                          OBJETO
+CONTRATO DE PRESTACIÓN DE SERVICIOS ASOCIACIÓN PROYECTO CULTURAL AFRODESCENDIENTE —PCA Prestación de servicios para la estructuración técnica, administrativa y financieramente, así como para el desarrollo los espacios de socialización de la Ruta de implementación del Decreto 1384 de 2023 y del artículo 2.2.5.11.5.8 del\nDecreto 1396 de 2023
+
+============================================
+FIN DE LA EXTRACCIÓN
+============================================

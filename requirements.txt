@@ -1,0 +1,62 @@
+# =======================================
+# DEPENDENCIAS - PRELIQUIDADOR RETEFUENTE v2.0
+# =======================================
+
+# Framework web (actualizados para compatibilidad con anyio 4.x)
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+
+# Procesamiento de archivos
+pdfplumber==0.11.0
+PyPDF2==3.0.1
+python-multipart==0.0.6
+python-docx==1.1.0
+pandas==2.1.3
+openpyxl==3.1.2
+Pillow==10.1.0
+
+# NUEVO v2.0: Conversión PDF → Imagen para OCR
+pdf2image==1.17.0
+PyMuPDF==1.23.8
+
+# Google APIs (ACTUALIZADO v3.0: nuevo SDK oficial)
+google-genai==0.2.0
+google-cloud-vision==3.4.5
+
+# Utilidades
+python-dotenv==1.0.0
+pydantic==2.10.0
+
+# Logging y debugging
+structlog==23.2.0
+
+# Seguridad
+cryptography==41.0.7
+
+# Opcional: para mejor performance
+aiofiles==23.2.0
+
+# Procesamiento de emails
+extract-msg==0.48.4
+
+# Cliente de base de datos
+supabase==2.10.0
+httpx==0.27.0
+requests==2.31.0
+
+# NUEVAS DEPENDENCIAS v2.3.0:
+# =======================================
+# pdfplumber: Método principal para extracción de PDF con estructuras complejas
+# PyPDF2: Método fallback para extracción de PDF
+# pdf2image: Convierte páginas PDF a imágenes para OCR
+# PyMuPDF: Alternativa para conversión PDF → Imagen
+# extract-msg: Procesa archivos .msg de Outlook
+# Nota: pdf2image requiere poppler-utils en Linux/Mac
+#       En Windows se incluye automáticamente
+
+# CAMBIOS v3.0.0 - MIGRACIÓN SDK Y FILES API:
+# =======================================
+# google-generativeai==0.3.1 → google-genai==0.2.0 (nuevo SDK oficial)
+# fastapi==0.104.1 → fastapi==0.115.0 (compatibilidad anyio 4.x)
+# uvicorn==0.24.0 → uvicorn==0.32.0 (compatibilidad anyio 4.x)
+# pydantic==2.5.0 → pydantic==2.10.0 (requerido por FastAPI 0.115.0)

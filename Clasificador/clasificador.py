@@ -101,7 +101,7 @@ class ProcesadorGemini:
 
         # NUEVO SDK v2.0: Inicializar cliente
         self.client = genai.Client(api_key=self.api_key)
-        self.model_name = 'gemini-3-flash-preview'
+        self.model_name = 'gemini-2.5-flash'
 
         # NUEVO: Inicializar Files Manager (SRP: gestión de archivos)
         self.files_manager = GeminiFilesManager(api_key=self.api_key)
@@ -988,7 +988,7 @@ class ProcesadorGemini:
             cache_archivos: Dict[str, FileUploadResult] - Cache de referencias Files API
 
         Returns:
-            List[File]: Lista de objetos File de Files API para reutilizar
+            List[FileUploadResult]: Lista de referencias Files API para reutilizar
         """
         from .gemini_files_manager import FileUploadResult
 
@@ -997,10 +997,10 @@ class ProcesadorGemini:
         for nombre_archivo, file_ref in cache_archivos.items():
             try:
                 # Si es FileUploadResult (nuevo cache Files API)
+                # Usamos el objeto directamente: ya tiene uri, mime_type y name.
+                # Evita una llamada files.get() por archivo por worker.
                 if isinstance(file_ref, FileUploadResult):
-                    # Obtener objeto File de Files API
-                    file_obj = self.client.files.get(name=file_ref.name)
-                    archivos_referencias.append(file_obj)
+                    archivos_referencias.append(file_ref)
                     logger.info(f" Referencia Files API reutilizada: {nombre_archivo} -> {file_ref.name}")
 
                 # Si es bytes (cache legacy - fallback)

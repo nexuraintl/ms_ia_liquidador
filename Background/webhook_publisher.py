@@ -181,7 +181,8 @@ class WebhookPublisher:
             Dict con headers HTTP
         """
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
 
         if self.auth_type == "bearer" and self.auth_token:

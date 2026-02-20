@@ -101,7 +101,7 @@ class ProcesadorGemini:
 
         # NUEVO SDK v2.0: Inicializar cliente
         self.client = genai.Client(api_key=self.api_key)
-        self.model_name = 'gemini-3-flash-preview'
+        self.model_name = 'gemini-2.5-flash'
 
         # NUEVO: Inicializar Files Manager (SRP: gestión de archivos)
         self.files_manager = GeminiFilesManager(api_key=self.api_key)

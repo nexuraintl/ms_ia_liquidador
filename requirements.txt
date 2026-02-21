@@ -32,6 +32,7 @@ structlog==23.2.0
 
 # Seguridad
 cryptography==41.0.7
+urllib3<2.0.0
 
 # Opcional: para mejor performance
 aiofiles==23.2.0

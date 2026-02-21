@@ -414,18 +414,11 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f"📎 ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
 
-            # Llamar a Gemini con contexto completo (timeout 60 segundos) - NUEVO SDK v3.0
-            loop = asyncio.get_event_loop()
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.procesador_gemini.client.models.generate_content(
-                        model=self.procesador_gemini.model_name,
-                        contents=contenido_gemini,
-                        config=self.procesador_gemini.generation_config
-                    )
-                ),
-                timeout=60.0
+            # Llamar a Gemini con retry automatico para errores SSL
+            respuesta = await self.procesador_gemini._ejecutar_con_retry(
+                contenido=contenido_gemini,
+                config=self.procesador_gemini.generation_config,
+                timeout_segundos=60.0
             )
 
             # Limpiar y parsear respuesta
@@ -433,7 +426,7 @@ class ClasificadorICA:
             json_limpio = limpiar_json_gemini(respuesta_texto)
             data = json.loads(json_limpio)
 
-            # 💾 GUARDAR RESPUESTA DE GEMINI (Primera llamada - ubicaciones)
+            # GUARDAR RESPUESTA DE GEMINI (Primera llamada - ubicaciones)
             self._guardar_respuesta_gemini(
                 respuesta_texto=respuesta_texto,
                 data_parseada=data,
@@ -706,18 +699,11 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f" ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para relacionar actividades")
 
-            # Llamar a Gemini con contexto completo (timeout 60 segundos) - NUEVO SDK v3.0
-            loop = asyncio.get_event_loop()
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.procesador_gemini.client.models.generate_content(
-                        model=self.procesador_gemini.model_name,
-                        contents=contenido_gemini,
-                        config=self.procesador_gemini.generation_config
-                    )
-                ),
-                timeout=60.0
+            # Llamar a Gemini con retry automatico para errores SSL
+            respuesta = await self.procesador_gemini._ejecutar_con_retry(
+                contenido=contenido_gemini,
+                config=self.procesador_gemini.generation_config,
+                timeout_segundos=60.0
             )
 
             # Limpiar y parsear respuesta
@@ -725,7 +711,7 @@ class ClasificadorICA:
             json_limpio = limpiar_json_gemini(respuesta_texto)
             data = json.loads(json_limpio)
 
-            #  GUARDAR RESPUESTA DE GEMINI (Segunda llamada - actividades)
+            # GUARDAR RESPUESTA DE GEMINI (Segunda llamada - actividades)
             self._guardar_respuesta_gemini(
                 respuesta_texto=respuesta_texto,
                 data_parseada=data,

@@ -14,6 +14,7 @@ import json
 import asyncio
 import logging
 import traceback
+import ssl
 from datetime import datetime
 from typing import Dict, Any, Tuple
 from pathlib import Path
@@ -446,6 +447,103 @@ class ProcesadorGemini:
             except Exception as cleanup_error:
                 logger.warning(f" Error en cleanup de Files API: {cleanup_error}")
 
+    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
+        """
+        Ejecuta llamada a Gemini con reintentos automaticos para errores SSL transitorios.
+
+        Detecta errores de conexion SSL (UNEXPECTED_EOF_WHILE_READING, ConnectionReset,
+        etc.) comunes en entornos Cloud Run y reintenta con backoff exponencial.
+
+        Args:
+            contenido: Lista de contenido para generate_content (prompt + archivos)
+            config: Configuracion de generacion (temperature, max_output_tokens, etc.)
+            timeout_segundos: Timeout maximo por intento individual
+            max_reintentos: Numero maximo de reintentos (default 3)
+
+        Returns:
+            Respuesta de Gemini (objeto GenerateContentResponse)
+
+        Raises:
+            Exception: Si todos los reintentos fallan, relanza la ultima excepcion
+        """
+        errores_reintentables = (
+            "unexpected_eof",
+            "unexpected eof",
+            "ssl",
+            "ssleof",
+            "connection reset",
+            "connectionreset",
+            "broken pipe",
+            "brokenpipe",
+            "max retries exceeded",
+            "connection aborted",
+            "remotedisconnected",
+            "remote end closed connection",
+        )
+
+        ultima_excepcion = None
+
+        for intento in range(1, max_reintentos + 1):
+            try:
+                loop = asyncio.get_event_loop()
+
+                respuesta = await asyncio.wait_for(
+                    loop.run_in_executor(
+                        None,
+                        lambda: self.client.models.generate_content(
+                            model=self.model_name,
+                            contents=contenido,
+                            config=config
+                        )
+                    ),
+                    timeout=timeout_segundos
+                )
+
+                if intento > 1:
+                    logger.info(f"Llamada a Gemini exitosa en reintento {intento}/{max_reintentos}")
+
+                return respuesta
+
+            except asyncio.TimeoutError:
+                # Timeout NO se reintenta, se propaga inmediatamente
+                raise
+
+            except Exception as e:
+                ultima_excepcion = e
+                error_str = str(e).lower()
+
+                # Verificar si es un error SSL/conexion transitorio
+                es_transitorio = any(patron in error_str for patron in errores_reintentables)
+
+                # Verificar excepciones SSL a nivel de tipo
+                if isinstance(e, (ssl.SSLError, ConnectionError, ConnectionResetError, BrokenPipeError)):
+                    es_transitorio = True
+
+                if not es_transitorio:
+                    # Error no transitorio, propagar inmediatamente
+                    raise
+
+                if intento < max_reintentos:
+                    espera = 2 ** (intento - 1)  # Backoff: 1s, 2s, 4s
+                    logger.warning(
+                        f"Error SSL transitorio en intento {intento}/{max_reintentos}: {e}. "
+                        f"Reintentando en {espera}s..."
+                    )
+                    await asyncio.sleep(espera)
+
+                    # Reinicializar cliente para forzar nueva conexion SSL
+                    try:
+                        self.client = genai.Client(api_key=self.api_key)
+                        logger.info("Cliente Gemini reinicializado con nueva conexion")
+                    except Exception as reinit_error:
+                        logger.warning(f"Error reinicializando cliente: {reinit_error}")
+                else:
+                    logger.error(
+                        f"Error SSL persistente despues de {max_reintentos} intentos: {e}"
+                    )
+
+        # Si llegamos aqui, todos los reintentos fallaron
+        raise ultima_excepcion
 
     async def _llamar_gemini_hibrido(self, contents: List) -> str:
         """
@@ -566,21 +664,13 @@ class ProcesadorGemini:
                     logger.error(f" Error procesando archivo {i+1}: {e}")
                     continue
             
-            # NUEVO SDK v2.0: Llamar a Gemini con contenido multimodal
-            logger.info(f"Enviando a Gemini (nuevo SDK): {len(contenido_multimodal)} elementos")
+            # Llamar a Gemini con retry automatico para errores SSL
+            logger.info(f"Enviando a Gemini (con retry SSL): {len(contenido_multimodal)} elementos")
 
-            loop = asyncio.get_event_loop()
-
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=contenido_multimodal,
-                        config=self.generation_config
-                    )
-                ),
-                timeout=timeout_segundos
+            respuesta = await self._ejecutar_con_retry(
+                contenido=contenido_multimodal,
+                config=self.generation_config,
+                timeout_segundos=timeout_segundos
             )
 
             if not respuesta:
@@ -865,23 +955,15 @@ class ProcesadorGemini:
                 archivos_omitidos = len(archivos_directos) - archivos_validos
                 logger.warning(f"Se omitieron {archivos_omitidos} archivos problemáticos de {len(archivos_directos)} archivos totales")
             
-            # ✅ LLAMAR A GEMINI CON CONTENIDO MULTIMODAL VALIDADO (NUEVO SDK v3.0)
-            logger.info(f" Enviando análisis a Gemini (nuevo SDK + Files API): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
+            # Llamar a Gemini con retry automatico para errores SSL
+            logger.info(f"Enviando analisis a Gemini (con retry SSL): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
 
-            loop = asyncio.get_event_loop()
-
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=contenido_multimodal,
-                        config=self.generation_config
-                    )
-                ),
-                timeout=timeout_segundos
+            respuesta = await self._ejecutar_con_retry(
+                contenido=contenido_multimodal,
+                config=self.generation_config,
+                timeout_segundos=timeout_segundos
             )
-            
+
             if not respuesta:
                 raise ValueError("IA devolvió respuesta None en análisis híbrido - posible problema de validación de archivos")
                 
@@ -1239,27 +1321,10 @@ class ProcesadorGemini:
             num_paginas = len(pdf_reader.pages)
             
             if num_paginas == 0:
-                logger.error(f" PDF sin páginas: {nombre_archivo}")
+                logger.error(f"PDF sin paginas: {nombre_archivo}")
                 return False
-            
-            # ✅ VALIDACIÓN ADICIONAL: Verificar que al menos una página tenga contenido
-            try:
-                primera_pagina = pdf_reader.pages[0]
-                contenido = primera_pagina.extract_text()
-                
-                if not contenido.strip():
-                    logger.warning(f" PDF posiblemente escaneado (sin texto extraíble): {nombre_archivo}")
-                    # ✅ Aún así es válido para Gemini (puede leer imágenes en PDFs)
-                    logger.info(f" PDF escaneado aceptado para Gemini: {nombre_archivo}")
-                else:
-                    logger.info(f" PDF con texto extraíble validado: {nombre_archivo}")
-                    
-            except Exception as e:
-                logger.warning(f" No se pudo extraer texto de {nombre_archivo}: {e}")
-                # No es crítico, Gemini puede procesar PDFs sin texto extraíble
-            
-            # ✅ VALIDACIÓN FINAL EXITOSA
-            logger.info(f" PDF validado correctamente: {nombre_archivo} - {num_paginas} páginas")
+
+            logger.info(f"PDF validado correctamente: {nombre_archivo} - {num_paginas} paginas")
             return True
             
         except Exception as e:
@@ -1299,26 +1364,17 @@ class ProcesadorGemini:
             else:
                 timeout_segundos = 120.0   # 60s para análisis estándar
 
-            logger.info(f"Llamando a Gemini (nuevo SDK) con timeout de {timeout_segundos}s")
+            logger.info(f"Llamando a Gemini (con retry SSL) con timeout de {timeout_segundos}s")
 
-            # Crear tarea con timeout
-            loop = asyncio.get_event_loop()
-
-            # NUEVO SDK v2.0: usar client.models.generate_content
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=[prompt],
-                        config=config
-                    )
-                ),
-                timeout=timeout_segundos
+            # Llamar con retry automatico para errores SSL
+            respuesta = await self._ejecutar_con_retry(
+                contenido=[prompt],
+                config=config,
+                timeout_segundos=timeout_segundos
             )
 
             if not respuesta:
-                raise ValueError("IA devolvió respuesta None")
+                raise ValueError("IA devolvio respuesta None")
 
             if not hasattr(respuesta, 'text') or not respuesta.text:
                 raise ValueError("IA devolvió respuesta sin texto")

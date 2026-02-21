@@ -254,7 +254,13 @@ class GeminiFilesManager:
             True si eliminado exitosamente, False si error
         """
         try:
-            self.client.files.delete(name=file_name)
+            # Ejecutar en thread pool para no bloquear el event loop:
+            # self.client.files.delete() es una llamada HTTP sincrona del SDK.
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: self.client.files.delete(name=file_name)
+            )
 
             # Remover del cache interno
             for filename, file_result in list(self.uploaded_files.items()):
@@ -271,7 +277,7 @@ class GeminiFilesManager:
 
     async def cleanup_all(self, ignore_errors: bool = True):
         """
-        Elimina todos los archivos subidos a Files API.
+        Elimina todos los archivos subidos a Files API en paralelo.
 
         CRÍTICO: Usar en finally del endpoint para evitar acumulación.
 
@@ -280,18 +286,30 @@ class GeminiFilesManager:
         """
         logger.info(f"Iniciando cleanup de {len(self.uploaded_files)} archivos")
 
-        errores = []
-        exitosos = 0
+        archivos_a_eliminar = list(self.uploaded_files.items())
 
-        for filename, file_result in list(self.uploaded_files.items()):
-            try:
-                await self.delete_file(file_result.name)
-                exitosos += 1
-                logger.info(f"Archivo eliminado: {filename}")
-            except Exception as e:
-                errores.append(f"{filename}: {str(e)}")
-                if not ignore_errors:
-                    raise
+        if archivos_a_eliminar:
+            # Lanzar todos los deletes en paralelo en lugar de secuencial.
+            # return_exceptions=True evita que un fallo cancele los demas.
+            resultados = await asyncio.gather(
+                *[self.delete_file(file_result.name) for _, file_result in archivos_a_eliminar],
+                return_exceptions=True
+            )
+
+            exitosos = sum(1 for r in resultados if r is True)
+            errores = []
+            for (nombre, _), resultado in zip(archivos_a_eliminar, resultados):
+                if isinstance(resultado, Exception):
+                    errores.append(f"{nombre}: {str(resultado)}")
+                    if not ignore_errors:
+                        raise resultado
+                elif resultado is False:
+                    errores.append(f"{nombre}: fallo al eliminar")
+
+            logger.info(f"Cleanup completado: {exitosos} exitosos, {len(errores)} errores")
+
+            if errores and ignore_errors:
+                logger.warning(f"Errores durante cleanup (ignorados): {errores}")
 
         # Limpiar cache interno
         self.uploaded_files.clear()
@@ -299,11 +317,6 @@ class GeminiFilesManager:
         # Limpiar archivos temporales restantes
         for temp_file in list(self.temp_files):
             await self._cleanup_temp_file(temp_file)
-
-        logger.info(f"Cleanup completado: {exitosos} exitosos, {len(errores)} errores")
-
-        if errores and ignore_errors:
-            logger.warning(f"Errores durante cleanup (ignorados): {errores}")
 
     async def __aenter__(self):
         """Context manager entry"""

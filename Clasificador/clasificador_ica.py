@@ -217,7 +217,10 @@ class ClasificadorICA:
             )
 
             if not validacion_ubicaciones["valido"]:
-                resultado_base["estado"] = "preliquidacion_sin_finalizar"
+                if validacion_ubicaciones.get("ubicacion_no_parametrizada", False):
+                    resultado_base["estado"] = "no_aplica_impuesto"
+                else:
+                    resultado_base["estado"] = "preliquidacion_sin_finalizar"
                 resultado_base["observaciones"].extend(validacion_ubicaciones["errores"])
                 logger.warning(f"Validación de ubicaciones falló: {validacion_ubicaciones['errores']}")
                 return resultado_base
@@ -514,7 +517,7 @@ class ClasificadorICA:
                     f"La ubicación '{ubicacion['nombre_ubicacion']}' no está parametrizada "
                     "en la base de datos. Por favor agregar esta ubicación"
                 )
-                return {"valido": False, "errores": errores, "advertencias": advertencias}
+                return {"valido": False, "errores": errores, "advertencias": advertencias, "ubicacion_no_parametrizada": True}
 
             logger.info("Validaciones de ubicación única exitosas")
             return {"valido": True, "errores": [], "advertencias": advertencias}
@@ -580,7 +583,7 @@ class ClasificadorICA:
         # Determinar si las validaciones pasaron
         if errores:
             logger.warning(f"Validaciones de ubicaciones fallaron: {len(errores)} errores")
-            return {"valido": False, "errores": errores, "advertencias": advertencias}
+            return {"valido": False, "errores": errores, "advertencias": advertencias, "ubicacion_no_parametrizada": bool(ubicaciones_no_parametrizadas)}
 
         logger.info("Validaciones de múltiples ubicaciones exitosas")
         return {"valido": True, "errores": [], "advertencias": advertencias}

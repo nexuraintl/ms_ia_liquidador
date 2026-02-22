@@ -439,13 +439,10 @@ class ProcesadorGemini:
             raise ValueError(f"Error en clasificación híbrida: {str(e)}")
 
         finally:
-            # PASO 9 (NUEVO v3.0): Cleanup automático de Files API
-            try:
-                if hasattr(self, 'files_manager') and self.files_manager:
-                    await self.files_manager.cleanup_all(ignore_errors=True)
-                    logger.info(" Cleanup de Files API completado")
-            except Exception as cleanup_error:
-                logger.warning(f" Error en cleanup de Files API: {cleanup_error}")
+            # PASO 9 (NUEVO v3.0): Cleanup omitido intencionalmente.
+            # Los archivos subidos aquí serán reutilizados por preparar_archivos_para_workers_paralelos()
+            # via cache en GeminiFilesManager. El cleanup final ocurre en _llamar_gemini_hibrido_factura().
+            pass
 
     async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
         """

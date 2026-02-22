@@ -88,6 +88,11 @@ class GeminiFilesManager:
         Raises:
             ValueError: Si falla upload o timeout
         """
+        # Verificar cache antes de subir
+        if archivo.filename in self.uploaded_files:
+            logger.info(f"Archivo ya en Files API (cache hit): {archivo.filename}")
+            return self.uploaded_files[archivo.filename]
+
         try:
             # PASO 1: Guardar archivo temporalmente (Files API requiere path)
             temp_path = await self._save_temp_file(archivo)

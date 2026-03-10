@@ -30,6 +30,7 @@ import PyPDF2
 from PIL import Image
 import pandas as pd
 from docx import Document
+from openpyxl import load_workbook
 
 # Procesamiento de emails
 import email

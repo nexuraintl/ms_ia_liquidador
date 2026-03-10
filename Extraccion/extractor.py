@@ -2004,7 +2004,13 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
         logger.info(f" Preprocesando Excel: {nombre_archivo}")
 
         # 1. LEER EXCEL CON TODAS LAS HOJAS
-        df_dict = pd.read_excel(io.BytesIO(contenido), sheet_name=None)
+        # nrows limita la lectura ANTES de cargar en memoria, evitando OOM
+        # con archivos grandes (ej: Excel embebidos en emails de 10MB+)
+        MAX_FILAS_LECTURA = 10_000
+        tamanio_mb = len(contenido) / (1024 * 1024)
+        if tamanio_mb > 2:
+            logger.warning(f" Excel grande ({tamanio_mb:.1f} MB): limitando lectura a {MAX_FILAS_LECTURA} filas por hoja")
+        df_dict = pd.read_excel(io.BytesIO(contenido), sheet_name=None, nrows=MAX_FILAS_LECTURA)
 
         texto_completo = ""
         total_hojas = 0
@@ -2037,7 +2043,10 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
                 texto_completo += f"\n--- HOJA: {nombre_hoja} ---\n"
 
                 if not df_limpio.empty:
-                    # Convertir a texto manteniendo formato tabular limpio
+                    MAX_FILAS_TEXTO = 10_000
+                    if len(df_limpio) > MAX_FILAS_TEXTO:
+                        logger.warning(f" Hoja '{nombre_hoja}' truncada: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
+                        df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
                     texto_hoja = df_limpio.to_string(index=False, na_rep='', max_cols=None, max_rows=None)
                     texto_completo += texto_hoja
                 else:
@@ -2066,6 +2075,10 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
             columnas_eliminadas_total = cols_orig - cols_final
 
             if not df_limpio.empty:
+                MAX_FILAS_TEXTO = 10_000
+                if len(df_limpio) > MAX_FILAS_TEXTO:
+                    logger.warning(f" Excel truncado: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
+                    df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
                 texto_completo = df_limpio.to_string(index=False, na_rep='', max_cols=None, max_rows=None)
             else:
                 texto_completo = "[ARCHIVO VACÍO DESPUÉS DE LIMPIEZA]"

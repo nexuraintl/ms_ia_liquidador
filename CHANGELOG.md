@@ -1,5 +1,42 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.0 - Extracción de Archivos Embebidos en Emails] - 2026-03-10
+
+### 🏗️ Arquitectura
+
+- Nuevo módulo `Extraccion/extractor_adjuntos.py` siguiendo SRP: responsabilidad única de extraer bytes de adjuntos en `.msg` y `.eml`
+- `ExtractorHibrido` extendido con tres nuevos métodos privados para procesar adjuntos sin cambiar interfaz pública (`ResultadoExtraccion` y `background_processor.py` sin modificaciones)
+- Constantes de extensiones centralizadas en `ExtractorHibrido` como atributos de clase (`EXTENSIONES_DIRECTAS`, `EXTENSIONES_EXCEL`, `EXTENSIONES_WORD`)
+
+### 🆕 Añadido
+
+#### `Extraccion/extractor_adjuntos.py` (nuevo)
+- **`AdjuntoExtraido`** (dataclass): nombre, bytes y extensión de cada adjunto extraído
+- **`ExtractorAdjuntos.extraer_de_msg()`**: extrae adjuntos binarios de `.msg` via librería `extract_msg` (`attachment.data`)
+- **`ExtractorAdjuntos.extraer_de_eml()`**: extrae adjuntos binarios de `.eml` via stdlib `email` (`part.get_payload(decode=True)`)
+- Manejo de encoding RFC 2047 en nombres de adjuntos EML
+- Cleanup automático de archivo temporal tras procesar `.msg`
+
+#### `app/extraccion_hibrida.py`
+- **`ExtractorHibrido._procesar_adjuntos_emails()`**: orquesta la extracción de adjuntos de todos los emails en el lote
+- **`ExtractorHibrido._enrutar_adjunto()`**: enruta cada adjunto al procesador correcto según extensión
+- **`ExtractorHibrido._crear_upload_file()`**: crea `UploadFile` sintético desde bytes en memoria (`BytesIO`)
+- `ExtractorHibrido.extraer()` ahora fusiona adjuntos en `archivos_directos` y `textos_preprocesados` antes de retornar
+
+#### `Extraccion/__init__.py`
+- Exporta `ExtractorAdjuntos` y `AdjuntoExtraido`
+
+### 🔀 Routing de adjuntos embebidos
+
+| Tipo | Procesamiento | Destino |
+|---|---|---|
+| PDF, imagen | `UploadFile` sintético | `archivos_directos` → Gemini Files API (multimodal) |
+| Excel (.xlsx, .xls) | `preprocesar_excel_limpio()` | `textos_preprocesados` |
+| Word (.docx, .doc) | `extraer_texto_word()` | `textos_preprocesados` |
+| Otros | Log informativo | Ignorado |
+
+---
+
 ## [3.13.0 - FIX: Re-autenticación por Tarea (Token TTL)] - 2026-02-07
 
 ### 🎯 PROBLEMA RESUELTO

@@ -4,9 +4,10 @@ Combina procesamiento multimodal (directo a Gemini) con preprocesamiento local.
 """
 import logging
 from dataclasses import dataclass
-from typing import List, Dict
+from io import BytesIO
+from typing import List, Dict, Tuple
 from fastapi import UploadFile
-from Extraccion import ProcesadorArchivos, preprocesar_excel_limpio
+from Extraccion import ProcesadorArchivos, preprocesar_excel_limpio, ExtractorAdjuntos
 from app.validacion_archivos import ValidadorArchivos
 
 logger = logging.getLogger(__name__)
@@ -41,10 +42,15 @@ class ExtractorHibrido:
         >>> print(f"Directos: {len(resultado.archivos_directos)}")
     """
 
+    EXTENSIONES_DIRECTAS = {'pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp'}
+    EXTENSIONES_EXCEL = {'xlsx', 'xls'}
+    EXTENSIONES_WORD = {'docx', 'doc'}
+
     def __init__(self):
         """Inicializa el extractor con procesadores necesarios"""
         self.extractor = ProcesadorArchivos()
         self.validador = ValidadorArchivos()
+        self.extractor_adjuntos = ExtractorAdjuntos()
 
     async def extraer(self, archivos_validos: List[UploadFile]) -> ResultadoExtraccion:
         """
@@ -69,6 +75,11 @@ class ExtractorHibrido:
             textos_archivos_original,
             archivos_preprocesamiento
         )
+
+        # Extraer y procesar archivos embebidos en emails (.msg / .eml)
+        adjuntos_directos, textos_adjuntos = await self._procesar_adjuntos_emails(archivos_preprocesamiento)
+        archivos_directos.extend(adjuntos_directos)
+        textos_preprocesados.update(textos_adjuntos)
 
         return ResultadoExtraccion(
             archivos_directos=archivos_directos,
@@ -189,3 +200,100 @@ class ExtractorHibrido:
         logger.info(f" Extracción local completada: {len(textos_preprocesados)} textos extraídos")
 
         return textos_preprocesados
+
+    async def _procesar_adjuntos_emails(
+        self,
+        archivos_preprocesamiento: List[UploadFile]
+    ) -> Tuple[List[UploadFile], Dict[str, str]]:
+        """
+        Extrae y procesa archivos embebidos en emails .msg y .eml.
+
+        Para cada adjunto encontrado aplica el procesamiento correcto:
+        - PDF / imagen  → UploadFile sintetico para procesamiento multimodal (Gemini)
+        - Excel         → preprocesar_excel_limpio() → texto preprocesado
+        - Word          → extraer_texto_word() → texto preprocesado
+        - Otros         → ignorar con log informativo
+
+        Args:
+            archivos_preprocesamiento: Archivos que pasaron por procesamiento local
+
+        Returns:
+            Tupla (nuevos_archivos_directos, nuevos_textos_preprocesados)
+        """
+        nuevos_directos: List[UploadFile] = []
+        nuevos_textos: Dict[str, str] = {}
+
+        emails = [
+            arch for arch in archivos_preprocesamiento
+            if arch.filename and arch.filename.lower().endswith(('.msg', '.eml'))
+        ]
+
+        if not emails:
+            return nuevos_directos, nuevos_textos
+
+        logger.info(f" Extrayendo adjuntos embebidos de {len(emails)} email(s)...")
+
+        for archivo in emails:
+            try:
+                await archivo.seek(0)
+                contenido = await archivo.read()
+                extension_email = archivo.filename.lower().rsplit('.', 1)[-1]
+
+                if extension_email == 'msg':
+                    adjuntos = self.extractor_adjuntos.extraer_de_msg(contenido, archivo.filename)
+                else:
+                    adjuntos = self.extractor_adjuntos.extraer_de_eml(contenido, archivo.filename)
+
+                for adjunto in adjuntos:
+                    await self._enrutar_adjunto(adjunto, nuevos_directos, nuevos_textos)
+
+            except Exception as e:
+                logger.warning(f" Error procesando adjuntos de {archivo.filename}: {e}")
+
+        logger.info(
+            f" Adjuntos procesados — directos: {len(nuevos_directos)}, textos: {len(nuevos_textos)}"
+        )
+        return nuevos_directos, nuevos_textos
+
+    async def _enrutar_adjunto(
+        self,
+        adjunto,
+        nuevos_directos: List[UploadFile],
+        nuevos_textos: Dict[str, str]
+    ) -> None:
+        """
+        Enruta un adjunto extraido al procesador correspondiente segun su extension.
+
+        Args:
+            adjunto: AdjuntoExtraido con nombre, contenido y extension
+            nuevos_directos: Lista de UploadFile para procesamiento multimodal
+            nuevos_textos: Dict de textos preprocesados
+        """
+        if adjunto.extension in self.EXTENSIONES_DIRECTAS:
+            nuevos_directos.append(self._crear_upload_file(adjunto.contenido, adjunto.nombre))
+            logger.info(f" Adjunto directo (multimodal): {adjunto.nombre}")
+
+        elif adjunto.extension in self.EXTENSIONES_EXCEL:
+            nuevos_textos[adjunto.nombre] = preprocesar_excel_limpio(adjunto.contenido, adjunto.nombre)
+            logger.info(f" Adjunto Excel preprocesado: {adjunto.nombre}")
+
+        elif adjunto.extension in self.EXTENSIONES_WORD:
+            nuevos_textos[adjunto.nombre] = await self.extractor.extraer_texto_word(adjunto.contenido, adjunto.nombre)
+            logger.info(f" Adjunto Word extraido: {adjunto.nombre}")
+
+        else:
+            logger.info(f" Adjunto ignorado (tipo no soportado): {adjunto.nombre} (.{adjunto.extension})")
+
+    def _crear_upload_file(self, contenido: bytes, nombre: str) -> UploadFile:
+        """
+        Crea un UploadFile sintetico a partir de bytes en memoria.
+        Permite tratar adjuntos extraidos igual que archivos subidos directamente.
+
+        Args:
+            contenido: Bytes del archivo adjunto
+            nombre: Nombre del archivo (con extension)
+
+        Returns:
+            UploadFile listo para ser enviado a Gemini Files API
+        """
+        return UploadFile(file=BytesIO(contenido), filename=nombre)

@@ -2,8 +2,10 @@
 Módulo de extracción híbrida de archivos.
 Combina procesamiento multimodal (directo a Gemini) con preprocesamiento local.
 """
+import asyncio
 import logging
 from dataclasses import dataclass
+from functools import partial
 from io import BytesIO
 from typing import List, Dict, Tuple
 from fastapi import UploadFile
@@ -183,9 +185,10 @@ class ExtractorHibrido:
                     if archivo_obj:
                         await archivo_obj.seek(0)
                         contenido_binario = await archivo_obj.read()
-                        texto_preprocesado = preprocesar_excel_limpio(
-                            contenido_binario,
-                            nombre_archivo
+                        loop = asyncio.get_event_loop()
+                        texto_preprocesado = await loop.run_in_executor(
+                            None,
+                            partial(preprocesar_excel_limpio, contenido_binario, nombre_archivo)
                         )
                         textos_preprocesados[nombre_archivo] = texto_preprocesado
                         logger.info(f" Excel preprocesado: {nombre_archivo}")
@@ -274,7 +277,11 @@ class ExtractorHibrido:
             logger.info(f" Adjunto directo (multimodal): {adjunto.nombre}")
 
         elif adjunto.extension in self.EXTENSIONES_EXCEL:
-            nuevos_textos[adjunto.nombre] = preprocesar_excel_limpio(adjunto.contenido, adjunto.nombre)
+            loop = asyncio.get_event_loop()
+            nuevos_textos[adjunto.nombre] = await loop.run_in_executor(
+                None,
+                partial(preprocesar_excel_limpio, adjunto.contenido, adjunto.nombre)
+            )
             logger.info(f" Adjunto Excel preprocesado: {adjunto.nombre}")
 
         elif adjunto.extension in self.EXTENSIONES_WORD:

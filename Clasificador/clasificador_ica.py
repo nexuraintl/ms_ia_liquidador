@@ -631,13 +631,16 @@ class ClasificadorICA:
 
                 actividades = resultado['data']
 
-                # Validar que el nombre de ubicación coincida
-                if actividades and actividades[0]["nombre_ubicacion"] != nombre_ubicacion:
-                    logger.error(
-                        f"El nombre de ubicación de BD '{actividades[0]['nombre_ubicacion']}' "
-                        f"no coincide con el identificado por Gemini '{nombre_ubicacion}'"
-                    )
-                    continue
+                # Validar que el nombre de ubicación coincida (comparación flexible)
+                if actividades:
+                    nombre_bd = actividades[0]["nombre_ubicacion"].strip().upper()
+                    nombre_gemini = nombre_ubicacion.strip().upper()
+                    if nombre_bd not in nombre_gemini and nombre_gemini not in nombre_bd:
+                        logger.error(
+                            f"El nombre de ubicación de BD '{actividades[0]['nombre_ubicacion']}' "
+                            f"no coincide con el identificado por Gemini '{nombre_ubicacion}'"
+                        )
+                        continue
 
                 actividades_por_ubicacion[str(codigo_ubicacion)] = actividades
                 logger.info(f"Actividades obtenidas para ubicación {codigo_ubicacion}: {len(actividades)}")

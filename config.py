@@ -466,8 +466,8 @@ def obtener_tarifa_extranjera(concepto: str, tiene_convenio: bool = False) -> fl
 # ===============================
 
 # Valores para la vigencia 2025
-UVT_2025 = 49799  # Valor UVT 2025 en pesos
-SMMLV_2025 = 1423500  # Salario Mínimo Mensual Legal Vigente 2025
+UVT_2025 = 52374  # Valor UVT 2025 en pesos
+SMMLV_2025 = 1750905   # Salario Mínimo Mensual Legal Vigente 2025
 
 # Conceptos que aplican para Artículo 383 ET
 CONCEPTOS_ARTICULO_383 = [

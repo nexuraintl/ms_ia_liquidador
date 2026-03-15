@@ -58,12 +58,14 @@ from database import (
     SupabaseDatabase,
     BusinessDataService,
     crear_business_service,
-    inicializar_database_manager  # INFRASTRUCTURE SETUP
+    inicializar_database_manager,  # INFRASTRUCTURE SETUP
+    obtener_uvt_desde_api,  # OBTENER UVT DESDE API EXTERNA
 )
 
 # Cargar configuración global - INCLUYE ESTAMPILLA Y OBRA PÚBLICA
 from config import (
     inicializar_configuracion,
+    establecer_uvt,
     obtener_nits_disponibles,
     validar_nit_administrativo,
     nit_aplica_retencion_fuente,
@@ -78,29 +80,7 @@ from config import (
 
 )
 
-from app.validacion_negocios import validar_negocio
 
-from app.clasificacion_documentos import clasificar_archivos
-
-from app.ejecucion_tareas_paralelo import ejecutar_tareas_paralelo
-
-from app.validar_retefuente import validar_retencion_en_la_fuente
-
-from app.validar_impuestos_esp import validar_impuestos_especiales
-
-from app.validar_iva_reteiva import validar_iva_reteiva
-
-from app.validar_estampillas_generales import validar_estampillas_generales
-
-from app.validar_ica import validar_ica
-
-from app.validar_bomberil import validar_sobretasa_bomberil
-
-from app.validar_tasa_prodeporte import validar_tasa_prodeporte
-
-from app.validar_timbre import validar_timbre
-
-from app.impuestos_no_aplicados import agregar_impuestos_no_aplicados
 
 # Importar modulo de procesamiento asincrono (Background)
 from Background import WebhookPublisher, BackgroundProcessor
@@ -110,7 +90,6 @@ import pandas as pd
 import io
 
 # Importar utilidades - Respuestas mock para validaciones (SRP)
-from utils.mockups import crear_respuesta_negocio_no_parametrizado
 from utils.error_handlers import registrar_exception_handler
 
 # ===============================
@@ -175,8 +154,16 @@ async def lifespan(app: FastAPI):
 
     logger.info(" Worker de FastAPI iniciándose...")
     if not inicializar_configuracion():
-        logger.critical(" FALLO EN CONFIGURACIÓN")
-        raise RuntimeError("Configuración inválida")
+        logger.critical(" FALLO EN CONFIGURACION")
+        raise RuntimeError("Configuracion invalida")
+
+    # Obtener valor UVT desde API externa (obligatorio para continuar)
+    try:
+        valor_uvt = await obtener_uvt_desde_api()
+        establecer_uvt(valor_uvt)
+    except RuntimeError as e:
+        logger.critical(f"No se pudo obtener el valor UVT desde la API: {e}")
+        raise
 
     # MODIFICADO v3.13.0: inicializar_database_manager() YA NO hace login
     try:

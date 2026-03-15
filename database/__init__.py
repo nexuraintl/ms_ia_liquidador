@@ -74,6 +74,9 @@ from .setup import (
     # Inicialización de infraestructura
     inicializar_database_manager,
 
+    # Obtener UVT desde API externa
+    obtener_uvt_desde_api,
+
     # Verificación de conexión
     verificar_conexion_database
 )
@@ -105,6 +108,7 @@ __all__ = [
 
     # Infrastructure Setup
     "inicializar_database_manager",
+    "obtener_uvt_desde_api",
     "verificar_conexion_database",
 ]
 

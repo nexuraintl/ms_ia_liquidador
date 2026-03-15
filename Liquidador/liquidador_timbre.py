@@ -12,7 +12,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
-from config import UVT_2025
+import config as _config
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +115,9 @@ class LiquidadorTimbre:
             )
 
         # Convertir valor_total_contrato a UVT
-        uvt_contrato = valor_total_contrato / UVT_2025
+        uvt_contrato = valor_total_contrato / _config.UVT_2025
         limite_uvt = 6000
-        valor_limite_pesos = limite_uvt * UVT_2025
+        valor_limite_pesos = limite_uvt * _config.UVT_2025
 
         logger.info(f"Validando límite UVT para contrato {id_contrato}: Valor ${valor_total_contrato:,.2f} = {uvt_contrato:,.2f} UVT (límite mínimo: {limite_uvt} UVT)")
 

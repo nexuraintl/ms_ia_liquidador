@@ -27,10 +27,13 @@ import os
 import logging
 from typing import Optional, Tuple
 
+import httpx
+
 # Importar componentes del modulo database (DIP: depender de abstracciones)
 from .database import DatabaseManager, SupabaseDatabase, NexuraAPIDatabase, DatabaseInterface, DatabaseWithFallback
 from .database_service import crear_business_service, BusinessDataService
 from .auth_provider import AuthProviderFactory, IAuthProvider
+from config import URL_UVT_API
 
 # Logger para este modulo
 logger = logging.getLogger(__name__)
@@ -38,6 +41,42 @@ logger = logging.getLogger(__name__)
 
 # ELIMINADO v3.13.0: inicializar_auth_service_nexura() ya no se usa
 # La autenticacion ahora se realiza por tarea en BackgroundProcessor._autenticar_con_retry()
+
+
+async def obtener_uvt_desde_api() -> int:
+    """
+    Consulta el valor UVT vigente desde la API externa.
+    Lanza RuntimeError si no se puede obtener el valor.
+
+    SRP: Responsabilidad unica de obtener el UVT desde servicio externo.
+    """
+    try:
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "Preliquidador/1.0",
+        }
+        async with httpx.AsyncClient(timeout=15.0, headers=headers) as client:
+            response = await client.get(URL_UVT_API)
+            response.raise_for_status()
+
+        datos = response.json()
+        codigo_error = datos.get("error", {}).get("code")
+        if codigo_error != 0:
+            mensaje = datos.get("error", {}).get("message", "Error desconocido")
+            raise RuntimeError(f"API UVT retorno error: {mensaje}")
+
+        valor_uvt = datos.get("data", {}).get("valor")
+        if not isinstance(valor_uvt, (int, float)) or valor_uvt <= 0:
+            raise RuntimeError(f"Valor UVT invalido recibido: {valor_uvt}")
+
+        return int(valor_uvt)
+
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Error HTTP al consultar UVT: {e.response.status_code}") from e
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Error de conexion al consultar UVT: {e}") from e
+    except (KeyError, TypeError, ValueError) as e:
+        raise RuntimeError(f"Error al parsear respuesta UVT: {e}") from e
 
 
 def crear_database_por_tipo(tipo_db: str, auth_provider: Optional[IAuthProvider] = None) -> Optional[DatabaseInterface]:

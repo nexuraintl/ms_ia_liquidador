@@ -466,7 +466,10 @@ def obtener_tarifa_extranjera(concepto: str, tiene_convenio: bool = False) -> fl
 # ===============================
 
 # Valores para la vigencia 2025
-UVT_2025 = 52374  # Valor UVT 2025 en pesos
+UVT_2025 = None  # Se obtiene dinamicamente desde API al iniciar el servidor
+
+# URL para obtener el valor UVT vigente
+URL_UVT_API = "https://liqimpuestos.fiducoldex.com.co/api/preliquidador/getValorUvt/"
 SMMLV_2025 = 1750905   # Salario Mínimo Mensual Legal Vigente 2025
 
 # Conceptos que aplican para Artículo 383 ET
@@ -1511,22 +1514,28 @@ def crear_resultado_recurso_extranjero_iva() -> Dict[str, Any]:
         }
     }
 
+def establecer_uvt(valor: int):
+    """Establece el valor UVT global para toda la aplicacion."""
+    global UVT_2025
+    UVT_2025 = valor
+    logger.info(f"UVT establecido desde API: ${valor:,}")
+
+
 # ===============================
 # INICIALIZACIÓN AUTOMÁTICA
 # ===============================
 
 def inicializar_configuracion():
-    """Inicializa y valida la configuración del sistema"""
+    """Inicializa y valida la configuración del sistema (excepto UVT que se obtiene async)."""
     try:
-        # Validar que las constantes estén definidas
-        assert UVT_2025 > 0, "UVT_2025 debe ser mayor a 0"
+        # UVT se valida despues de obtenerlo desde la API
         assert SMMLV_2025 > 0, "SMMLV_2025 debe ser mayor a 0"
         assert len(TERCEROS_RECURSOS_PUBLICOS) > 0, "Debe haber terceros configurados"
         assert len(CONCEPTOS_RETEFUENTE) > 0, "Debe haber conceptos de retefuente configurados"
         assert len(NITS_IVA_RETEIVA) > 0, "Debe haber NITs configurados para IVA y ReteIVA"
         
         logger.info(" Configuración inicializada correctamente")
-        logger.info(f"   - UVT 2025: ${UVT_2025:,}")
+        logger.info(f"   - UVT 2025: pendiente (se obtendra desde API)")
         logger.info(f"   - Terceros: {len(TERCEROS_RECURSOS_PUBLICOS)}")
         logger.info(f"   - Conceptos ReteFuente: {len(CONCEPTOS_RETEFUENTE)}")
         logger.info(f"   - NITs IVA y ReteIVA: {len(NITS_IVA_RETEIVA)}")

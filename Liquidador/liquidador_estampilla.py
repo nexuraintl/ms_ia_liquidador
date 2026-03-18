@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 # IMPORTAR CONFIGURACIÓN
 # ===============================
 
+import config as _config
 from config import (
-    UVT_2025,
     CODIGOS_NEGOCIO_ESTAMPILLA,
     CODIGOS_NEGOCIO_OBRA_PUBLICA,
     TERCEROS_RECURSOS_PUBLICOS,
@@ -151,7 +151,7 @@ class LiquidadorEstampilla:
         Args:
             database_manager: DatabaseManager para consultas a BD (opcional)
         """
-        self.uvt_2025 = UVT_2025
+        self.uvt_2025 = _config.UVT_2025
         self.database_manager = database_manager
         logger.info(f" LiquidadorEstampilla INTEGRADO inicializado - UVT 2025: ${self.uvt_2025:,}")
         logger.info(f" Configuración: {len(CODIGOS_NEGOCIO_ESTAMPILLA)} códigos de negocio válidos")

@@ -23,7 +23,7 @@ Arquitectura: SOLID + Clean Architecture + Validaciones Manuales
 import logging
 import json
 import asyncio
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 
@@ -197,27 +197,24 @@ class ClasificadorICA:
             logger.info(f"Ubicaciones obtenidas de BD: {len(ubicaciones_bd)}")
 
             # PASO 3: Primera llamada Gemini - Identificar ubicaciones (MULTIMODAL)
-            ubicaciones_identificadas = await self._identificar_ubicaciones_gemini(
+            ubicaciones_identificadas, aplica_ica, obs_gemini = await self._identificar_ubicaciones_gemini(
                 ubicaciones_bd, textos_documentos, archivos_directos, nit_administrativo
             )
-
-            if not ubicaciones_identificadas:
-                resultado_base["estado"] = "preliquidacion_sin_finalizar"
-                resultado_base["observaciones"].append(
-                    "No se pudo identificar el municipio de la actividad gravada"
-                )
-                logger.error("Gemini no identificó ubicaciones")
-                return resultado_base
 
             logger.info(f"Ubicaciones identificadas por Gemini: {len(ubicaciones_identificadas)}")
 
             # PASO 4: Validaciones manuales de ubicaciones (Python)
             validacion_ubicaciones = self._validar_ubicaciones_manualmente(
-                ubicaciones_identificadas
+                ubicaciones_identificadas, aplica_ica, obs_gemini
             )
 
             if not validacion_ubicaciones["valido"]:
-                if validacion_ubicaciones.get("ubicacion_no_parametrizada", False):
+                if validacion_ubicaciones.get("rechazo_por_tercero"):
+                    resultado_base["estado"] = "no_aplica_impuesto"
+                    resultado_base["observaciones"].append(validacion_ubicaciones.get("mensaje_rechazo"))
+                    logger.warning("ICA no aplica por Adquirente/Cliente (factura de tercero)")
+                    return resultado_base
+                elif validacion_ubicaciones.get("ubicacion_no_parametrizada", False):
                     resultado_base["estado"] = "no_aplica_impuesto"
                 else:
                     resultado_base["estado"] = "preliquidacion_sin_finalizar"
@@ -372,7 +369,7 @@ class ClasificadorICA:
         textos_documentos: Dict[str, str],
         archivos_directos: List[Any],
         nit_administrativo: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], bool, str]:
         """
         Primera llamada a Gemini para identificar ubicaciones de la actividad (MULTIMODAL).
 
@@ -391,7 +388,7 @@ class ClasificadorICA:
             nit_administrativo: NIT para organizar archivos guardados (opcional)
 
         Returns:
-            List[Dict]: Ubicaciones identificadas por Gemini
+            Tuple[List[Dict[str, Any]], bool, str]: (ubicaciones, aplica_ica, observaciones)
         """
         logger.info("Primera llamada Gemini: identificando ubicaciones (MULTIMODAL)...")
 
@@ -440,22 +437,27 @@ class ClasificadorICA:
             # Validar estructura
             if not validar_estructura_ubicaciones(data):
                 logger.error("Estructura de JSON de ubicaciones inválida")
-                return []
+                return [], True, "Estructura de JSON inválida"
 
             ubicaciones = data.get("ubicaciones", [])
-            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones")
-            return ubicaciones
+            aplica_ica = data.get("aplica_ica", True)
+            observaciones = data.get("observaciones", "")
+            
+            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones. Aplica ICA: {aplica_ica}")
+            return ubicaciones, aplica_ica, observaciones
 
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (ubicaciones): {e}")
-            return []
+            return [], True, f"Error parseando JSON: {e}"
         except Exception as e:
             logger.error(f"Error en llamada a Gemini (ubicaciones): {e}")
-            return []
+            return [], True, f"Error en llamada a Gemini: {e}"
 
     def _validar_ubicaciones_manualmente(
         self,
-        ubicaciones_identificadas: List[Dict[str, Any]]
+        ubicaciones_identificadas: List[Dict[str, Any]],
+        aplica_ica: bool = True,
+        observaciones_gemini: str = ""
     ) -> Dict[str, Any]:
         """
         Valida manualmente las ubicaciones identificadas por Gemini.
@@ -469,6 +471,8 @@ class ClasificadorICA:
 
         Args:
             ubicaciones_identificadas: Ubicaciones de Gemini
+            aplica_ica: Indica si la factura aplica para ICA
+            observaciones_gemini: Observaciones de la identificación
 
         Returns:
             Dict con validación: {"valido": bool, "errores": List[str], "advertencias": List[str]}
@@ -477,6 +481,15 @@ class ClasificadorICA:
 
         errores = []
         advertencias = []
+
+        if not aplica_ica:
+            return {
+                "valido": False,
+                "errores": [],
+                "advertencias": [],
+                "rechazo_por_tercero": True,
+                "mensaje_rechazo": observaciones_gemini or "La factura no está a nombre de una compañía o consorcio válido."
+            }
 
         # VALIDACIÓN 0: Debe haber al menos una ubicación
         if not ubicaciones_identificadas or len(ubicaciones_identificadas) == 0:

@@ -69,6 +69,31 @@ REGLA FUNDAMENTAL:
 - Si no encuentras evidencia clara, marca codigo_ubicacion = 0
 
 ═══════════════════════════════════════════════════════════════════════
+PASO 0: VERIFICAR ADQUIRENTE/CLIENTE DE LA FACTURA (CRÍTICO)
+═══════════════════════════════════════════════════════════════════════
+
+Busca en los documentos adjuntos la FACTURA DE VENTA y verifica EXACTAMENTE a nombre de quién está facturado (busca campos como "Cliente", "Adquirente", "Señores", "Facturado a").
+
+REGLA ESTRICTA: SOLO DEBES CONTINUAR si el CLIENTE PRINCIPAL de la FACTURA es alguna de estas entidades o sus líneas de negocio:
+- FIDUCOLDEX (Fiduciaria Colombiana de Comercio Exterior S.A.)
+- ENCARGOS FIDUCIARIOS
+- FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX
+- PATRIMONIO AUTÓNOMO (Cualquier P.A., ej: P.A. FONTUR, P.A. INNPULSA, P.A. COLOMBIA PRODUCTIVA, etc.)
+- FONDOS DE INVERSIÓN - ABIERTA Y 60 MODERADO
+- FONDO AUREOS COLOMBIA – FONDO DE FONDO BANCOLDEX
+- CONSORCIOS (Cualquier consorcio)
+- Fondo de Inversión Colectiva Fiducoldex / FIC FIDUCOLDEX
+- Fondo de Capital Privado Áureos Colombia
+- FONDO MUJER LIBRE Y PRODUCTIVA / FONDO MUJER EMPRENDE
+
+IMPORTANTE: 
+1. Si el documento principal es una legalización de viáticos, un formato interno de Fiducoldex, un documento de cobro de un empleado, o NO es una factura expedida hacia nosotros, marca "aplica_ica": false.
+2. Si la factura está a nombre de una PERSONA NATURAL (un empleado) o un tercero distinto a la lista, marca "aplica_ica": false.
+3. No basta con que el nombre de Fiducoldex o de un Fondo aparezca en el encabezado o logo del documento; la entidad DEBE ser el ADQUIRENTE/CLIENTE de la factura.
+
+Si la factura NO está a nombre de nuestras entidades (según las reglas anteriores), debes indicar "aplica_ica": false, dejar las ubicaciones vacías y colocar EXACTAMENTE la siguiente frase en observaciones: "El documento analizado no es una factura a nombre de fiducoldex". Si SI es nuestro cliente, marca "aplica_ica": true.
+
+═══════════════════════════════════════════════════════════════════════
 PASO 1: UBICACIONES PARAMETRIZADAS EN BASE DE DATOS
 ═══════════════════════════════════════════════════════════════════════
 
@@ -183,6 +208,7 @@ PASO 5: FORMATO DE RESPUESTA JSON (OBLIGATORIO)
 Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
 
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "NOMBRE EXACTO como aparece en BD (SIN MAYUSCULAS SIN ACENTOS si no está en BD)",
@@ -202,6 +228,7 @@ Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
 
 EJEMPLO 1 - Una ubicación encontrada en BD:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "BOGOTA D.C.",
@@ -215,6 +242,7 @@ EJEMPLO 1 - Una ubicación encontrada en BD:
 
 EJEMPLO 2 - Múltiples ubicaciones con porcentajes:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "BOGOTA D.C.",
@@ -234,6 +262,7 @@ EJEMPLO 2 - Múltiples ubicaciones con porcentajes:
 
 EJEMPLO 3 - Ubicación NO encontrada en BD:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "zipaquira",
@@ -247,6 +276,7 @@ EJEMPLO 3 - Ubicación NO encontrada en BD:
 
 EJEMPLO 4 - NO se encontró ubicación:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "",
@@ -256,6 +286,13 @@ EJEMPLO 4 - NO se encontró ubicación:
     }}
   ],
   "observaciones": "No se encontró ubicación en los documentos proporcionados o no se encontrar documentos"
+}}
+
+EJEMPLO 5 - NO aplica ICA por Adquirente (Factura de Terceros):
+{{
+  "aplica_ica": false,
+  "ubicaciones": [],
+  "observaciones": "El documento analizado no es una factura a nombre de fiducoldex"
 }}
 
 IMPORTANTE:
@@ -532,13 +569,17 @@ def validar_estructura_ubicaciones(data: Dict[str, Any]) -> bool:
     Returns:
         bool: True si la estructura es válida
     """
+    if "aplica_ica" not in data or not isinstance(data["aplica_ica"], bool):
+        return False
+
     if "ubicaciones" not in data:
         return False
 
     if not isinstance(data["ubicaciones"], list):
         return False
 
-    if len(data["ubicaciones"]) == 0:
+    # Permitir ubicaciones vacías solo si aplica_ica es False
+    if len(data["ubicaciones"]) == 0 and data.get("aplica_ica", True):
         return False
 
     campos_requeridos = ["nombre_ubicacion", "codigo_ubicacion", "texto_identificador", "porcentaje_ejecucion"]

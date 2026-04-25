@@ -285,12 +285,14 @@ class PlanillaSeguridadSocial(BaseModel):
         IBC_seguridad_social: Ingreso Base de Cotizacion
         planilla_seguridad_social: True si hay planilla PILA
         fecha_de_planilla_seguridad_social: Fecha de pago de la planilla
+        valor_pagado_seguridad_social: Valor total a pagar reportado en la planilla PILA
 
     Example:
         >>> planilla = PlanillaSeguridadSocial(
         ...     IBC_seguridad_social=8000000.0,
         ...     planilla_seguridad_social=True,
-        ...     fecha_de_planilla_seguridad_social="2024-10-15"
+        ...     fecha_de_planilla_seguridad_social="2024-10-15",
+        ...     valor_pagado_seguridad_social=950000.0
         ... )
 
     Note:
@@ -300,6 +302,7 @@ class PlanillaSeguridadSocial(BaseModel):
     IBC_seguridad_social: float = 0.0
     planilla_seguridad_social: bool = False
     fecha_de_planilla_seguridad_social: str = "0000-00-00"
+    valor_pagado_seguridad_social: float = 0.0
 
 
 class DeduccionesArticulo383(BaseModel):

@@ -420,9 +420,10 @@ BUSCAR: "AFC" O "ahorro para fomento" O "cuenta AFC"
                 "planilla_de_cuenta_AFC": boolean (default: false)
             }},
             "planilla_seguridad_social": {{
-                "IBC_seguridad_social": número o 0.0 (SOLO de planilla)
+                "IBC_seguridad_social": número o 0.0 (SOLO de planilla),
                 "planilla_seguridad_social": boolean (default: false),
-                "fecha_de_planilla_seguridad_social": "AAAA-MM-DD" (default: "0000-00-00")
+                "fecha_de_planilla_seguridad_social": "AAAA-MM-DD" (default: "0000-00-00"),
+                "valor_pagado_seguridad_social": número o 0.0
             }}
         }}
     }}

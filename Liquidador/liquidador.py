@@ -371,6 +371,7 @@ class LiquidadorRetencion:
             planilla_seguridad_social = False
             fecha_planilla = "0000-00-00"
             IBC_seguridad_social = 0.0
+            valor_pagado_seguridad_social = 0.0
             
             # Extraer información de planilla de seguridad social
             if deducciones and hasattr(deducciones, 'planilla_seguridad_social'):
@@ -378,6 +379,7 @@ class LiquidadorRetencion:
                 planilla_seguridad_social = getattr(planilla_info, 'planilla_seguridad_social', False)
                 fecha_planilla = getattr(planilla_info, 'fecha_de_planilla_seguridad_social', "0000-00-00")
                 IBC_seguridad_social = getattr(planilla_info, 'IBC_seguridad_social', 0.0)
+                valor_pagado_seguridad_social = getattr(planilla_info, 'valor_pagado_seguridad_social', 0.0)
             
             # VALIDACIÓN 2.1: Si NO es primer pago, planilla es OBLIGATORIA
             if not es_primer_pago and not planilla_seguridad_social:
@@ -584,8 +586,8 @@ class LiquidadorRetencion:
             
             logger.info(" Paso 7: Cálculo final...")
             
-            # Calcular aportes a seguridad social (40% del ingreso)
-            aportes_seguridad_social = ingreso_bruto * LIMITES_DEDUCCIONES_ART383["seguridad_social_porcentaje"]
+            # Calcular aportes a seguridad social (usar valor real pagado en planilla)
+            aportes_seguridad_social = valor_pagado_seguridad_social
             
             # Sumar todas las deducciones aplicables
             total_deducciones = sum(deducciones_aplicables.values())
@@ -631,7 +633,7 @@ class LiquidadorRetencion:
                 f" Validaciones básicas: Persona natural + Conceptos aplicables",
                 f" Primer pago: {'SÍ' if es_primer_pago else 'NO'} - Planilla: {'Presente' if planilla_seguridad_social else 'No requerida'}",
                 f" Ingreso bruto: ${ingreso_bruto:,.2f}",
-                f" Aportes seguridad social (40%): ${aportes_seguridad_social:,.2f}",
+                f" Valor pagado en seguridad social (PILA): ${aportes_seguridad_social:,.2f}",
                 f" Deducciones aplicables: ${deducciones_limitadas:,.2f}"
             ]
             

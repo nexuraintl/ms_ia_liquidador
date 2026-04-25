@@ -512,16 +512,16 @@ def es_concepto_articulo_383(concepto: str) -> bool:
     """Verifica si un concepto aplica para Artículo 383"""
     return concepto in CONCEPTOS_ARTICULO_383
 
-def obtener_tarifa_articulo_383(base_gravable_pesos: float) -> float:
-    """Obtiene la tarifa del Artículo 383 según la base gravable en pesos"""
+def obtener_tarifa_articulo_383(base_gravable_pesos: float) -> Tuple[float, float]:
+    """Obtiene la tarifa del Artículo 383 y el límite inferior en UVT según la base gravable en pesos"""
     base_gravable_uvt = base_gravable_pesos / UVT_2025
     
     for rango in TARIFAS_ARTICULO_383:
         if rango["desde_uvt"] <= base_gravable_uvt < rango["hasta_uvt"]:
-            return rango["tarifa"]
+            return float(rango["tarifa"]), float(rango["desde_uvt"])
     
     # Si no encuentra rango, usar la última tarifa (39%)
-    return TARIFAS_ARTICULO_383[-1]["tarifa"]
+    return float(TARIFAS_ARTICULO_383[-1]["tarifa"]), float(TARIFAS_ARTICULO_383[-1]["desde_uvt"])
 
 def calcular_limite_deduccion(tipo_deduccion: str, ingreso_bruto: float, valor_deducido: float) -> float:
     """Calcula el límite permitido para una deducción específica"""

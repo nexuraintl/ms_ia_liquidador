@@ -589,19 +589,33 @@ class LiquidadorRetencion:
             # Calcular aportes a seguridad social (usar valor real pagado en planilla)
             aportes_seguridad_social = valor_pagado_seguridad_social
             
-            # Sumar todas las deducciones aplicables
-            total_deducciones = sum(deducciones_aplicables.values())
+            # Sumar todas las deducciones aplicables identificadas (sin Renta Exenta del 25%)
+            total_deducciones_iniciales = sum(deducciones_aplicables.values())
+            
+            # Calcular Renta Exenta de Trabajo (25%)
+            base_para_renta_exenta = ingreso_bruto - total_deducciones_iniciales - aportes_seguridad_social
+            if base_para_renta_exenta < 0:
+                base_para_renta_exenta = 0
+            
+            renta_exenta_trabajo = base_para_renta_exenta * 0.25
+            
+            # Agregar la renta exenta a las deducciones aplicables (para trazabilidad en logs)
+            deducciones_aplicables["renta_exenta_25_porc"] = renta_exenta_trabajo
+            logger.info(f" Renta exenta de trabajo (25%) aplicada: ${renta_exenta_trabajo:,.2f}")
+            
+            # Total de deducciones soportadas (incluyendo el 25%)
+            total_deducciones_soportadas = total_deducciones_iniciales + renta_exenta_trabajo
             
             # Aplicar límite máximo del 40% del ingreso bruto
             limite_maximo_deducciones = ingreso_bruto * LIMITES_DEDUCCIONES_ART383["deducciones_maximas_porcentaje"]
-            deducciones_limitadas = min(total_deducciones, limite_maximo_deducciones)
+            deducciones_limitadas = min(total_deducciones_soportadas, limite_maximo_deducciones)
             
-            if total_deducciones > limite_maximo_deducciones:
-                mensajes_error.append(f" Deducciones limitadas al 40% del ingreso: ${deducciones_limitadas:,.2f} (original: ${total_deducciones:,.2f})")
+            if total_deducciones_soportadas > limite_maximo_deducciones:
+                mensajes_error.append(f" Deducciones limitadas al 40% del ingreso: ${deducciones_limitadas:,.2f} (original: ${total_deducciones_soportadas:,.2f})")
                 logger.warning(f"Deducciones limitadas al 40%: ${deducciones_limitadas:,.2f}")
             
-            # Calcular base gravable final
-            base_gravable_final = ingreso_bruto - aportes_seguridad_social - deducciones_limitadas
+            # Calcular base gravable final (ingreso - deducciones limitadas - aportes a seguridad social)
+            base_gravable_final = ingreso_bruto - deducciones_limitadas - aportes_seguridad_social
             
             # Verificar que la base gravable no sea negativa
             if base_gravable_final < 0:

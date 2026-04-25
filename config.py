@@ -9,7 +9,7 @@ import os
 import json
 import pandas as pd
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import logging
 from datetime import datetime
 

@@ -626,14 +626,20 @@ class LiquidadorRetencion:
             base_gravable_uvt = base_gravable_final / UVT_2025
             
             # Aplicar tarifa progresiva del Artículo 383
-            tarifa_art383 = obtener_tarifa_articulo_383(base_gravable_final)
-            valor_retencion_art383 = base_gravable_final * tarifa_art383
+            tarifa_art383, limite_inferior_uvt = obtener_tarifa_articulo_383(base_gravable_final)
+            limite_inferior_pesos = limite_inferior_uvt * UVT_2025
+            
+            # Validar que la base gravable sea mayor al límite inferior para evitar retenciones negativas
+            base_sujeta_retencion = max(0, base_gravable_final - limite_inferior_pesos)
+            valor_retencion_art383 = base_sujeta_retencion * tarifa_art383
             
             logger.info(f" Cálculo completado:")
             logger.info(f"   - Ingreso bruto: ${ingreso_bruto:,.2f}")
             logger.info(f"   - Aportes seg. social: ${aportes_seguridad_social:,.2f}")
             logger.info(f"   - Deducciones: ${deducciones_limitadas:,.2f}")
             logger.info(f"   - Base gravable: ${base_gravable_final:,.2f}")
+            logger.info(f"   - Límite inferior descontado: ${limite_inferior_pesos:,.2f} ({limite_inferior_uvt} UVT)")
+            logger.info(f"   - Base sujeta a retención: ${base_sujeta_retencion:,.2f}")
             logger.info(f"   - Tarifa: {tarifa_art383*100:.1f}%")
             logger.info(f"   - Retención: ${valor_retencion_art383:,.2f}")
             
@@ -660,6 +666,8 @@ class LiquidadorRetencion:
             mensajes_detalle.extend([
                 f" Base gravable final: ${base_gravable_final:,.2f}",
                 f" Base gravable en UVT: {base_gravable_uvt:.2f} UVT",
+                f" Límite inferior descontado: ${limite_inferior_pesos:,.2f} ({limite_inferior_uvt} UVT)",
+                f" Base sujeta a retención: ${base_sujeta_retencion:,.2f}",
                 f" Tarifa aplicada: {tarifa_art383*100:.1f}%",
                 f" Retención calculada: ${valor_retencion_art383:,.2f}",
                 " Cálculo completado con validaciones manuales"

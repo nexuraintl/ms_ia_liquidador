@@ -202,17 +202,14 @@ class LiquidadorRetencion:
         tolerancia = 1.0  # Tolerancia de $1 peso por redondeos
 
         if abs(suma_bases_gravables - valor_base_total) > tolerancia:
-            diferencia = suma_bases_gravables - valor_base_total
-            mensajes_error.append("Error: La sumatoria de las bases gravables no coincide con el valor total de la factura")
-            mensajes_error.append(f"  • Suma de bases gravables: ${suma_bases_gravables:,.2f}")
-            mensajes_error.append(f"  • Valor total factura (sin IVA): ${valor_base_total:,.2f}")
-            mensajes_error.append(f"  • Diferencia: ${diferencia:,.2f}")
-            logger.error(f"Liquidación detenida: Suma bases (${suma_bases_gravables:,.2f}) != Valor total (${valor_base_total:,.2f})")
-            return self._crear_resultado_no_liquidable(
-                mensajes_error,
-                estado="preliquidacion_sin_finalizar",
-                valor_factura_sin_iva=analisis.valor_total or 0
+            diferencia = abs(suma_bases_gravables - valor_base_total)
+            mensaje_advertencia = (
+                f"Advertencia: La sumatoria de las bases gravables (${suma_bases_gravables:,.2f}) "
+                f"no coincide con el valor total de la factura (${valor_base_total:,.2f}). Diferencia: ${diferencia:,.2f}"
             )
+            mensajes_error.append(mensaje_advertencia)
+            logger.warning(f"Discrepancia en bases: Suma bases (${suma_bases_gravables:,.2f}) != Valor total (${valor_base_total:,.2f})")
+            # Ya no se detiene la ejecución ni se retorna _crear_resultado_no_liquidable
 
         for concepto_item in conceptos_con_bases:
             logger.info(f" Procesando concepto: {concepto_item.concepto} - Base: ${concepto_item.base_gravable:,.2f}")

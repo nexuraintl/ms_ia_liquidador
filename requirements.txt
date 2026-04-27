@@ -20,7 +20,7 @@ pdf2image==1.17.0
 PyMuPDF==1.23.8
 
 # Google APIs (ACTUALIZADO v3.0: nuevo SDK oficial)
-google-genai==0.2.0
+google-genai==1.12.1
 google-cloud-vision==3.4.5
 
 # Utilidades
@@ -41,8 +41,8 @@ aiofiles==23.2.0
 extract-msg==0.48.4
 
 # Cliente de base de datos
-supabase==2.10.0
-httpx==0.27.0
+supabase==2.12.0
+httpx==0.28.1
 requests==2.31.0
 
 # NUEVAS DEPENDENCIAS v2.3.0:

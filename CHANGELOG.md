@@ -1,5 +1,24 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.2] - 2026-04-26
+
+### Cambiado
+
+- `requirements.txt` — `google-genai` actualizado `0.2.0` → `1.12.1`. Desde v1.3.0 del SDK el cliente async usa `httpx` nativo, eliminando el patrón `asyncio.to_thread(requests.post, ...)` que causaba `UNEXPECTED_EOF_WHILE_READING` en Cloud Run con 1 vCPU bajo carga concurrente. Ésta es la fix estructural del SSL EOF que la migración a `client.aio.*` (v3.14.1) no podía resolver sola.
+- `requirements.txt` — `httpx` actualizado `0.27.0` → `0.28.1` (requerido por `google-genai==1.12.1`); `supabase` actualizado `2.10.0` → `2.12.0` para compatibilidad con `httpx<0.29`.
+- `Clasificador/gemini_files_manager.py:104` — adoptado breaking change SDK v1.5.0: `files.upload(path=...)` → `files.upload(file=...)`.
+- `app/ejecucion_tareas_paralelo.py` — `max_workers` por defecto reducido `4` → `2` en `ControladorConcurrencia`, `CoordinadorEjecucionParalela` y función fachada `ejecutar_tareas_paralelo`. Defensa en profundidad para Cloud Run 2 GB / 1 vCPU.
+- `Background/background_processor.py` — eliminado kwarg explícito `max_workers=4` para usar el nuevo default.
+
+## [3.14.1] - 2026-04-26
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — `_ejecutar_con_retry`: migrado de `run_in_executor + client.models.generate_content` (sync, urllib3/requests) a `await client.aio.models.generate_content` (async nativo, httpx). Elimina la competencia por CPU entre hilos y event loop que causaba `UNEXPECTED_EOF_WHILE_READING` en Cloud Run con 1 vCPU bajo carga concurrente.
+- `Clasificador/clasificador.py` — `clasificar_documentos` y `_llamar_gemini_hibrido_factura`: `client.files.get` convertido a `await client.aio.files.get`.
+- `Clasificador/gemini_files_manager.py` — todas las operaciones de Files API (`upload`, `get`, `delete`) convertidas a sus equivalentes async nativos via `client.aio.files.*`. Eliminado el `run_in_executor` en `delete_file`.
+- `tests/test_clasificador_files_api.py` — mocks actualizados de `client.models.generate_content` y `client.files.*` a `AsyncMock` en `client.aio.*` para reflejar el cliente async nativo.
+
 ## [3.14.0 - Extracción de Archivos Embebidos en Emails] - 2026-03-10
 
 ### 🏗️ Arquitectura

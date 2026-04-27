@@ -357,7 +357,7 @@ class ProcesadorGemini:
                 # Agregar referencias de Files API al contenido
                 for file_ref in uploaded_files_refs:
                     # Obtener objeto File usando la referencia
-                    file_obj = self.client.files.get(name=file_ref.name)
+                    file_obj = await self.client.aio.files.get(name=file_ref.name)
                     contents.append(file_obj)
                     logger.info(f"Referencia Files API agregada: {file_ref.name}")
             
@@ -446,10 +446,11 @@ class ProcesadorGemini:
 
     async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
         """
-        Ejecuta llamada a Gemini con reintentos automaticos para errores SSL transitorios.
+        Ejecuta llamada a Gemini con cliente async nativo y reintentos para errores SSL transitorios.
 
-        Detecta errores de conexion SSL (UNEXPECTED_EOF_WHILE_READING, ConnectionReset,
-        etc.) comunes en entornos Cloud Run y reintenta con backoff exponencial.
+        Usa client.aio.models.generate_content (async nativo, httpx) en lugar de
+        run_in_executor + cliente sync (requests/urllib3). Esto elimina la competencia
+        por CPU entre hilos y el event loop que causaba UNEXPECTED_EOF en Cloud Run.
 
         Args:
             contenido: Lista de contenido para generate_content (prompt + archivos)
@@ -482,16 +483,11 @@ class ProcesadorGemini:
 
         for intento in range(1, max_reintentos + 1):
             try:
-                loop = asyncio.get_event_loop()
-
                 respuesta = await asyncio.wait_for(
-                    loop.run_in_executor(
-                        None,
-                        lambda: self.client.models.generate_content(
-                            model=self.model_name,
-                            contents=contenido,
-                            config=config
-                        )
+                    self.client.aio.models.generate_content(
+                        model=self.model_name,
+                        contents=contenido,
+                        config=config
                     ),
                     timeout=timeout_segundos
                 )
@@ -926,7 +922,7 @@ class ProcesadorGemini:
             # PASO 4: Agregar referencias de archivos SUBIDOS en este flujo
             # NOTA: Los archivos File de Google (desde cache) ya fueron agregados directamente en el loop
             for file_ref in uploaded_files_refs:
-                file_obj = self.client.files.get(name=file_ref.name)
+                file_obj = await self.client.aio.files.get(name=file_ref.name)
                 file_part = types.Part(
                     file_data=types.FileData(
                         mime_type=file_obj.mime_type,

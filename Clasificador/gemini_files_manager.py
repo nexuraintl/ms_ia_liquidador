@@ -101,8 +101,8 @@ class GeminiFilesManager:
                 # PASO 2: Upload usando nuevo SDK
                 logger.info(f"Subiendo archivo a Files API: {archivo.filename}")
 
-                uploaded_file = self.client.files.upload(
-                    path=str(temp_path),
+                uploaded_file = await self.client.aio.files.upload(
+                    file=str(temp_path),
                     config={
                         "display_name": archivo.filename
                     }
@@ -204,7 +204,7 @@ class GeminiFilesManager:
 
             # Obtener estado actualizado
             try:
-                file_obj = self.client.files.get(name=file_obj.name)
+                file_obj = await self.client.aio.files.get(name=file_obj.name)
             except Exception as e:
                 raise ValueError(f"Error consultando estado del archivo: {str(e)}")
 
@@ -241,7 +241,7 @@ class GeminiFilesManager:
             File object con metadata
         """
         try:
-            file_obj = self.client.files.get(name=file_name)
+            file_obj = await self.client.aio.files.get(name=file_name)
             logger.debug(f"Metadata obtenida: {file_name}")
             return file_obj
         except Exception as e:
@@ -259,13 +259,7 @@ class GeminiFilesManager:
             True si eliminado exitosamente, False si error
         """
         try:
-            # Ejecutar en thread pool para no bloquear el event loop:
-            # self.client.files.delete() es una llamada HTTP sincrona del SDK.
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                None,
-                lambda: self.client.files.delete(name=file_name)
-            )
+            await self.client.aio.files.delete(name=file_name)
 
             # Remover del cache interno
             for filename, file_result in list(self.uploaded_files.items()):

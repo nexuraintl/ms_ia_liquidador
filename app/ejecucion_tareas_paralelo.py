@@ -243,13 +243,13 @@ class ControladorConcurrencia:
         >>> resultado = await controlador.ejecutar_con_semaforo(tarea_async)
     """
 
-    def __init__(self, max_workers: int = 4):
+    def __init__(self, max_workers: int = 2):
         """
         Inicializa controlador con numero maximo de workers.
 
         Args:
             max_workers: Numero maximo de workers simultaneos.
-                        Default: 4 (optimizado para llamadas a Gemini).
+                        Default: 2 (optimizado para Cloud Run 1 vCPU / 2 GB RAM).
         """
         self.max_workers = max_workers
         self.semaforo = asyncio.Semaphore(max_workers)
@@ -444,7 +444,7 @@ class CoordinadorEjecucionParalela:
 
     def __init__(
         self,
-        max_workers: int = 4,
+        max_workers: int = 2,
         logger: Optional[logging.Logger] = None
     ):
         """
@@ -540,7 +540,7 @@ class CoordinadorEjecucionParalela:
 
 async def ejecutar_tareas_paralelo(
     tareas_analisis: List[TareaAnalisis],
-    max_workers: int = 4
+    max_workers: int = 2
 ) -> ResultadoEjecucionParalela:
     """
     Funcion fachada para ejecutar tareas de analisis en paralelo.

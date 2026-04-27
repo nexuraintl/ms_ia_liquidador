@@ -425,8 +425,7 @@ class BackgroundProcessor:
         # PASO 4.2: EJECUCION PARALELA
         # ================================
         resultado_ejecucion = await ejecutar_tareas_paralelo(
-            tareas_analisis=resultado_preparacion.tareas_analisis,
-            max_workers=4
+            tareas_analisis=resultado_preparacion.tareas_analisis
         )
 
         resultados_analisis = resultado_ejecucion.resultados_analisis

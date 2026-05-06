@@ -727,7 +727,7 @@ class ClasificadorICA:
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=config_matching,
-                timeout_segundos=60.0
+                timeout_segundos=180.0
             )
 
             # Limpiar y parsear respuesta
@@ -763,6 +763,10 @@ class ClasificadorICA:
                 "autorretenedor_ica": autorretenedor_ica
             }
 
+        except asyncio.TimeoutError:
+            logger.error("Timeout en llamada a Gemini (actividades): la respuesta superó 180s. "
+                         "Posible causa: prompt muy grande (muchas actividades en BD) o carga en Cloud Run.")
+            return {}
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (actividades): {e}")
             return {}

@@ -1,5 +1,18 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.3] - 2026-05-05
+
+### Cambiado
+
+- `prompts/prompt_ica.py` — `crear_prompt_relacionar_actividades`: anadida seccion "RUBRICA DE MATCHING" con 4 criterios priorizados (semantica > especificidad > tipo_actividad > tarifa-no-elegir) y regla de desempate explicita. El JSON de respuesta ahora pide un campo `razonamiento` por cada actividad relacionada, limitado a 60 palabras, citando 2-3 candidatos de la BD evaluados y justificando la eleccion. Anadido EJEMPLO 6 (caso ambiguo) como few-shot. Corregida errata `autorenedor_ica` → `autorretenedor_ica` en ejemplos 3 y 4.
+- `prompts/prompt_ica.py` — `validar_estructura_actividades`: presencia del campo `razonamiento` se valida de forma INFORMATIVA (logger warning si falta o no es string) sin bloquear el flujo. Liquidador (`Liquidador/liquidador_ica.py`) y validador (`app/validar_ica.py`) ignoran el campo (solo iteran sobre `nombre_act_rel`, `codigo_actividad`, `codigo_ubicacion`), por lo que no hay impacto rio abajo.
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: override local de `temperature` a `0.2` para la segunda llamada Gemini (matching). Se construye un dict local heredando `generation_config` global con `**spread`, sin modificar el config compartido por los otros 8 clasificadores. La primera llamada (`_identificar_ubicaciones_gemini`) conserva `temperature=0.4` global.
+- `tests/test_validar_ica.py` — anadidos 3 tests unitarios para `validar_estructura_actividades` verificando que el campo `razonamiento` se trata de forma no bloqueante.
+
+### Motivacion
+
+Mejora de precision en el matching factura-BD del clasificador ICA. Combinacion de chain-of-thought explicito (Opcion A) y rubrica + few-shots (Opcion B) sobre Gemini 2.5 Flash.
+
 ## [3.14.2] - 2026-04-26
 
 ### Cambiado

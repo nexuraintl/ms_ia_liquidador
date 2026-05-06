@@ -1,5 +1,12 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.4] - 2026-05-06
+
+### Corregido
+
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: timeout aumentado de 60s a 180s para la segunda llamada Gemini (matching de actividades). Con prompts grandes (ej: 7634 actividades para Bogota) y razonamiento chain-of-thought, la generacion supera 60s en Cloud Run con 1 vCPU. Hay precedente: `_llamar_gemini_hibrido` ya usaba 120s.
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: captura `asyncio.TimeoutError` de forma explicita antes del handler generico `Exception`. Antes, `str(asyncio.TimeoutError())` retornaba `""` y el log quedaba vacio; ahora el mensaje incluye el limite de tiempo y la causa probable.
+
 ## [3.14.3] - 2026-05-05
 
 ### Cambiado

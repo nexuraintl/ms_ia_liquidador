@@ -718,10 +718,15 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f" ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para relacionar actividades")
 
-            # Llamar a Gemini con retry automatico para errores SSL
+            # Override local: temperature reducida para tarea deterministica de matching.
+            # No se modifica generation_config global (compartido con otros 8 clasificadores).
+            config_matching = {
+                **self.procesador_gemini.generation_config,
+                'temperature': 0.2,
+            }
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
-                config=self.procesador_gemini.generation_config,
+                config=config_matching,
                 timeout_segundos=60.0
             )
 

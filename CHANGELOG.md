@@ -1,5 +1,19 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.5] - 2026-05-14
+
+### Corregido
+
+- `Liquidador/liquidador_consorcios.py` — `_liquidar_consorciado_individual`: validación explícita cuando Gemini devuelve `porcentaje_participacion: null` (caso permitido por `prompts/prompt_retefuente.py:559` cuando el porcentaje no se identifica en el documento). Antes `float(consorciado.get('porcentaje_participacion', 0))` lanzaba `TypeError: float() argument must be a string or a real number, not 'NoneType'` porque `dict.get(key, default)` no usa el default cuando la clave existe pero su valor es `None`. La excepción caía en el `try/except` genérico de `liquidar_consorcio` y reseteaba toda la respuesta a `es_consorcio=False, consorciados=[], procesamiento_exitoso=False`, ocultando los datos extraídos. Ahora el caso se reporta como "Información incompleta: falta el porcentaje de participación del consorciado X" reutilizando el flujo existente de `_campo_faltante` / `error_naturaleza_incompleta`. El usuario recibe `procesamiento_exitoso=False`, `estado="preliquidación_sin_finalizar"`, la lista completa de consorciados con la observación específica y el `valor_factura_sin_iva` preservado.
+
+### Arquitectura
+
+- `Liquidador/liquidador_consorcios.py` — eliminado el antipatrón `dict.get(key, 0)` → `float(...)`/`Decimal(str(...))` en 9 puntos (líneas 400, 413, 469, 481, 582, 675, 703, 718, 854). Reemplazado por `dict.get(key) or 0` en cada caso. Razón: `dict.get` con default ignora el default cuando el valor existe pero es `None`, lo que convertía cualquier `null` de Gemini en `TypeError`/`InvalidOperation` aguas abajo. El bug del `porcentaje_participacion` fue una manifestación; el resto de los puntos eran bombas latentes equivalentes (`valor_total`, `tarifa_retencion`, `base_gravable`).
+
+### Tests
+
+- `tests/test_liquidador_consorcios.py` (nuevo) — 6 casos en dos clases `IsolatedAsyncioTestCase`. Cobertura del fix de `porcentaje_participacion` (3 casos: null aislado reproduce el incidente real, null junto a otros consorciados válidos verifica preservación, 0 verifica que es valor numérico válido y no "incompleto") y del hardening del antipatrón `None`-vs-default (3 casos: `valor_total` null, `tarifa_retencion` null, `base_gravable` null).
+
 ## [3.14.4] - 2026-05-06
 
 ### Corregido

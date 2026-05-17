@@ -236,7 +236,8 @@ class BackgroundProcessor:
             logger.error(f"Factura {factura_id}: {error_msg}")
             logger.error(f"Traceback: {error_traceback}")
 
-            # Guardar error en JSON local
+            # Guardar error tecnico completo (CON traceback) en JSON local
+            # para soporte interno. Esto NO se envia al webhook/frontend.
             from config import guardar_archivo_json
             error_data = {
                 "timestamp": datetime.now().isoformat(),
@@ -247,15 +248,63 @@ class BackgroundProcessor:
             }
             guardar_archivo_json(error_data, f"error_procesamiento_{factura_id}")
 
-            # Intentar enviar error a webhook
+            # Construir payload que RESPETA EL CONTRATO de la API.
+            # En vez del blob {"status": "error"} -que rompe el frontend-,
+            # se envia la forma normal con estado "preliquidacion_sin_finalizar".
+            from utils import crear_respuesta_preliquidacion_sin_finalizar
+
+            error_str = str(e).lower()
+            tipo_error = type(e).__name__
+            es_fallo_conexion_ia = (
+                "connecterror" in error_str
+                or "connecttimeout" in error_str
+                or "bad_gateway" in error_str
+                or "gateway_timeout" in error_str
+                or "502" in error_str
+                or "504" in error_str
+                or "clasificación híbrida" in error_str
+                or "clasificacion híbrida" in error_str
+            )
+
+            if es_fallo_conexion_ia:
+                mensaje_usuario = (
+                    "No se pudo conectar con el servicio de procesamiento. "
+                    "Preliquidación sin finalizar, intente nuevamente."
+                )
+            else:
+                mensaje_usuario = (
+                    "El procesamiento no pudo completarse. "
+                    "Preliquidación sin finalizar, intente nuevamente."
+                )
+
+            try:
+                codigo_del_negocio = parametros.get("codigo_del_negocio", 0)
+            except AttributeError:
+                codigo_del_negocio = 0
+
+            resultado_contrato = crear_respuesta_preliquidacion_sin_finalizar(
+                mensaje=mensaje_usuario,
+                codigo_del_negocio=codigo_del_negocio,
+                diagnostico={
+                    "tipo_error": tipo_error,
+                    "servicio_externo": "Google Gemini API",
+                    "timestamp_error": datetime.now().isoformat(),
+                    "retry_sugerido": True,
+                }
+            )
+
+            # Respaldo local del payload enviado al webhook
+            guardar_archivo_json(resultado_contrato, f"resultado_final_{factura_id}")
+
+            # Intentar enviar resultado (formato de contrato) a webhook
             try:
                 await self.webhook_publisher.enviar_resultado(
                     factura_id=factura_id,
-                    resultado=error_data
+                    resultado=resultado_contrato
                 )
             except Exception as webhook_error:
                 logger.error(
-                    f"Factura {factura_id}: Error adicional enviando error a webhook: {webhook_error}"
+                    f"Factura {factura_id}: Error adicional enviando resultado a webhook: {webhook_error}"
                 )
 
     def _reconstruir_archivos(self, archivos_data: List[Dict[str, Any]]) -> List[UploadFile]:

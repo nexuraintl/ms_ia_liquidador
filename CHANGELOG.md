@@ -1,5 +1,21 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.6] - 2026-05-18
+
+### Corregido
+
+- `utils/mockups.py` — corregida la errata `preliquidacion_sin_finalzar` → `preliquidacion_sin_finalizar` (faltaba la 2ª "i") en 10 puntos: `estado_procesamiento`/`razon_fallo` de `crear_respuesta_error_validacion` y el campo `estado`/`estado_liquidacion` de los 8 helpers `_crear_mock_*_validacion`. Antes el estado por-impuesto no coincidía con el valor canónico usado en el resto del sistema, lo que podía romper el frontend si discrimina por ese campo.
+- `Clasificador/clasificador.py` — los fallos `httpx.ConnectError` / `httpcore.ConnectError` (falla de handshake TLS hacia Google Gemini API desde Cloud Run) ya NO abortan la clasificación sin reintentar. Causa: `"connecterror"` no estaba en la lista de patrones reintentables y `httpx.ConnectError` no deriva de `ssl.SSLError`/`ConnectionError`, por lo que `_ejecutar_con_retry` lo trataba como no transitorio. Además `client.aio.files.get()` (línea ~360) no tenía ninguna protección de reintento. Se añadieron patrones de conexión y tipos `httpx`/`httpcore` a la detección de transitoriedad, extraída a `_es_error_transitorio()`, y un nuevo `_files_get_con_retry()` con el mismo backoff + reinicialización de cliente. El mensaje del `ValueError` ya no queda vacío (`Error en clasificación híbrida: `) cuando `str(e)` es vacío: ahora incluye `type(e).__name__`.
+
+### Arquitectura
+
+- `utils/mockups.py` — nueva función pública `crear_respuesta_preliquidacion_sin_finalizar(mensaje, codigo_del_negocio, diagnostico)` que sigue el patrón de `crear_respuesta_error_validacion`, reutilizando los helpers `_crear_mock_*_validacion`. Devuelve la forma normal del contrato con `estado_procesamiento="preliquidacion_sin_finalizar"`, todos los impuestos presentes y un bloque `diagnostico_error` (sin traceback crudo). Exportada en `utils/__init__.py`.
+- `Background/background_processor.py` — el `except` de `procesar_factura_background` ya NO envía al webhook el blob ad-hoc `{"status":"error","error_traceback":...}` que rompía el frontend. Ahora envía el payload de contrato vía `crear_respuesta_preliquidacion_sin_finalizar` con un mensaje claro y sin nombre de proveedor ("No se pudo conectar con el servicio de procesamiento. Preliquidación sin finalizar..."). El proveedor de IA (`Google Gemini API`) solo se conserva en `diagnostico_error.servicio_externo`, no en las `observaciones` visibles al usuario. El traceback técnico completo se sigue logueando y guardando en `error_procesamiento_*` (uso interno de soporte), no en el payload al frontend.
+
+### Tests
+
+- `tests/test_preliquidacion_sin_finalizar.py` (nuevo) — cobertura de `crear_respuesta_preliquidacion_sin_finalizar` (claves de contrato, `estado_procesamiento`, todos los impuestos con `estado`/`aplica:false`, `diagnostico_error` sin `error_traceback`), de `_es_error_transitorio` / `_files_get_con_retry` ante `httpx.ConnectError`, y test de integración de `BackgroundProcessor.procesar_factura_background` que verifica que ante un fallo (502/bad_gateway IA o genérico) el webhook recibe el payload de contrato y NO el blob `{"status":"error"}`.
+
 ## [3.14.5] - 2026-05-14
 
 ### Corregido

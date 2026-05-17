@@ -15,6 +15,8 @@ import asyncio
 import logging
 import traceback
 import ssl
+import httpx
+import httpcore
 from datetime import datetime
 from typing import Dict, Any, Tuple
 from pathlib import Path
@@ -356,8 +358,9 @@ class ProcesadorGemini:
 
                 # Agregar referencias de Files API al contenido
                 for file_ref in uploaded_files_refs:
-                    # Obtener objeto File usando la referencia
-                    file_obj = await self.client.aio.files.get(name=file_ref.name)
+                    # Obtener objeto File usando la referencia (con retry ante
+                    # errores de conexion transitorios hacia Files API)
+                    file_obj = await self._files_get_con_retry(name=file_ref.name)
                     contents.append(file_obj)
                     logger.info(f"Referencia Files API agregada: {file_ref.name}")
             
@@ -436,13 +439,124 @@ class ProcesadorGemini:
             
             logger.error(f" Archivos directos fallidos: {archivos_fallidos_nombres}")
             logger.error(f" Textos preprocesados fallidos: {list(textos_preprocesados.keys())}")
-            raise ValueError(f"Error en clasificación híbrida: {str(e)}")
+            # str(e) puede ser vacio (p. ej. httpx.ConnectError) -> incluir el tipo
+            # para que el mensaje nunca quede como "Error en clasificación híbrida: "
+            detalle_error = str(e) or f"{type(e).__name__}: fallo de conexión con Google Gemini API"
+            raise ValueError(f"Error en clasificación híbrida: {detalle_error}")
 
         finally:
             # PASO 9 (NUEVO v3.0): Cleanup omitido intencionalmente.
             # Los archivos subidos aquí serán reutilizados por preparar_archivos_para_workers_paralelos()
             # via cache en GeminiFilesManager. El cleanup final ocurre en _llamar_gemini_hibrido_factura().
             pass
+
+    # Patrones de error (en str(e).lower()) considerados transitorios y reintentables.
+    # Incluye fallos SSL/EOF historicos y fallos de conexion/TLS hacia Gemini
+    # (httpx/httpcore ConnectError) que antes NO se reintentaban.
+    ERRORES_REINTENTABLES = (
+        "unexpected_eof",
+        "unexpected eof",
+        "ssl",
+        "ssleof",
+        "connection reset",
+        "connectionreset",
+        "broken pipe",
+        "brokenpipe",
+        "max retries exceeded",
+        "connection aborted",
+        "remotedisconnected",
+        "remote end closed connection",
+        "connecterror",
+        "connect error",
+        "connecttimeout",
+        "connect timeout",
+        "connection refused",
+        "temporary failure in name resolution",
+        "all connection attempts failed",
+    )
+
+    # Tipos de excepcion considerados transitorios a nivel de clase.
+    TIPOS_TRANSITORIOS = (
+        ssl.SSLError,
+        ConnectionError,
+        ConnectionResetError,
+        BrokenPipeError,
+        httpx.ConnectError,
+        httpx.ConnectTimeout,
+        httpx.ReadTimeout,
+        httpx.RemoteProtocolError,
+        httpx.TransportError,
+        httpcore.ConnectError,
+        httpcore.ConnectTimeout,
+    )
+
+    def _es_error_transitorio(self, e: Exception) -> bool:
+        """
+        Determina si una excepcion es un error de conexion/SSL transitorio
+        que vale la pena reintentar.
+
+        Combina deteccion por tipo (TIPOS_TRANSITORIOS) y por substring del
+        mensaje (ERRORES_REINTENTABLES). httpx.ConnectError tiene str() vacio,
+        por eso la deteccion por tipo es indispensable.
+        """
+        if isinstance(e, self.TIPOS_TRANSITORIOS):
+            return True
+        error_str = str(e).lower()
+        return any(patron in error_str for patron in self.ERRORES_REINTENTABLES)
+
+    async def _files_get_con_retry(self, name, max_reintentos: int = 3):
+        """
+        Obtiene un objeto File de la Files API con reintentos ante errores
+        de conexion transitorios (mismo criterio que _ejecutar_con_retry).
+
+        Antes esta llamada no tenia proteccion: un httpx.ConnectError aqui
+        abortaba toda la clasificacion con un mensaje vacio.
+
+        Args:
+            name: Nombre/referencia del archivo en Files API
+            max_reintentos: Numero maximo de intentos (default 3)
+
+        Returns:
+            Objeto File de Gemini Files API
+
+        Raises:
+            Exception: Si todos los reintentos fallan, relanza la ultima excepcion
+        """
+        ultima_excepcion = None
+
+        for intento in range(1, max_reintentos + 1):
+            try:
+                file_obj = await self.client.aio.files.get(name=name)
+                if intento > 1:
+                    logger.info(f"files.get exitoso en reintento {intento}/{max_reintentos}")
+                return file_obj
+
+            except Exception as e:
+                ultima_excepcion = e
+
+                if not self._es_error_transitorio(e):
+                    raise
+
+                if intento < max_reintentos:
+                    espera = 2 ** (intento - 1)
+                    logger.warning(
+                        f"Error transitorio en files.get intento {intento}/{max_reintentos}: "
+                        f"{type(e).__name__}: {e}. Reintentando en {espera}s..."
+                    )
+                    await asyncio.sleep(espera)
+
+                    try:
+                        self.client = genai.Client(api_key=self.api_key)
+                        logger.info("Cliente Gemini reinicializado con nueva conexion")
+                    except Exception as reinit_error:
+                        logger.warning(f"Error reinicializando cliente: {reinit_error}")
+                else:
+                    logger.error(
+                        f"Error de conexion persistente en files.get despues de "
+                        f"{max_reintentos} intentos: {type(e).__name__}: {e}"
+                    )
+
+        raise ultima_excepcion
 
     async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
         """
@@ -464,21 +578,6 @@ class ProcesadorGemini:
         Raises:
             Exception: Si todos los reintentos fallan, relanza la ultima excepcion
         """
-        errores_reintentables = (
-            "unexpected_eof",
-            "unexpected eof",
-            "ssl",
-            "ssleof",
-            "connection reset",
-            "connectionreset",
-            "broken pipe",
-            "brokenpipe",
-            "max retries exceeded",
-            "connection aborted",
-            "remotedisconnected",
-            "remote end closed connection",
-        )
-
         ultima_excepcion = None
 
         for intento in range(1, max_reintentos + 1):
@@ -503,14 +602,9 @@ class ProcesadorGemini:
 
             except Exception as e:
                 ultima_excepcion = e
-                error_str = str(e).lower()
 
                 # Verificar si es un error SSL/conexion transitorio
-                es_transitorio = any(patron in error_str for patron in errores_reintentables)
-
-                # Verificar excepciones SSL a nivel de tipo
-                if isinstance(e, (ssl.SSLError, ConnectionError, ConnectionResetError, BrokenPipeError)):
-                    es_transitorio = True
+                es_transitorio = self._es_error_transitorio(e)
 
                 if not es_transitorio:
                     # Error no transitorio, propagar inmediatamente

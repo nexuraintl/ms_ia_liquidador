@@ -10,7 +10,7 @@
 ### Arquitectura
 
 - `utils/mockups.py` — nueva función pública `crear_respuesta_preliquidacion_sin_finalizar(mensaje, codigo_del_negocio, diagnostico)` que sigue el patrón de `crear_respuesta_error_validacion`, reutilizando los helpers `_crear_mock_*_validacion`. Devuelve la forma normal del contrato con `estado_procesamiento="preliquidacion_sin_finalizar"`, todos los impuestos presentes y un bloque `diagnostico_error` (sin traceback crudo). Exportada en `utils/__init__.py`.
-- `Background/background_processor.py` — el `except` de `procesar_factura_background` ya NO envía al webhook el blob ad-hoc `{"status":"error","error_traceback":...}` que rompía el frontend. Ahora envía el payload de contrato vía `crear_respuesta_preliquidacion_sin_finalizar` con un mensaje claro ("No se pudo conectar con el servicio de IA (Google Gemini). Preliquidación sin finalizar..."). El traceback técnico completo se sigue logueando y guardando en `error_procesamiento_*` (uso interno de soporte), no en el payload al frontend.
+- `Background/background_processor.py` — el `except` de `procesar_factura_background` ya NO envía al webhook el blob ad-hoc `{"status":"error","error_traceback":...}` que rompía el frontend. Ahora envía el payload de contrato vía `crear_respuesta_preliquidacion_sin_finalizar` con un mensaje claro y sin nombre de proveedor ("No se pudo conectar con el servicio de procesamiento. Preliquidación sin finalizar..."). El proveedor de IA (`Google Gemini API`) solo se conserva en `diagnostico_error.servicio_externo`, no en las `observaciones` visibles al usuario. El traceback técnico completo se sigue logueando y guardando en `error_procesamiento_*` (uso interno de soporte), no en el payload al frontend.
 
 ### Tests
 

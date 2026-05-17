@@ -268,7 +268,7 @@ class BackgroundProcessor:
 
             if es_fallo_conexion_ia:
                 mensaje_usuario = (
-                    "No se pudo conectar con el servicio de IA (Google Gemini). "
+                    "No se pudo conectar con el servicio de procesamiento. "
                     "Preliquidación sin finalizar, intente nuevamente."
                 )
             else:

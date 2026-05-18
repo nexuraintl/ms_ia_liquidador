@@ -1,5 +1,19 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.7] - 2026-05-18
+
+### Corregido
+
+- `Clasificador/clasificador_ica.py` — un timeout de Gemini ya NO se reporta como si la IA no hubiera identificado la ubicación/actividad. Antes, `_identificar_ubicaciones_gemini` no tenía handler de `asyncio.TimeoutError`: caía en el `except Exception` genérico, devolvía lista vacía y `_validar_ubicaciones_manualmente` producía "No se pudo identificar el municipio de la actividad gravada." (mensaje engañoso). Lo mismo ocurría en `_relacionar_actividades_gemini` (timeout → `{}` → "No se pudo identificar la actividad económica facturada"). Ahora se distingue el fallo técnico: la 1ª llamada retorna una 4-tupla con `error_tecnico` y la 2ª un dict con clave `error_tecnico`; `analizar_ica` corta temprano con observaciones "Error analizando ubicaciones ICA..." / "Error mapeando actividades ICA..." (con texto específico para timeout: "el servicio de IA no respondió a tiempo"). El caso genuino (Gemini sin datos) conserva sus mensajes originales.
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — timeout de las 2 llamadas a Gemini de ICA aumentado a 240s: identificación de ubicaciones 60s → 240s, mapeo de actividades 180s → 240s. Causa: prompts grandes (muchas ubicaciones/actividades en BD) y carga en Cloud Run hacían superar los límites anteriores.
+
+### Tests
+
+- `tests/test_clasificador_ica_timeout.py` (nuevo) — cobertura de `ClasificadorICA.analizar_ica`: timeout en ubicaciones → "Error analizando ubicaciones ICA"; timeout en actividades → "Error mapeando actividades ICA"; regresión del caso genuino que conserva "No se pudo identificar el municipio de la actividad gravada.".
+
 ## [3.14.6] - 2026-05-18
 
 ### Corregido

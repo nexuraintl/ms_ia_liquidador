@@ -115,7 +115,7 @@ class ProcesadorGemini:
 
         # Configuración de generación estándar
         self.generation_config = {
-            'temperature': 0.4,
+            'temperature': 0.3,
             'max_output_tokens': 65536,
             'candidate_count': 1
         }

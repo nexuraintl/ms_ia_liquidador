@@ -165,6 +165,7 @@ class BackgroundProcessor:
             archivos_data: Lista de diccionarios con {filename, content_type, content (bytes)}
             parametros: Parametros del endpoint (codigo_negocio, proveedor, etc.)
         """
+        clasificador = None
         try:
             logger.info(f"Factura {factura_id}: Iniciando procesamiento en background")
 
@@ -306,6 +307,12 @@ class BackgroundProcessor:
                 logger.error(
                     f"Factura {factura_id}: Error adicional enviando resultado a webhook: {webhook_error}"
                 )
+
+        finally:
+            # Resumen agregado de tokens Gemini por factura (incl. ICA).
+            # Siempre, aun si una tarea fallo. Best-effort.
+            if clasificador is not None:
+                clasificador._log_resumen_uso_tokens()
 
     def _reconstruir_archivos(self, archivos_data: List[Dict[str, Any]]) -> List[UploadFile]:
         """

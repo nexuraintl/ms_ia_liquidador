@@ -109,6 +109,10 @@ class ProcesadorGemini:
         # NUEVO: Inicializar Files Manager (SRP: gestión de archivos)
         self.files_manager = GeminiFilesManager(api_key=self.api_key)
 
+        # Acumulador de uso de tokens por factura (la instancia es por factura).
+        # Lo llena _log_uso_tokens; lo resume _log_resumen_uso_tokens.
+        self._uso_acumulado: list = []
+
         # Configuración de generación estándar
         self.generation_config = {
             'temperature': 0.4,
@@ -558,7 +562,80 @@ class ProcesadorGemini:
 
         raise ultima_excepcion
 
-    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
+    def _log_uso_tokens(self, respuesta, contexto: str) -> None:
+        """
+        Loguea el uso de tokens de una respuesta de Gemini para medir el
+        impacto del implicit caching de Gemini 2.5.
+
+        Defensivo: usage_metadata y sus campos pueden no existir o ser None
+        segun la version del SDK / la respuesta. Nunca debe romper el flujo.
+
+        Args:
+            respuesta: GenerateContentResponse de Gemini
+            contexto: Etiqueta para identificar la llamada (ej. "clasificacion")
+        """
+        try:
+            um = getattr(respuesta, "usage_metadata", None)
+            if um is None:
+                return
+
+            prompt_tokens = getattr(um, "prompt_token_count", None) or 0
+            cacheados = getattr(um, "cached_content_token_count", None) or 0
+            salida = getattr(um, "candidates_token_count", None) or 0
+
+            pct = (cacheados / prompt_tokens * 100) if prompt_tokens else 0.0
+            logger.info(
+                f"Tokens Gemini [{contexto}]: prompt={prompt_tokens} "
+                f"cacheados={cacheados} ({pct:.0f}%) salida={salida}"
+            )
+
+            # Acumular por factura (la instancia de ProcesadorGemini es por
+            # factura, ver background_processor.py). Permite el resumen agregado.
+            self._uso_acumulado.append({
+                "contexto": contexto,
+                "prompt": prompt_tokens,
+                "cacheados": cacheados,
+                "salida": salida,
+            })
+        except Exception as e:
+            logger.debug(f"No se pudo loguear usage_metadata [{contexto}]: {e}")
+
+    def _log_resumen_uso_tokens(self) -> None:
+        """
+        Loguea el total agregado de tokens Gemini de TODAS las llamadas de esta
+        factura (incluye ICA). Defensivo: nunca rompe el flujo.
+        """
+        try:
+            registros = getattr(self, "_uso_acumulado", [])
+            if not registros:
+                return
+
+            n = len(registros)
+            prompt_total = sum(r["prompt"] for r in registros)
+            cacheados_total = sum(r["cacheados"] for r in registros)
+            salida_total = sum(r["salida"] for r in registros)
+            pct = (cacheados_total / prompt_total * 100) if prompt_total else 0.0
+
+            # Desglose por contexto: cacheados/prompt
+            por_ctx = {}
+            for r in registros:
+                acc = por_ctx.setdefault(r["contexto"], [0, 0, 0])
+                acc[0] += r["prompt"]
+                acc[1] += r["cacheados"]
+                acc[2] += 1
+            desglose = " ".join(
+                f"{ctx}(x{c}:{cac}/{pr})" for ctx, (pr, cac, c) in por_ctx.items()
+            )
+
+            logger.info(
+                f"RESUMEN Gemini factura: {n} llamadas | "
+                f"prompt_total={prompt_total} cacheados_total={cacheados_total} "
+                f"({pct:.0f}% ahorro) salida_total={salida_total} | {desglose}"
+            )
+        except Exception as e:
+            logger.debug(f"No se pudo loguear resumen de uso de tokens: {e}")
+
+    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3, contexto: str = "gemini"):
         """
         Ejecuta llamada a Gemini con cliente async nativo y reintentos para errores SSL transitorios.
 
@@ -593,6 +670,11 @@ class ProcesadorGemini:
 
                 if intento > 1:
                     logger.info(f"Llamada a Gemini exitosa en reintento {intento}/{max_reintentos}")
+
+                # Hook de medicion: unico punto de retorno -> captura el 100%
+                # de llamadas (incl. ICA). NO altera la logica de
+                # retry/except/TLS de abajo.
+                self._log_uso_tokens(respuesta, contexto)
 
                 return respuesta
 
@@ -654,14 +736,14 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt + {len(contents) - 1} archivos directos")
             
             #  CREAR CONTENIDO MULTIMODAL CORRECTO
+            # Orden: documentos primero, prompt al final. El prefijo estable
+            # (documentos identicos entre los ~8 clasificadores) habilita el
+            # implicit caching de Gemini 2.5 y evita re-procesar el doc N veces.
             contenido_multimodal = []
-            
-            # Agregar prompt (primer elemento)
-            if contents:
-                prompt_texto = contents[0]
-                contenido_multimodal.append(prompt_texto)
-                logger.info(f" Prompt agregado: {len(prompt_texto):,} caracteres")
-            
+
+            # El prompt se anexa al FINAL (despues de los archivos)
+            prompt_texto = contents[0] if contents else None
+
             #  PROCESAR ARCHIVOS DIRECTOS CORRECTAMENTE
             archivos_directos = contents[1:] if len(contents) > 1 else []
             for i, archivo_elemento in enumerate(archivos_directos):
@@ -751,13 +833,20 @@ class ProcesadorGemini:
                     logger.error(f" Error procesando archivo {i+1}: {e}")
                     continue
             
+            # Anexar el prompt al FINAL (sufijo variable; el prefijo de
+            # documentos queda estable para el implicit caching de Gemini 2.5)
+            if prompt_texto is not None:
+                contenido_multimodal.append(prompt_texto)
+                logger.info(f" Prompt agregado al final: {len(prompt_texto):,} caracteres")
+
             # Llamar a Gemini con retry automatico para errores SSL
             logger.info(f"Enviando a Gemini (con retry SSL): {len(contenido_multimodal)} elementos")
 
             respuesta = await self._ejecutar_con_retry(
                 contenido=contenido_multimodal,
                 config=self.generation_config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="clasificacion"
             )
 
             if not respuesta:
@@ -912,11 +1001,9 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt de análisis + {len(archivos_directos)} archivos directos")
 
             #  CREAR CONTENIDO MULTIMODAL CORRECTO PARA ANÁLISIS
+            # Orden: documentos primero, prompt al final, para habilitar el
+            # implicit caching de Gemini 2.5 (prefijo de documentos estable).
             contenido_multimodal = []
-
-            # Agregar prompt de análisis (primer elemento)
-            contenido_multimodal.append(prompt)
-            logger.info(f"Prompt de análisis agregado: {len(prompt):,} caracteres")
 
             # NUEVO v3.0: PROCESAR ARCHIVOS CON FILES API + VALIDACIÓN ROBUSTA
             uploaded_files_refs = []
@@ -1027,7 +1114,9 @@ class ProcesadorGemini:
                 logger.info(f" Referencia Files API agregada (recién subido): {file_ref.name}")
             
             #  VALIDACIÓN FINAL: Verificar que tenemos contenido válido para enviar
-            archivos_validos = len(contenido_multimodal) - 1  # -1 porque el primer elemento es el prompt
+            # En este punto contenido_multimodal solo tiene Part de archivos
+            # (el prompt se anexa despues, al final).
+            archivos_validos = len(contenido_multimodal)
 
             if archivos_validos == 0 and len(archivos_directos) > 0:
                 # Solo lanzar error si se esperaban archivos pero ninguno fue validado
@@ -1042,13 +1131,19 @@ class ProcesadorGemini:
                 archivos_omitidos = len(archivos_directos) - archivos_validos
                 logger.warning(f"Se omitieron {archivos_omitidos} archivos problemáticos de {len(archivos_directos)} archivos totales")
             
+            # Anexar el prompt de analisis al FINAL (sufijo variable; el
+            # prefijo de documentos queda estable para el implicit caching)
+            contenido_multimodal.append(prompt)
+            logger.info(f"Prompt de análisis agregado al final: {len(prompt):,} caracteres")
+
             # Llamar a Gemini con retry automatico para errores SSL
             logger.info(f"Enviando analisis a Gemini (con retry SSL): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
 
             respuesta = await self._ejecutar_con_retry(
                 contenido=contenido_multimodal,
                 config=self.generation_config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="analisis_factura"
             )
 
             if not respuesta:
@@ -1188,7 +1283,7 @@ class ProcesadorGemini:
 
         logger.info(f" {len(archivos_referencias)} referencias Files API listas para worker")
         return archivos_referencias
-    
+
     # ===============================
     #  FUNCIÓN COORDINADORA PARA CONCURRENCIA
     # ===============================
@@ -1457,7 +1552,8 @@ class ProcesadorGemini:
             respuesta = await self._ejecutar_con_retry(
                 contenido=[prompt],
                 config=config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="consorcio" if usar_modelo_consorcio else "texto"
             )
 
             if not respuesta:

@@ -441,8 +441,10 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1)
+            # para habilitar el implicit caching de Gemini 2.5.
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
@@ -451,11 +453,15 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f"📎 ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
 
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
+
             # Llamar a Gemini con retry automatico para errores SSL
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=self.procesador_gemini.generation_config,
-                timeout_segundos=240.0
+                timeout_segundos=240.0,
+                contexto="ica_ubicaciones"
             )
 
             # Limpiar y parsear respuesta
@@ -749,8 +755,9 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1).
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
@@ -758,6 +765,9 @@ class ClasificadorICA:
                 archivos_procesados = await self._procesar_archivos_para_gemini(archivos_directos)
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f" ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para relacionar actividades")
+
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
 
             # Override local: temperature reducida para tarea deterministica de matching.
             # No se modifica generation_config global (compartido con otros 8 clasificadores).
@@ -768,7 +778,8 @@ class ClasificadorICA:
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=config_matching,
-                timeout_segundos=240.0
+                timeout_segundos=240.0,
+                contexto="ica_actividades"
             )
 
             # Limpiar y parsear respuesta

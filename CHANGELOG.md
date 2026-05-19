@@ -1,5 +1,35 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.9] - 2026-05-18
+
+### Añadido
+
+- `Clasificador/clasificador.py` — medición agregada de tokens Gemini por factura. Hook único en el punto de `return` de `_ejecutar_con_retry` (parámetro opcional `contexto`) que captura el 100% de las llamadas, incluidas las 2 de ICA que antes no se medían. Acumulador `_uso_acumulado` por instancia (la instancia es por factura) y `_log_resumen_uso_tokens()` que emite `RESUMEN Gemini factura: N llamadas | prompt_total=... cacheados_total=... (X% ahorro) ... | desglose por contexto`. NO se modificó la lógica de retry/recreación de cliente SSL-TLS.
+- `Background/background_processor.py` — llamada a `_log_resumen_uso_tokens()` en bloque `finally` (resumen siempre, aun si falla una tarea).
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — ambas llamadas a Gemini (identificar ubicaciones, relacionar actividades) reordenadas a `[documentos..., prompt]` para coherencia con la Fase 1 (release 3.14.8) y habilitar el implicit caching también en ICA.
+- `Clasificador/clasificador.py` — centralizada la instrumentación: eliminadas las 3 llamadas redundantes a `_log_uso_tokens` introducidas en 3.14.8 (`_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura`, `_llamar_gemini`); ahora pasan `contexto=` a `_ejecutar_con_retry`, que loguea y acumula en un solo sitio (evita doble conteo).
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` — ampliado: cobertura del reorden de ICA (`[documentos..., prompt]`) y de `_log_resumen_uso_tokens` (suma correcta de `_uso_acumulado`).
+
+## [3.14.8] - 2026-05-18
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — `_llamar_gemini_hibrido` y `_llamar_gemini_hibrido_factura`: invertido el orden de `contenido_multimodal` a `[documentos..., prompt]` (antes `[prompt, documentos...]`). El texto variable (prompt por impuesto) iba primero y rompía el prefijo común entre las ~8 llamadas del fan-out, inhabilitando el implicit caching de Gemini 2.5. Con los documentos como prefijo estable (idénticos y en el mismo orden porque vienen del mismo `cache_archivos`), Gemini reutiliza el prefill del documento en lugar de re-procesarlo N veces, reduciendo latencia y costo. NO se modificó `_ejecutar_con_retry` ni la lógica de retry/recreación de cliente SSL/TLS.
+
+### Añadido
+
+- `Clasificador/clasificador.py` — nuevo helper `_log_uso_tokens(respuesta, contexto)` que loguea `prompt_token_count`, `cached_content_token_count` y `candidates_token_count` de `usage_metadata` tras cada respuesta de Gemini (en `_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura` y `_llamar_gemini`). Permite cuantificar el % de tokens servidos desde el implicit cache. Defensivo: nunca rompe el flujo si falta `usage_metadata`.
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` (nuevo) — verifica que el último elemento enviado a `generate_content` es el prompt (str) y los previos son documentos, en clasificación y análisis de factura; y que `_log_uso_tokens` no rompe sin `usage_metadata`.
+
 ## [3.14.7] - 2026-05-18
 
 ### Corregido

@@ -1,5 +1,17 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.11] - 2026-05-19
+
+### Corregido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`) — `regimen_tributario` devolvía `null` de forma intermitente (~2 de cada 10 intentos) cuando el documento no declara el régimen explícitamente pero sí da una pista inequívoca. Causa raíz: el prompt ordenaba `null` si no había texto exacto y la prohibición absoluta "NO deduzcas el régimen tributario" vetaba la única inferencia válida; los aciertos eran el modelo desobedeciendo el prompt, por eso ajustar la temperatura producía resultados erráticos y no monótonos. Solución (sin tocar temperatura): bloque RÉGIMEN TRIBUTARIO reescrito con prioridades explícitas (1: texto exacto + código DIAN R-99-PN; 2: inferencia acotada por la pista documental "depuración art. 383 del ET" manifestada por persona natural → ORDINARIO, con la lógica tributaria que la justifica; 3: `null`), exigencia de registrar en `observaciones` la frase textual de la pista usada, y excepción explícita y acotada abierta en PROHIBICIONES ABSOLUTAS para esa única pista.
+
+## [3.14.10] - 2026-05-18
+
+### Añadido
+
+- `tools/benchmark_prompt_caching.py` — herramienta de desarrollo: mini servidor FastAPI independiente (`POST /benchmark`, parámetro `archivos` multipart) que corre el fan-out real (bootstrap config + UVT + DB como `main.py`) e instrumenta el único chokepoint `ProcesadorGemini._ejecutar_con_retry` para comparar, llamada por llamada, latencia y tokens cacheados del orden NUEVO `[documentos..., prompt]` vs. el ANTERIOR `[prompt, documentos...]`. N pasadas configurables por orden. No se monta en `main.py` ni altera código de producción.
+
 ## [3.14.9] - 2026-05-18
 
 ### Añadido

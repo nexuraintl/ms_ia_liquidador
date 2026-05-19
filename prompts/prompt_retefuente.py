@@ -114,18 +114,34 @@ Si no encuentras el RUT, buscar en FACTURA, si no en ANEXOS.
 ├─ Si encuentras "Persona jurídica" → es_persona_natural: false
 └─ Si NO encuentras → es_persona_natural: null
 
- RÉGIMEN TRIBUTARIO (Buscar texto exacto):
+ RÉGIMEN TRIBUTARIO (aplicar en este orden estricto de prioridad):
+
+ PRIORIDAD 1 - TEXTO EXACTO (la evidencia textual SIEMPRE manda):
 ├─ Si encuentras "RÉGIMEN SIMPLE" o "SIMPLE" o codigo "O-47" → regimen_tributario: "SIMPLE"
 ├─ Si encuentras "RÉGIMEN ORDINARIO" , "ORDINARIO" o "régimen ordinar" → regimen_tributario: "ORDINARIO"
 ├─ Si encuentras "RÉGIMEN ESPECIAL", "ESPECIAL" o "SIN ÁNIMO DE LUCRO" → regimen_tributario: "ESPECIAL"
-└─ Si NO encuentras → regimen_tributario: null
+└─ Si encuentras codigo DIAN "R-99-PN" → regimen_tributario: "ORDINARIO"
+
+ PRIORIDAD 2 - INFERENCIA POR PISTA DOCUMENTAL (SOLO si la PRIORIDAD 1 no dio resultado Y es_persona_natural == true):
+├─ Esta es la ÚNICA inferencia de régimen permitida. NO es deducción por tipo de empresa: es una pista
+│  documental explícita y unívoca escrita por el propio contribuyente.
+├─ PISTA "DEPURACIÓN ART. 383": Si en la factura/cuenta de cobro/anexos el contribuyente persona natural
+│  manifiesta expresamente que se le aplique la depuración del "artículo 383 del ET" / "art. 383" /
+│  "artículo 383 del Estatuto Tributario" sobre sus rentas de trabajo (típicamente una manifestación
+│  bajo gravedad de juramento sobre costos/deducciones, p. ej. Ley 2277 de 2022 / Decreto 2231 de 2023 /
+│  DUR 1625 de 2016 arts. 1.2.4.1.6 y 1.2.4.1.17) → regimen_tributario: "ORDINARIO"
+├─ RAZÓN (no la inventes, esta es la lógica): la depuración del art. 383 (tabla de retención sobre rentas
+│  de trabajo) SOLO aplica a personas naturales del régimen ORDINARIO; quien tributa bajo el régimen
+│  SIMPLE no está sujeto a esa retención y no solicitaría dicha depuración.
+└─ Si aplicas esta inferencia, DEBES registrar en "observaciones" la frase textual de la pista encontrada
+   y que el régimen "ORDINARIO" fue INFERIDO por esa manifestación (no leído de un campo de régimen).
+
+ PRIORIDAD 3 - SIN EVIDENCIA:
+└─ Si ninguna de las anteriores aplica → regimen_tributario: null
 
  AUTORRETENEDOR:
 ├─ Si encuentras texto "ES AUTORRETENEDOR" o codigo "O-15" → es_autorretenedor: true
 └─ Si NO encuentras esa frase → es_autorretenedor: false
-
-CODIGO COMODIN DIAN :
-├─ Si encuentras codigo "R-99-PN" →  regimen_tributario: "ORDINARIO" 
 
 IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RUT sobre los demas documentos.
 
@@ -164,7 +180,7 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
  NO asumas valores por defecto excepto los especificados
  NO modifiques nombres de conceptos del diccionario
  NO calcules valores no mostrados
- NO deduzcas el régimen tributario por el tipo de empresa
+ NO deduzcas el régimen tributario por el tipo de empresa, el sector, el concepto facturado ni el nombre del proveedor. ÚNICA excepción permitida: la PISTA "DEPURACIÓN ART. 383" descrita en la PRIORIDAD 2 del bloque RÉGIMEN TRIBUTARIO (manifestación expresa del contribuyente persona natural). Fuera de esa pista documental explícita, el régimen NO se infiere
  NO asumas que alguien es autorretenedor sin confirmación explícita
  NO extraigas conceptos facturados de documentos que NO sean la FACTURA
 ═══════════════════════════════════════════════════════════════════

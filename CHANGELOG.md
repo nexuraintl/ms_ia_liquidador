@@ -1,5 +1,18 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.12] - 2026-05-20
+
+### Cambiado
+
+- `Extraccion/extractor.py` — lectura de Excel migrada al engine `python-calamine` (Rust, libera el GIL) en lugar de `openpyxl`. Aplica a las dos rutas: `preprocesar_excel_limpio` (`pd.read_excel(..., engine="calamine")`) y `extraer_texto_excel` (a través del nuevo helper `_extraer_texto_excel_sync`).
+- `Extraccion/extractor.py` — serialización de DataFrames a texto reemplazada de `DataFrame.to_string(...)` por `to_csv(sep='\t', index=False, na_rep='')` mediante el nuevo helper `_dataframe_a_texto_tabular`. `to_string` formatea celda a celda calculando anchos por columna (~O(n^2) en filas); `to_csv` está vectorizado en C y es 5–20× más rápido en DataFrames grandes. El separador `\t` mantiene la lectura tabular para Gemini y evita ambigüedad con comas dentro de celdas.
+- `Extraccion/extractor.py` — `extraer_texto_excel` (método async) ahora delega su trabajo CPU-bound a un thread vía `asyncio.to_thread(_extraer_texto_excel_sync, ...)`, evitando que la lectura y serialización bloqueen el event loop. `preprocesar_excel_limpio` ya estaba delegada vía `run_in_executor` en `app/extraccion_hibrida.py:206` y `:298`, por lo que no se tocó esa cadena.
+- `requirements.txt` — `pandas` subido de `2.1.3` a `>=2.2.2,<2.3` (engine calamine soportado nativamente desde pandas 2.2). Agregada dependencia `python-calamine>=0.2.0`. `openpyxl` se conserva como fallback.
+
+### Corregido
+
+- Preprocesamiento de Excel grandes (caso real: `C1 Bases Fommur_linea3.xlsx`, 3 hojas, ~1.7M caracteres) pasa de ~16 min a segundos en Cloud Run (1 vCPU / 2 GiB). Causa raíz: combinación de `openpyxl` (parser XML puro en Python) + `DataFrame.to_string` con `max_rows=None`, ambos cuellos de CPU que se sumaban en hardware modesto.
+
 ## [3.14.11] - 2026-05-19
 
 ### Corregido

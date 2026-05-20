@@ -1,5 +1,11 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.13] - 2026-05-20
+
+### Corregido
+
+- `Liquidador/liquidador.py` (`_validar_naturaleza_tercero`) — el corte por régimen SIMPLE exigía `es_persona_natural == False`, por lo que un proveedor persona natural en régimen SIMPLE atravesaba la validación de naturaleza y luego moría en la validación posterior de conceptos mapeados, devolviendo `preliquidacion_sin_finalizar` con el mensaje "El concepto facturado no se identifica en los soportes adjuntos" cuando la causa real era el régimen. Ahora cualquier proveedor en régimen SIMPLE (natural o jurídico) corta con `estado: "no_aplica_impuesto"` y mensaje "Régimen Simple de Tributación - NO aplica retención en la fuente". El proveedor SIMPLE está exento de retefuente por normativa, independientemente del tipo de persona.
+
 ## [3.14.12] - 2026-05-20
 
 ### Cambiado

@@ -901,10 +901,10 @@ class LiquidadorRetencion:
             # Ya no se valida responsable de IVA porque aplica retención igual
 
             # Validar régimen simple
-            if hasattr(naturaleza, 'regimen_tributario') and naturaleza.regimen_tributario == "SIMPLE" and hasattr(naturaleza, 'es_persona_natural') and naturaleza.es_persona_natural == False:
+            if hasattr(naturaleza, 'regimen_tributario') and naturaleza.regimen_tributario == "SIMPLE":
                 resultado["puede_continuar"] = False
-                resultado["mensajes"].append("Régimen Simple de Tributación - Persona Jurídica - NO aplica retención en la fuente")
-                resultado["estado"] = "no_aplica_impuesto"  # NUEVO
+                resultado["mensajes"].append("Régimen Simple de Tributación - NO aplica retención en la fuente")
+                resultado["estado"] = "no_aplica_impuesto"
                 logger.info("Régimen Simple detectado - no aplica retención")
                 return resultado
             

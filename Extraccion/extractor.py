@@ -914,54 +914,36 @@ FIN DE LA EXTRACCIÓN
         """
         Extrae texto de archivo Excel (XLSX/XLS).
         GUARDA AUTOMÁTICAMENTE el texto extraído.
-        
+
+        El trabajo CPU-bound (lectura + serializacion) se delega a un thread
+        via asyncio.to_thread para no bloquear el event loop.
+
         Args:
             contenido: Contenido binario del archivo Excel
             nombre_archivo: Nombre del archivo original para guardado
-            
+
         Returns:
             str: Texto extraído y formateado del Excel
         """
         try:
-            # Leer Excel
-            df = pd.read_excel(io.BytesIO(contenido), sheet_name=None)  # Leer todas las hojas
-            
-            texto_completo = ""
-            total_hojas = 0
-            total_filas = 0
-            
-            # Si hay múltiples hojas
-            if isinstance(df, dict):
-                total_hojas = len(df)
-                for nombre_hoja, dataframe in df.items():
-                    texto_completo += f"\n--- HOJA: {nombre_hoja} ---\n"
-                    texto_completo += dataframe.to_string(index=False, na_rep='')
-                    texto_completo += "\n"
-                    total_filas += len(dataframe)
-            else:
-                # Una sola hoja
-                total_hojas = 1
-                total_filas = len(df)
-                texto_completo = df.to_string(index=False, na_rep='')
-            
-            texto_final = texto_completo.strip()
-            
-            # Preparar metadatos
+            texto_final, total_hojas, total_filas = await asyncio.to_thread(
+                _extraer_texto_excel_sync, contenido
+            )
+
             metadatos = {
                 "total_hojas": total_hojas,
                 "total_filas": total_filas,
                 "tamaño_archivo_bytes": len(contenido),
-                "metodo": "pandas.read_excel"
+                "metodo": "pandas.read_excel(engine=calamine)+to_csv"
             }
-            
-            # Guardar texto extraído automáticamente
+
             archivo_guardado = self._guardar_texto_extraido(
                 nombre_archivo, texto_final, "EXCEL", metadatos
             )
-            
+
             logger.info(f" Excel procesado: {len(texto_final)} caracteres extraídos")
             logger.info(f" Hojas: {total_hojas}, Filas: {total_filas}")
-            
+
             return texto_final
             
         except Exception as e:
@@ -1981,6 +1963,45 @@ FECHA: {fecha}
 # FUNCIONES DE PREPROCESAMIENTO EXCEL
 # ===============================
 
+def _dataframe_a_texto_tabular(dataframe) -> str:
+    """Serializa un DataFrame a texto tabular usando to_csv(sep='\\t').
+
+    Sustituye a DataFrame.to_string, que es ~O(n^2) en filas porque calcula
+    anchos por columna y formatea celda a celda. to_csv esta implementado en C
+    y resulta 5-20x mas rapido en DataFrames grandes.
+    """
+    buf = io.StringIO()
+    dataframe.to_csv(buf, sep='\t', index=False, header=True, na_rep='')
+    return buf.getvalue()
+
+
+def _extraer_texto_excel_sync(contenido: bytes) -> tuple:
+    """Cuerpo CPU-bound de extraer_texto_excel. Se ejecuta en un thread.
+
+    Returns:
+        (texto_final, total_hojas, total_filas)
+    """
+    df = pd.read_excel(io.BytesIO(contenido), sheet_name=None, engine="calamine")
+
+    texto_completo = ""
+    total_hojas = 0
+    total_filas = 0
+
+    if isinstance(df, dict):
+        total_hojas = len(df)
+        for nombre_hoja, dataframe in df.items():
+            texto_completo += f"\n--- HOJA: {nombre_hoja} ---\n"
+            texto_completo += _dataframe_a_texto_tabular(dataframe)
+            texto_completo += "\n"
+            total_filas += len(dataframe)
+    else:
+        total_hojas = 1
+        total_filas = len(df)
+        texto_completo = _dataframe_a_texto_tabular(df)
+
+    return texto_completo.strip(), total_hojas, total_filas
+
+
 def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xlsx") -> str:
     """
     Preprocesa archivo Excel eliminando filas y columnas vacías.
@@ -2011,7 +2032,7 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
         tamanio_mb = len(contenido) / (1024 * 1024)
         if tamanio_mb > 2:
             logger.warning(f" Excel grande ({tamanio_mb:.1f} MB): limitando lectura a {MAX_FILAS_LECTURA} filas por hoja")
-        df_dict = pd.read_excel(io.BytesIO(contenido), sheet_name=None, nrows=MAX_FILAS_LECTURA)
+        df_dict = pd.read_excel(io.BytesIO(contenido), sheet_name=None, nrows=MAX_FILAS_LECTURA, engine="calamine")
 
         texto_completo = ""
         total_hojas = 0
@@ -2048,8 +2069,7 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
                     if len(df_limpio) > MAX_FILAS_TEXTO:
                         logger.warning(f" Hoja '{nombre_hoja}' truncada: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
                         df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
-                    texto_hoja = df_limpio.to_string(index=False, na_rep='', max_cols=None, max_rows=None)
-                    texto_completo += texto_hoja
+                    texto_completo += _dataframe_a_texto_tabular(df_limpio)
                 else:
                     texto_completo += "[HOJA VACÍA DESPUÉS DE LIMPIEZA]"
 
@@ -2080,7 +2100,7 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
                 if len(df_limpio) > MAX_FILAS_TEXTO:
                     logger.warning(f" Excel truncado: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
                     df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
-                texto_completo = df_limpio.to_string(index=False, na_rep='', max_cols=None, max_rows=None)
+                texto_completo = _dataframe_a_texto_tabular(df_limpio)
             else:
                 texto_completo = "[ARCHIVO VACÍO DESPUÉS DE LIMPIEZA]"
 

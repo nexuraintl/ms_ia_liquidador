@@ -1,5 +1,26 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.15] - 2026-05-23
+
+### Añadido
+
+- `config.py` — constantes de límites para el preprocesamiento de Excel:
+  `EXCEL_MAX_FILAS_LECTURA` (10.000, filas leídas por hoja), `EXCEL_MAX_FILAS_POR_HOJA` (500, filas serializadas por hoja) y `EXCEL_MAX_CHARS_POR_ARCHIVO` (80.000, presupuesto total de caracteres). Centralizan los topes que acotan el texto enviado a Gemini y el consumo de memoria.
+- `Extraccion/extractor.py` (`_normalizar_enteros`) — nuevo helper que convierte a `Int64` (entero nullable) las columnas `float64` cuyos valores no nulos son todos enteros. Calamine fuerza `float64` en columnas numéricas con alguna celda vacía, lo que generaba dos formas de ruido sin valor: el sufijo `.0` en cada entero y notación científica en enteros grandes (que volvía ilegibles IDs/NITs). La conversión es vectorizada por columna y no muta el DataFrame de entrada. Las columnas con decimales reales (p. ej. tarifas) se conservan intactas.
+- `tests/test_preprocesado_excel.py` — cobertura de `_normalizar_enteros` y `preprocesar_excel_limpio` (sin `.0`, sin notación científica, decimales preservados, truncado por hoja, reparto del presupuesto entre hojas con arrastre, multi-hoja y limpieza de vacíos).
+
+### Cambiado
+
+- `Extraccion/extractor.py` (`preprocesar_excel_limpio`) — reescrito para reducir el consumo de la ventana de contexto y de memoria:
+  - Lectura **hoja por hoja** con `pd.ExcelFile(..., engine="calamine")` + `del` por hoja, en lugar de `pd.read_excel(sheet_name=None)` que mantenía todas las hojas en memoria a la vez. El pico de memoria pasa a ser ~una hoja (crítico en Cloud Run 2 GB / 1 vCPU).
+  - Topes configurables desde `config.py`: truncado por hoja (`EXCEL_MAX_FILAS_POR_HOJA`) y presupuesto de caracteres por archivo (`EXCEL_MAX_CHARS_POR_ARCHIVO`), reemplazando el `MAX_FILAS_TEXTO = 10_000` hardcodeado. Todo truncado se anota en el texto (`[...truncado N filas...]` / `[...hoja truncada por presupuesto...]`) y se registra en log.
+  - El presupuesto de caracteres se **reparte entre las hojas** en lugar de consumirse por orden de llegada: cada hoja recibe una cuota dinámica (`presupuesto_restante / hojas_restantes`) y el sobrante de las hojas pequeñas se arrastra a las siguientes. Así ninguna hoja se omite por completo (cada una conserva al menos su encabezado de columnas + nota) y el total sigue acotado a `EXCEL_MAX_CHARS_POR_ARCHIVO`. Tradeoff aceptado: al ser un solo pase (sin doble lectura del workbook, por costo en Cloud Run 2 GB / 1 vCPU), el reparto depende del orden de las hojas. Un techo duro final se conserva como salvaguarda.
+  - Higiene numérica vía `_normalizar_enteros` aplicada en `_dataframe_a_texto_tabular`. Medición real: el export `C1 Bases Fommur_linea3.xlsx` tenía ~22 % del texto en sufijos `.0` (54.154 ocurrencias); ahora 0. Los IDs/NITs dejan de salir en notación científica.
+
+### Notas
+
+- Precisión: enteros de más de 15 dígitos (p. ej. IDs compuestos de encuesta) ya perdían precisión al ser leídos como `float64` por calamine; `_normalizar_enteros` los muestra como entero limpio (mejor que la notación científica previa) aunque los últimos dígitos puedan diferir. Los NIT colombianos (≤10 dígitos) y los valores monetarios son exactos en `float64`, por lo que no se ven afectados.
+
 ## [3.14.14] - 2026-05-23
 
 ### Corregido

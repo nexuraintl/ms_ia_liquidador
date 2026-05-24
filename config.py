@@ -284,6 +284,25 @@ CONFIG = {
 }
 
 # ===============================
+# LÍMITES DE PREPROCESAMIENTO EXCEL
+# ===============================
+# Topes para acotar el texto que se envía a Gemini y el consumo de memoria
+# (Cloud Run 2GB / 1 vCPU). Los usa Extraccion/extractor.py:preprocesar_excel_limpio.
+
+# Filas máximas a LEER por hoja desde el workbook (antes de limpiar). Cota
+# superior de memoria por hoja; debe ser >= EXCEL_MAX_FILAS_POR_HOJA.
+EXCEL_MAX_FILAS_LECTURA = 10_000
+
+# Filas máximas (tras limpieza) que se serializan por hoja. Al exceder, se
+# conservan las primeras N y se anota el truncado.
+EXCEL_MAX_FILAS_POR_HOJA = 500
+
+# Presupuesto total de caracteres del texto final por archivo Excel, REPARTIDO
+# dinámicamente entre las hojas (cuota por hoja con arrastre del sobrante). Ninguna
+# hoja se omite por completo; cada una conserva al menos su encabezado de columnas.
+EXCEL_MAX_CHARS_POR_ARCHIVO = 80_000
+
+# ===============================
 # CONFIGURACIÓN DE NITS ADMINISTRATIVOS
 # ===============================
 

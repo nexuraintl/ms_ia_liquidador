@@ -71,6 +71,13 @@ from google.cloud import vision
 # FastAPI
 from fastapi import UploadFile
 
+# Límites de preprocesamiento Excel (centralizados en config.py)
+from config import (
+    EXCEL_MAX_FILAS_LECTURA,
+    EXCEL_MAX_FILAS_POR_HOJA,
+    EXCEL_MAX_CHARS_POR_ARCHIVO,
+)
+
 # Configuración de logging
 logger = logging.getLogger(__name__)
 
@@ -1926,13 +1933,55 @@ FECHA: {fecha}
 # FUNCIONES DE PREPROCESAMIENTO EXCEL
 # ===============================
 
+def _normalizar_enteros(dataframe):
+    """Convierte a Int64 las columnas float que en realidad son enteras.
+
+    Calamine devuelve float64 en cualquier columna numérica que tenga al menos
+    una celda vacía (NaN fuerza float). Al serializar, eso produce dos formas de
+    ruido sin valor informativo:
+      - sufijo '.0' en cada entero (ej. 1061719238.0),
+      - notacion cientifica en enteros grandes (ej. 1.04e+16), que ademas vuelve
+        ilegibles NITs e IDs.
+
+    Convertir esas columnas a Int64 (entero nullable de pandas) elimina ambos
+    sin perder informacion. Es una operacion vectorizada por columna; no recorre
+    celdas en Python. No muta el DataFrame de entrada (astype devuelve copia solo
+    de las columnas convertidas).
+    """
+    conversiones = {}
+    for col in dataframe.columns:
+        serie = dataframe[col]
+        if not pd.api.types.is_float_dtype(serie):
+            continue
+        no_nulos = serie.dropna()
+        if no_nulos.empty:
+            continue
+        # ¿todos los valores no nulos son enteros? (comparacion vectorizada)
+        try:
+            if (no_nulos == no_nulos.round()).all():
+                conversiones[col] = "Int64"
+        except (TypeError, ValueError):
+            continue  # valores no comparables (inf, etc.): dejar como esta
+
+    if not conversiones:
+        return dataframe
+    try:
+        return dataframe.astype(conversiones)
+    except (ValueError, TypeError, OverflowError):
+        return dataframe  # ante cualquier caso limite, no degradar el flujo
+
+
 def _dataframe_a_texto_tabular(dataframe) -> str:
     """Serializa un DataFrame a texto tabular usando to_csv(sep='\\t').
 
     Sustituye a DataFrame.to_string, que es ~O(n^2) en filas porque calcula
     anchos por columna y formatea celda a celda. to_csv esta implementado en C
     y resulta 5-20x mas rapido en DataFrames grandes.
+
+    Antes de serializar normaliza columnas float-enteras a Int64 para eliminar
+    sufijos '.0' y notacion cientifica (ver _normalizar_enteros).
     """
+    dataframe = _normalizar_enteros(dataframe)
     buf = io.StringIO()
     dataframe.to_csv(buf, sep='\t', index=False, header=True, na_rep='')
     return buf.getvalue()
@@ -1940,16 +1989,20 @@ def _dataframe_a_texto_tabular(dataframe) -> str:
 
 def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xlsx") -> str:
     """
-    Preprocesa archivo Excel eliminando filas y columnas vacías.
-    Mantiene formato tabular limpio con toda la información intacta.
+    Preprocesa archivo Excel a texto tabular limpio para enviar a Gemini.
 
     FUNCIONALIDAD:
-    Elimina filas completamente vacías
-    Elimina columnas completamente vacías
-    Mantiene formato tabular pero limpio
-    Conserva toda la información relevante
-    Óptimo y simple
-    Guarda automáticamente el archivo preprocesado
+    - Lee el workbook una hoja a la vez (pico de memoria ~una hoja, no todas).
+    - Elimina filas y columnas completamente vacías.
+    - Normaliza enteros (quita '.0' y notación científica) vía _dataframe_a_texto_tabular.
+    - Aplica topes configurables (config.py) para acotar la ventana de contexto:
+        * EXCEL_MAX_FILAS_LECTURA: filas leídas por hoja.
+        * EXCEL_MAX_FILAS_POR_HOJA: filas serializadas por hoja.
+        * EXCEL_MAX_CHARS_POR_ARCHIVO: presupuesto total de caracteres, REPARTIDO
+          entre las hojas (cuota dinámica por hoja con arrastre del sobrante), de
+          modo que ninguna hoja se omite por completo.
+      Todo truncado queda anotado en el texto y registrado en log.
+    - Guarda automáticamente el archivo preprocesado.
 
     Args:
         contenido: Contenido binario del archivo Excel
@@ -1961,94 +2014,127 @@ def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xl
     try:
         logger.info(f" Preprocesando Excel: {nombre_archivo}")
 
-        # 1. LEER EXCEL CON TODAS LAS HOJAS
-        # nrows limita la lectura ANTES de cargar en memoria, evitando OOM
-        # con archivos grandes (ej: Excel embebidos en emails de 10MB+)
-        MAX_FILAS_LECTURA = 10_000
         tamanio_mb = len(contenido) / (1024 * 1024)
         if tamanio_mb > 2:
-            logger.warning(f" Excel grande ({tamanio_mb:.1f} MB): limitando lectura a {MAX_FILAS_LECTURA} filas por hoja")
-        df_dict = pd.read_excel(io.BytesIO(contenido), sheet_name=None, nrows=MAX_FILAS_LECTURA, engine="calamine")
+            logger.warning(
+                f" Excel grande ({tamanio_mb:.1f} MB): lectura limitada a "
+                f"{EXCEL_MAX_FILAS_LECTURA} filas por hoja"
+            )
 
-        texto_completo = ""
-        total_hojas = 0
+        # 1. ABRIR EL WORKBOOK UNA VEZ Y PROCESAR HOJA POR HOJA.
+        # Materializar y liberar cada hoja antes de la siguiente mantiene el pico
+        # de memoria en ~una hoja (no todas a la vez), clave en Cloud Run 2GB/1vCPU.
+        #
+        # PRESUPUESTO REPARTIDO ENTRE HOJAS: en vez de que las primeras hojas
+        # consuman todo el cupo y las siguientes se omitan, cada hoja recibe una
+        # cuota dinámica (presupuesto_restante / hojas_restantes). El sobrante de
+        # una hoja pequeña se arrastra y agranda la cuota de las siguientes. Así
+        # ninguna hoja se omite por completo y el total sigue ≤ presupuesto.
+        partes = []
         filas_eliminadas_total = 0
         columnas_eliminadas_total = 0
+        hojas_truncadas_presupuesto = 0
 
-        # 2. PROCESAR CADA HOJA CON LIMPIEZA
-        if isinstance(df_dict, dict):
-            total_hojas = len(df_dict)
+        with pd.ExcelFile(io.BytesIO(contenido), engine="calamine") as xls:
+            nombres_hojas = xls.sheet_names
+            total_hojas = len(nombres_hojas)
 
-            for nombre_hoja, dataframe in df_dict.items():
-                # Estadísticas originales
+            presupuesto_restante = EXCEL_MAX_CHARS_POR_ARCHIVO
+            hojas_restantes = max(total_hojas, 1)
+
+            for nombre_hoja in nombres_hojas:
+                # Cuota de esta hoja; el sobrante no usado por hojas previas ya
+                # está incluido en presupuesto_restante.
+                cuota = max(0, presupuesto_restante // hojas_restantes)
+
+                dataframe = xls.parse(nombre_hoja, nrows=EXCEL_MAX_FILAS_LECTURA)
+
                 filas_orig = len(dataframe)
                 cols_orig = len(dataframe.columns)
 
-                #  LIMPIEZA SIMPLE: Eliminar filas y columnas completamente vacías
-                df_limpio = dataframe.dropna(how='all')  # Filas vacías
-                df_limpio = df_limpio.dropna(axis=1, how='all')  # Columnas vacías
+                # Limpieza: eliminar filas y columnas completamente vacías.
+                df_limpio = dataframe.dropna(how='all')
+                df_limpio = df_limpio.dropna(axis=1, how='all')
+                del dataframe  # liberar la copia original cuanto antes
 
-                # Estadísticas después de limpieza
-                filas_final = len(df_limpio)
-                cols_final = len(df_limpio.columns)
+                filas_eliminadas_total += filas_orig - len(df_limpio)
+                columnas_eliminadas_total += cols_orig - len(df_limpio.columns)
 
-                filas_eliminadas = filas_orig - filas_final
-                columnas_eliminadas = cols_orig - cols_final
-                filas_eliminadas_total += filas_eliminadas
-                columnas_eliminadas_total += columnas_eliminadas
+                encabezado = f"\n--- HOJA: {nombre_hoja} ---\n"
 
-                # Agregar hoja al texto
-                texto_completo += f"\n--- HOJA: {nombre_hoja} ---\n"
-
-                if not df_limpio.empty:
-                    MAX_FILAS_TEXTO = 10_000
-                    if len(df_limpio) > MAX_FILAS_TEXTO:
-                        logger.warning(f" Hoja '{nombre_hoja}' truncada: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
-                        df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
-                    texto_completo += _dataframe_a_texto_tabular(df_limpio)
+                if df_limpio.empty:
+                    cuerpo = "[HOJA VACÍA DESPUÉS DE LIMPIEZA]"
                 else:
-                    texto_completo += "[HOJA VACÍA DESPUÉS DE LIMPIEZA]"
+                    filas_totales = len(df_limpio)
+                    if filas_totales > EXCEL_MAX_FILAS_POR_HOJA:
+                        df_limpio = df_limpio.head(EXCEL_MAX_FILAS_POR_HOJA)
+                        logger.warning(
+                            f" Hoja '{nombre_hoja}' truncada: {filas_totales} → "
+                            f"{EXCEL_MAX_FILAS_POR_HOJA} filas (límite por hoja)"
+                        )
+                        cuerpo = _dataframe_a_texto_tabular(df_limpio)
+                        cuerpo += (
+                            f"\n[...truncado: {filas_totales - EXCEL_MAX_FILAS_POR_HOJA} "
+                            f"filas adicionales de {filas_totales}...]"
+                        )
+                    else:
+                        cuerpo = _dataframe_a_texto_tabular(df_limpio)
 
-                texto_completo += "\n"
+                del df_limpio  # liberar la hoja antes de la siguiente
 
-        else:
-            # UNA SOLA HOJA
-            total_hojas = 1
-            dataframe = df_dict
+                pieza = encabezado + cuerpo + "\n"
 
-            # Estadísticas originales
-            filas_orig = len(dataframe)
-            cols_orig = len(dataframe.columns)
+                # Recorte por cuota de la hoja: cortar en frontera de fila, pero
+                # nunca por debajo del encabezado para que la hoja siempre aparezca.
+                if len(pieza) > cuota:
+                    limite = max(len(encabezado), cuota)
+                    corte = pieza.rfind("\n", 0, limite)
+                    if corte <= len(encabezado):
+                        corte = limite
+                    pieza = pieza[:corte].rstrip() + (
+                        "\n[...hoja truncada por presupuesto de caracteres...]\n"
+                    )
+                    hojas_truncadas_presupuesto += 1
 
-            #  LIMPIEZA SIMPLE: Eliminar filas y columnas vacías
-            df_limpio = dataframe.dropna(how='all')  # Filas vacías
-            df_limpio = df_limpio.dropna(axis=1, how='all')  # Columnas vacías
+                partes.append(pieza)
+                presupuesto_restante = max(0, presupuesto_restante - len(pieza))
+                hojas_restantes -= 1
 
-            # Estadísticas finales
-            filas_final = len(df_limpio)
-            cols_final = len(df_limpio.columns)
+        texto_final = "".join(partes).strip()
 
-            filas_eliminadas_total = filas_orig - filas_final
-            columnas_eliminadas_total = cols_orig - cols_final
+        # 2. TECHO DURO: salvaguarda final. La suma de cuotas ya es ≤ presupuesto;
+        # esto solo actúa en el caso límite de muchos encabezados largos.
+        if len(texto_final) > EXCEL_MAX_CHARS_POR_ARCHIVO:
+            corte = texto_final.rfind("\n", 0, EXCEL_MAX_CHARS_POR_ARCHIVO)
+            if corte <= 0:
+                corte = EXCEL_MAX_CHARS_POR_ARCHIVO
+            texto_final = texto_final[:corte].rstrip() + (
+                f"\n[...texto truncado: se alcanzó el presupuesto de "
+                f"{EXCEL_MAX_CHARS_POR_ARCHIVO} caracteres del archivo...]"
+            )
 
-            if not df_limpio.empty:
-                MAX_FILAS_TEXTO = 10_000
-                if len(df_limpio) > MAX_FILAS_TEXTO:
-                    logger.warning(f" Excel truncado: {len(df_limpio)} filas → {MAX_FILAS_TEXTO} (limite de preprocesamiento)")
-                    df_limpio = df_limpio.head(MAX_FILAS_TEXTO)
-                texto_completo = _dataframe_a_texto_tabular(df_limpio)
-            else:
-                texto_completo = "[ARCHIVO VACÍO DESPUÉS DE LIMPIEZA]"
+        if not texto_final:
+            texto_final = "[ARCHIVO VACÍO DESPUÉS DE LIMPIEZA]"
 
-        texto_final = texto_completo.strip()
+        if hojas_truncadas_presupuesto:
+            logger.warning(
+                f" Excel '{nombre_archivo}': {hojas_truncadas_presupuesto} hoja(s) "
+                f"recortada(s) por reparto de presupuesto "
+                f"({EXCEL_MAX_CHARS_POR_ARCHIVO} chars entre {total_hojas} hojas)"
+            )
 
         # 3. GUARDADO AUTOMÁTICO DEL ARCHIVO PREPROCESADO
-        _guardar_archivo_preprocesado(nombre_archivo, texto_final, filas_eliminadas_total, columnas_eliminadas_total, total_hojas)
+        _guardar_archivo_preprocesado(
+            nombre_archivo, texto_final,
+            filas_eliminadas_total, columnas_eliminadas_total, total_hojas
+        )
 
-        # 4. LOGGING OPTIMIZADO
+        # 4. LOGGING
         logger.info(f" Preprocesamiento completado: {len(texto_final)} caracteres")
-        logger.info(f" Hojas: {total_hojas} | Filas eliminadas: {filas_eliminadas_total} | Columnas eliminadas: {columnas_eliminadas_total}")
-        logger.info(f" Archivo preprocesado guardado automáticamente")
+        logger.info(
+            f" Hojas: {total_hojas} | Filas eliminadas: {filas_eliminadas_total} "
+            f"| Columnas eliminadas: {columnas_eliminadas_total}"
+        )
 
         return texto_final
 

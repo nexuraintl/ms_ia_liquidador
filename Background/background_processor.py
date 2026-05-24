@@ -256,6 +256,7 @@ class BackgroundProcessor:
 
             error_str = str(e).lower()
             tipo_error = type(e).__name__
+            es_limite_archivos = "demasiados archivos directos" in error_str
             es_fallo_conexion_ia = (
                 "connecterror" in error_str
                 or "connecttimeout" in error_str
@@ -267,7 +268,11 @@ class BackgroundProcessor:
                 or "clasificacion híbrida" in error_str
             )
 
-            if es_fallo_conexion_ia:
+            if es_limite_archivos:
+                mensaje_usuario = (
+                    "Error en el procesamiento, Límite de archivos adjuntos superado."
+                )
+            elif es_fallo_conexion_ia:
                 mensaje_usuario = (
                     "No se pudo conectar con el servicio de procesamiento. "
                     "Preliquidación sin finalizar, intente nuevamente."
@@ -283,15 +288,27 @@ class BackgroundProcessor:
             except AttributeError:
                 codigo_del_negocio = 0
 
-            resultado_contrato = crear_respuesta_preliquidacion_sin_finalizar(
-                mensaje=mensaje_usuario,
-                codigo_del_negocio=codigo_del_negocio,
-                diagnostico={
+            if es_limite_archivos:
+                # El limite de archivos no es un fallo de Gemini; reintentar con los
+                # mismos archivos volveria a fallar (el usuario debe reducirlos).
+                diagnostico = {
+                    "tipo_error": tipo_error,
+                    "servicio_externo": "Validacion de archivos",
+                    "timestamp_error": datetime.now().isoformat(),
+                    "retry_sugerido": False,
+                }
+            else:
+                diagnostico = {
                     "tipo_error": tipo_error,
                     "servicio_externo": "Google Gemini API",
                     "timestamp_error": datetime.now().isoformat(),
                     "retry_sugerido": True,
                 }
+
+            resultado_contrato = crear_respuesta_preliquidacion_sin_finalizar(
+                mensaje=mensaje_usuario,
+                codigo_del_negocio=codigo_del_negocio,
+                diagnostico=diagnostico
             )
 
             # Respaldo local del payload enviado al webhook

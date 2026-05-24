@@ -414,22 +414,28 @@ FIN DE LA EXTRACCIÓN
             raise ValueError("Archivo sin nombre")
         
         extension = Path(archivo.filename).suffix.lower()
+
+        # Excel: el parseo real (con limite de filas) lo hace preprocesar_excel_limpio
+        # en app/extraccion_hibrida._preprocesar_excel. Evitamos un segundo parseo
+        # completo del workbook (sin tope de filas) devolviendo un placeholder que
+        # _preprocesar_excel sobrescribe con el texto real.
+        if extension in ['.xlsx', '.xls']:
+            logger.info(f" Excel detectado, extraccion diferida a preprocesar_excel_limpio: {archivo.filename}")
+            return ""
+
         contenido = await archivo.read()
-        
+
         logger.info(f" Procesando archivo: {archivo.filename} ({extension})")
-        
+
         # Determinar método de extracción según extensión
         if extension == '.pdf':
             texto = await self.extraer_texto_pdf(contenido, archivo.filename)
             # La función extraer_texto_pdf ya maneja automáticamente el OCR cuando es necesario
             return texto
-        
+
         elif extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff']:
             return await self.extraer_texto_imagen(contenido, archivo.filename)
-        
-        elif extension in ['.xlsx', '.xls']:
-            return await self.extraer_texto_excel(contenido, archivo.filename)
-        
+
         elif extension in ['.docx', '.doc']:
             return await self.extraer_texto_word(contenido, archivo.filename)
         
@@ -905,54 +911,6 @@ FIN DE LA EXTRACCIÓN
             # Guardar error
             self._guardar_texto_extraido(
                 nombre_archivo, error_msg, f"{metodo}_ERROR", 
-                {"error": str(e)}
-            )
-            
-            return error_msg
-    
-    async def extraer_texto_excel(self, contenido: bytes, nombre_archivo: str = "archivo.xlsx") -> str:
-        """
-        Extrae texto de archivo Excel (XLSX/XLS).
-        GUARDA AUTOMÁTICAMENTE el texto extraído.
-
-        El trabajo CPU-bound (lectura + serializacion) se delega a un thread
-        via asyncio.to_thread para no bloquear el event loop.
-
-        Args:
-            contenido: Contenido binario del archivo Excel
-            nombre_archivo: Nombre del archivo original para guardado
-
-        Returns:
-            str: Texto extraído y formateado del Excel
-        """
-        try:
-            texto_final, total_hojas, total_filas = await asyncio.to_thread(
-                _extraer_texto_excel_sync, contenido
-            )
-
-            metadatos = {
-                "total_hojas": total_hojas,
-                "total_filas": total_filas,
-                "tamaño_archivo_bytes": len(contenido),
-                "metodo": "pandas.read_excel(engine=calamine)+to_csv"
-            }
-
-            archivo_guardado = self._guardar_texto_extraido(
-                nombre_archivo, texto_final, "EXCEL", metadatos
-            )
-
-            logger.info(f" Excel procesado: {len(texto_final)} caracteres extraídos")
-            logger.info(f" Hojas: {total_hojas}, Filas: {total_filas}")
-
-            return texto_final
-            
-        except Exception as e:
-            error_msg = f"Error procesando Excel: {str(e)}"
-            logger.error(f" {error_msg}")
-            
-            # Guardar error
-            self._guardar_texto_extraido(
-                nombre_archivo, error_msg, "EXCEL_ERROR", 
                 {"error": str(e)}
             )
             
@@ -1896,8 +1854,13 @@ FECHA: {fecha}
                 # Procesar archivo (esto automáticamente guarda el texto)
                 texto = await self.procesar_archivo(archivo)
                 textos_extraidos[archivo.filename] = texto
-                
-                logger.info(f" Archivo procesado y guardado: {archivo.filename}")
+
+                # Excel se difiere a preprocesar_excel_limpio (procesar_archivo
+                # devuelve ""): nada se procesa ni guarda en esta etapa, evitamos
+                # el log enganoso. Ya cubierto por "Excel detectado, extraccion
+                # diferida..." en procesar_archivo.
+                if not archivo.filename.lower().endswith(('.xlsx', '.xls')):
+                    logger.info(f" Archivo procesado y guardado: {archivo.filename}")
                 
             except Exception as e:
                 logger.error(f" Error procesando archivo {archivo.filename}: {e}")
@@ -1973,33 +1936,6 @@ def _dataframe_a_texto_tabular(dataframe) -> str:
     buf = io.StringIO()
     dataframe.to_csv(buf, sep='\t', index=False, header=True, na_rep='')
     return buf.getvalue()
-
-
-def _extraer_texto_excel_sync(contenido: bytes) -> tuple:
-    """Cuerpo CPU-bound de extraer_texto_excel. Se ejecuta en un thread.
-
-    Returns:
-        (texto_final, total_hojas, total_filas)
-    """
-    df = pd.read_excel(io.BytesIO(contenido), sheet_name=None, engine="calamine")
-
-    texto_completo = ""
-    total_hojas = 0
-    total_filas = 0
-
-    if isinstance(df, dict):
-        total_hojas = len(df)
-        for nombre_hoja, dataframe in df.items():
-            texto_completo += f"\n--- HOJA: {nombre_hoja} ---\n"
-            texto_completo += _dataframe_a_texto_tabular(dataframe)
-            texto_completo += "\n"
-            total_filas += len(dataframe)
-    else:
-        total_hojas = 1
-        total_filas = len(df)
-        texto_completo = _dataframe_a_texto_tabular(df)
-
-    return texto_completo.strip(), total_hojas, total_filas
 
 
 def preprocesar_excel_limpio(contenido: bytes, nombre_archivo: str = "archivo.xlsx") -> str:

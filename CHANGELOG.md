@@ -1,5 +1,17 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.14] - 2026-05-23
+
+### Corregido
+
+- Excel (.xlsx/.xls): eliminado el doble parseo en el flujo híbrido. En `Extraccion/extractor.py` (`procesar_archivo`), los archivos Excel ya no se extraen en el primer pase (`extraer_texto_excel`); su texto lo produce únicamente `preprocesar_excel_limpio` en `app/extraccion_hibrida.py` (`_preprocesar_excel`). Antes, cada Excel se leía y parseaba dos veces completas con `pd.read_excel(..., sheet_name=None)` y el resultado del primer pase —además **sin límite de filas**— siempre se descartaba. Reduce a la mitad el trabajo CPU por Excel y elimina el mayor pico de memoria (crítico en Cloud Run 2 GB / 1 vCPU). `procesar_archivo` ahora detecta Excel antes de leer el binario y devuelve un placeholder que `_preprocesar_excel` sobrescribe.
+- `Extraccion/extractor.py` (`procesar_multiples_archivos`): el log `"Archivo procesado y guardado: ..."` ya no se emite para `.xlsx/.xls`. Tras diferir el Excel, ese log era engañoso (no se procesa ni guarda nada en esa etapa para Excel); la detección ya queda registrada por `"Excel detectado, extraccion diferida..."`. Solo logging, sin cambio funcional.
+
+### Arquitectura
+
+- `Extraccion/extractor.py` — removidas `extraer_texto_excel` y `_extraer_texto_excel_sync` por quedar sin uso tras diferir la extracción de Excel al preprocesamiento. Se conserva `_dataframe_a_texto_tabular`, usado por `preprocesar_excel_limpio`.
+- Efecto colateral: el Excel subido directo deja de generar el artefacto de auditoría `Results/Extracciones/<fecha>/*_EXCEL_*.txt` (sigue generándose `extracciones/*_preprocesado.txt`). Queda igual que el Excel dentro de ZIP/email, que ya operaba así.
+
 ## [3.14.13] - 2026-05-20
 
 ### Corregido

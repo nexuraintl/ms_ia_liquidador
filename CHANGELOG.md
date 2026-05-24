@@ -1,5 +1,38 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.15] - 2026-05-23
+
+### Añadido
+
+- `config.py` — constantes de límites para el preprocesamiento de Excel:
+  `EXCEL_MAX_FILAS_LECTURA` (10.000, filas leídas por hoja), `EXCEL_MAX_FILAS_POR_HOJA` (500, filas serializadas por hoja) y `EXCEL_MAX_CHARS_POR_ARCHIVO` (80.000, presupuesto total de caracteres). Centralizan los topes que acotan el texto enviado a Gemini y el consumo de memoria.
+- `Extraccion/extractor.py` (`_normalizar_enteros`) — nuevo helper que convierte a `Int64` (entero nullable) las columnas `float64` cuyos valores no nulos son todos enteros. Calamine fuerza `float64` en columnas numéricas con alguna celda vacía, lo que generaba dos formas de ruido sin valor: el sufijo `.0` en cada entero y notación científica en enteros grandes (que volvía ilegibles IDs/NITs). La conversión es vectorizada por columna y no muta el DataFrame de entrada. Las columnas con decimales reales (p. ej. tarifas) se conservan intactas.
+- `tests/test_preprocesado_excel.py` — cobertura de `_normalizar_enteros` y `preprocesar_excel_limpio` (sin `.0`, sin notación científica, decimales preservados, truncado por hoja, reparto del presupuesto entre hojas con arrastre, multi-hoja y limpieza de vacíos).
+
+### Cambiado
+
+- `Extraccion/extractor.py` (`preprocesar_excel_limpio`) — reescrito para reducir el consumo de la ventana de contexto y de memoria:
+  - Lectura **hoja por hoja** con `pd.ExcelFile(..., engine="calamine")` + `del` por hoja, en lugar de `pd.read_excel(sheet_name=None)` que mantenía todas las hojas en memoria a la vez. El pico de memoria pasa a ser ~una hoja (crítico en Cloud Run 2 GB / 1 vCPU).
+  - Topes configurables desde `config.py`: truncado por hoja (`EXCEL_MAX_FILAS_POR_HOJA`) y presupuesto de caracteres por archivo (`EXCEL_MAX_CHARS_POR_ARCHIVO`), reemplazando el `MAX_FILAS_TEXTO = 10_000` hardcodeado. Todo truncado se anota en el texto (`[...truncado N filas...]` / `[...hoja truncada por presupuesto...]`) y se registra en log.
+  - El presupuesto de caracteres se **reparte entre las hojas** en lugar de consumirse por orden de llegada: cada hoja recibe una cuota dinámica (`presupuesto_restante / hojas_restantes`) y el sobrante de las hojas pequeñas se arrastra a las siguientes. Así ninguna hoja se omite por completo (cada una conserva al menos su encabezado de columnas + nota) y el total sigue acotado a `EXCEL_MAX_CHARS_POR_ARCHIVO`. Tradeoff aceptado: al ser un solo pase (sin doble lectura del workbook, por costo en Cloud Run 2 GB / 1 vCPU), el reparto depende del orden de las hojas. Un techo duro final se conserva como salvaguarda.
+  - Higiene numérica vía `_normalizar_enteros` aplicada en `_dataframe_a_texto_tabular`. Medición real: el export `C1 Bases Fommur_linea3.xlsx` tenía ~22 % del texto en sufijos `.0` (54.154 ocurrencias); ahora 0. Los IDs/NITs dejan de salir en notación científica.
+
+### Notas
+
+- Precisión: enteros de más de 15 dígitos (p. ej. IDs compuestos de encuesta) ya perdían precisión al ser leídos como `float64` por calamine; `_normalizar_enteros` los muestra como entero limpio (mejor que la notación científica previa) aunque los últimos dígitos puedan diferir. Los NIT colombianos (≤10 dígitos) y los valores monetarios son exactos en `float64`, por lo que no se ven afectados.
+
+## [3.14.14] - 2026-05-23
+
+### Corregido
+
+- Excel (.xlsx/.xls): eliminado el doble parseo en el flujo híbrido. En `Extraccion/extractor.py` (`procesar_archivo`), los archivos Excel ya no se extraen en el primer pase (`extraer_texto_excel`); su texto lo produce únicamente `preprocesar_excel_limpio` en `app/extraccion_hibrida.py` (`_preprocesar_excel`). Antes, cada Excel se leía y parseaba dos veces completas con `pd.read_excel(..., sheet_name=None)` y el resultado del primer pase —además **sin límite de filas**— siempre se descartaba. Reduce a la mitad el trabajo CPU por Excel y elimina el mayor pico de memoria (crítico en Cloud Run 2 GB / 1 vCPU). `procesar_archivo` ahora detecta Excel antes de leer el binario y devuelve un placeholder que `_preprocesar_excel` sobrescribe.
+- `Extraccion/extractor.py` (`procesar_multiples_archivos`): el log `"Archivo procesado y guardado: ..."` ya no se emite para `.xlsx/.xls`. Tras diferir el Excel, ese log era engañoso (no se procesa ni guarda nada en esa etapa para Excel); la detección ya queda registrada por `"Excel detectado, extraccion diferida..."`. Solo logging, sin cambio funcional.
+
+### Arquitectura
+
+- `Extraccion/extractor.py` — removidas `extraer_texto_excel` y `_extraer_texto_excel_sync` por quedar sin uso tras diferir la extracción de Excel al preprocesamiento. Se conserva `_dataframe_a_texto_tabular`, usado por `preprocesar_excel_limpio`.
+- Efecto colateral: el Excel subido directo deja de generar el artefacto de auditoría `Results/Extracciones/<fecha>/*_EXCEL_*.txt` (sigue generándose `extracciones/*_preprocesado.txt`). Queda igual que el Excel dentro de ZIP/email, que ya operaba así.
+
 ## [3.14.13] - 2026-05-20
 
 ### Corregido

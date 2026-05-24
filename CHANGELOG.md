@@ -1,5 +1,12 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.16] - 2026-05-24
+
+### Corregido
+
+- `Background/background_processor.py` — el límite de 20 archivos directos (`HTTPException` "Demasiados archivos directos" lanzada en `Clasificador/clasificador.py`) ahora se devuelve en el formato de contrato (`estado_procesamiento: "preliquidacion_sin_finalizar"`) con el mensaje "Error en el procesamiento, Límite de archivos adjuntos superado." y un diagnóstico propio (`servicio_externo: "Validacion de archivos"`, `retry_sugerido: False`). Antes este caso caía en el handler genérico, que entregaba el mensaje engañoso de fallo de Gemini con sugerencia de reintento (reintentar con los mismos archivos vuelve a fallar).
+- `tests/test_preliquidacion_sin_finalizar.py` — nuevo test `test_limite_archivos_envia_contrato_con_mensaje_especifico` que verifica el payload del webhook para este caso.
+
 ## [3.14.15] - 2026-05-23
 
 ### Añadido

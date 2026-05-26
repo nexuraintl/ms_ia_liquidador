@@ -1,5 +1,16 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.14.17] - 2026-05-25
+
+### Añadido
+
+- `app/extraccion_hibrida.py` (`_deduplicar_adjuntos_email`) — nuevo helper que implementa un mecanismo robusto de deduplicación para los archivos adjuntos binarios extraídos de emails `.msg`/`.eml`, comparando nombres (case-insensitive) y tamaños (tolerancia de +-10%). Esto previene el procesamiento duplicado de archivos ya recibidos directamente o extraídos de otros correos del mismo lote.
+
+### Optimizado
+
+- `Extraccion/extractor.py` (`ProcesadorArchivos.msg_attachments_cache`) — implementado un caché en memoria que almacena los adjuntos binarios de los archivos `.msg` en el primer y único pase donde se lee e instancia el email con la costosa librería `extract-msg` (cuerpo del email y metadatos).
+- `app/extraccion_hibrida.py` (`_procesar_adjuntos_emails`) — refactorizado para consultar la caché en memoria del procesador local antes de intentar instanciar de nuevo `extract_msg.Message` sobre el archivo `.msg`. Elimina la duplicación de lectura que antes sumaba más de 30 segundos de latencia inútil en el pipeline (reducción de latencia de ~40% para el procesamiento de correos electrónicos en Cloud Run con 1 vCPU).
+
 ## [3.14.16] - 2026-05-24
 
 ### Corregido

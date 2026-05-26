@@ -97,6 +97,7 @@ class ProcesadorArchivos:
         self.vision_client = self._configurar_vision()
         self._crear_carpetas_guardado()
         self._verificar_dependencias_pdf()
+        self.msg_attachments_cache = {}  # Caché para evitar doble parseo de MSG
         logger.info("ProcesadorArchivos inicializado con guardado automático")
     
     def _verificar_dependencias_pdf(self):
@@ -1074,6 +1075,29 @@ FIN DE LA EXTRACCIÓN
                 fecha = self._formatear_fecha(msg.date)
                 cuerpo = self._extraer_cuerpo_msg(msg)
                 adjuntos = self._listar_adjuntos_msg(msg)
+                
+                # Extraer y cachear adjuntos binarios reales en este único paso
+                self.msg_attachments_cache[nombre_archivo] = []
+                if hasattr(msg, 'attachments') and msg.attachments:
+                    from Extraccion.extractor_adjuntos import AdjuntoExtraido
+                    for attachment in msg.attachments:
+                        try:
+                            nombre = (
+                                getattr(attachment, 'longFilename', None)
+                                or getattr(attachment, 'shortFilename', None)
+                                or 'adjunto_sin_nombre'
+                            ).strip()
+                            datos = getattr(attachment, 'data', None)
+                            if datos:
+                                ext = Path(nombre).suffix.lstrip('.').lower() or "bin"
+                                adjunto_obj = AdjuntoExtraido(
+                                    nombre=nombre,
+                                    contenido=datos,
+                                    extension=ext
+                                )
+                                self.msg_attachments_cache[nombre_archivo].append(adjunto_obj)
+                        except Exception as ex_adj:
+                            logger.warning(f"Error cacheando adjunto binario de MSG '{nombre_archivo}': {ex_adj}")
                 
                 # Formatear texto final
                 texto_formateado = self._formatear_email(

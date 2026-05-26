@@ -87,7 +87,9 @@ class ExtractorHibrido:
         )
 
         # Extraer y procesar archivos embebidos en emails (.msg / .eml)
-        adjuntos_directos, textos_adjuntos = await self._procesar_adjuntos_emails(archivos_preprocesamiento)
+        adjuntos_directos, textos_adjuntos = await self._procesar_adjuntos_emails(
+            archivos_preprocesamiento, archivos_directos
+        )
         archivos_directos.extend(adjuntos_directos)
         textos_preprocesados.update(textos_adjuntos)
 
@@ -221,7 +223,8 @@ class ExtractorHibrido:
 
     async def _procesar_adjuntos_emails(
         self,
-        archivos_preprocesamiento: List[UploadFile]
+        archivos_preprocesamiento: List[UploadFile],
+        archivos_existentes: List[UploadFile] = None
     ) -> Tuple[List[UploadFile], Dict[str, str]]:
         """
         Extrae y procesa archivos embebidos en emails .msg y .eml.
@@ -234,6 +237,7 @@ class ExtractorHibrido:
 
         Args:
             archivos_preprocesamiento: Archivos que pasaron por procesamiento local
+            archivos_existentes: Archivos existentes (para deduplicación)
 
         Returns:
             Tupla (nuevos_archivos_directos, nuevos_textos_preprocesados)
@@ -258,9 +262,18 @@ class ExtractorHibrido:
                 extension_email = archivo.filename.lower().rsplit('.', 1)[-1]
 
                 if extension_email == 'msg':
-                    adjuntos = self.extractor_adjuntos.extraer_de_msg(contenido, archivo.filename)
+                    if hasattr(self.extractor, 'msg_attachments_cache') and archivo.filename in self.extractor.msg_attachments_cache:
+                        adjuntos = self.extractor.msg_attachments_cache[archivo.filename]
+                        logger.info(f" Adjuntos de MSG '{archivo.filename}' recuperados desde caché (ahorro de doble parseo)")
+                    else:
+                        adjuntos = self.extractor_adjuntos.extraer_de_msg(contenido, archivo.filename)
                 else:
                     adjuntos = self.extractor_adjuntos.extraer_de_eml(contenido, archivo.filename)
+
+                # Deduplicar adjuntos de email contra archivos directos existentes y los ya extraídos en esta misma llamada
+                if archivos_existentes is not None:
+                    todos_existentes = archivos_existentes + nuevos_directos
+                    adjuntos = self._deduplicar_adjuntos_email(adjuntos, todos_existentes, archivo.filename)
 
                 for adjunto in adjuntos:
                     await self._enrutar_adjunto(adjunto, nuevos_directos, nuevos_textos)
@@ -399,6 +412,40 @@ class ExtractorHibrido:
         if duplicados > 0:
             logger.info(
                 f" ZIP '{nombre_zip}': {duplicados} duplicado(s) omitido(s), "
+                f"{len(unicos)} archivo(s) nuevo(s)"
+            )
+        return unicos
+
+    def _deduplicar_adjuntos_email(
+        self,
+        adjuntos: List[AdjuntoExtraido],
+        archivos_existentes: List[UploadFile],
+        nombre_email: str
+    ) -> List[AdjuntoExtraido]:
+        """
+        Filtra adjuntos de email que ya existen entre los archivos directos.
+        Criterio: mismo nombre de archivo (case-insensitive) Y tamano similar (+-10%).
+
+        Args:
+            adjuntos: Archivos extraidos del email
+            archivos_existentes: Archivos recibidos directamente o ya procesados
+            nombre_email: Nombre del email para logging
+
+        Returns:
+            Lista de adjuntos unicos (no duplicados)
+        """
+        existentes = self._construir_indice_archivos(archivos_existentes)
+
+        unicos: List[AdjuntoExtraido] = []
+        for adjunto in adjuntos:
+            if self._es_duplicado(adjunto, existentes, nombre_email):
+                continue
+            unicos.append(adjunto)
+
+        duplicados = len(adjuntos) - len(unicos)
+        if duplicados > 0:
+            logger.info(
+                f" Email '{nombre_email}': {duplicados} duplicado(s) omitido(s), "
                 f"{len(unicos)} archivo(s) nuevo(s)"
             )
         return unicos

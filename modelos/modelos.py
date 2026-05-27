@@ -35,6 +35,8 @@ class ConceptoIdentificado(BaseModel):
         concepto_facturado: Descripcion literal del concepto en la factura (opcional)
         base_gravable: Base sobre la que se calcula la retencion (opcional)
         concepto_index: Indice del concepto en la lista de conceptos (opcional)
+        razonamiento: Chain-of-thought del matching - candidatos evaluados,
+            pistas contextuales citadas y criterio decisivo (opcional)
 
     Example:
         >>> concepto = ConceptoIdentificado(
@@ -48,6 +50,7 @@ class ConceptoIdentificado(BaseModel):
     concepto_facturado: Optional[str] = None
     base_gravable: Optional[float] = None
     concepto_index: Optional[int] = None
+    razonamiento: Optional[str] = None
 
 
 class DetalleConcepto(BaseModel):

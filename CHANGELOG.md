@@ -1,5 +1,173 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.15.0] - 2026-05-26
+
+### Añadido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`, `PROMPT_MATCHING_CONCEPTOS`) — rúbrica explícita de 4 criterios (chain-of-thought) para el matching de conceptos de retención en la fuente nacional, replicando el patrón ya validado en ICA. La rúbrica fuerza a Gemini a evaluar 2-3 candidatos del diccionario y a citar pistas contextuales reales (objeto del contrato, cotizaciones, CIIU del RUT, nombre del proveedor) cuando el ítem facturado es genérico, antes de elegir. Incluye few-shots para ítem genérico con proveedor revelador, ítem específico confirmado por cotización, ambigüedad con regla de desempate y caso sin coincidencia. El prompt de facturación extranjera (`PROMPT_ANALISIS_FACTURA_EXTRANJERA`) NO se modifica: su diccionario de conceptos es reducido y el matching es directo.
+- `modelos/modelos.py` (`ConceptoIdentificado.razonamiento`) — nuevo campo `Optional[str]` que persiste el chain-of-thought del matching para auditoría/observabilidad. Retrocompatible: respuestas previas sin el campo siguen siendo válidas.
+- `Clasificador/clasificador_consorcio.py` — propaga el `razonamiento` retornado por `PROMPT_MATCHING_CONCEPTOS` al `ConceptoIdentificado` final del consorcio.
+
+### Cambiado
+
+- `prompts/prompt_retefuente.py` (`PROMPT_MATCHING_CONCEPTOS`) — el campo de explicación del matching se renombró de `justificacion` (opcional) a `razonamiento` (obligatorio) por consistencia con ICA y con el resto de prompts de retefuente. La segunda llamada de consorcios queda limitada a Criterios 1 y 2 (semántica + especificidad) porque no tiene acceso a los documentos originales.
+
+## [3.14.17] - 2026-05-25
+
+### Añadido
+
+- `app/extraccion_hibrida.py` (`_deduplicar_adjuntos_email`) — nuevo helper que implementa un mecanismo robusto de deduplicación para los archivos adjuntos binarios extraídos de emails `.msg`/`.eml`, comparando nombres (case-insensitive) y tamaños (tolerancia de +-10%). Esto previene el procesamiento duplicado de archivos ya recibidos directamente o extraídos de otros correos del mismo lote.
+
+### Optimizado
+
+- `Extraccion/extractor.py` (`ProcesadorArchivos.msg_attachments_cache`) — implementado un caché en memoria que almacena los adjuntos binarios de los archivos `.msg` en el primer y único pase donde se lee e instancia el email con la costosa librería `extract-msg` (cuerpo del email y metadatos).
+- `app/extraccion_hibrida.py` (`_procesar_adjuntos_emails`) — refactorizado para consultar la caché en memoria del procesador local antes de intentar instanciar de nuevo `extract_msg.Message` sobre el archivo `.msg`. Elimina la duplicación de lectura que antes sumaba más de 30 segundos de latencia inútil en el pipeline (reducción de latencia de ~40% para el procesamiento de correos electrónicos en Cloud Run con 1 vCPU).
+
+## [3.14.16] - 2026-05-24
+
+### Corregido
+
+- `Background/background_processor.py` — el límite de 20 archivos directos (`HTTPException` "Demasiados archivos directos" lanzada en `Clasificador/clasificador.py`) ahora se devuelve en el formato de contrato (`estado_procesamiento: "preliquidacion_sin_finalizar"`) con el mensaje "Error en el procesamiento, Límite de archivos adjuntos superado." y un diagnóstico propio (`servicio_externo: "Validacion de archivos"`, `retry_sugerido: False`). Antes este caso caía en el handler genérico, que entregaba el mensaje engañoso de fallo de Gemini con sugerencia de reintento (reintentar con los mismos archivos vuelve a fallar).
+- `tests/test_preliquidacion_sin_finalizar.py` — nuevo test `test_limite_archivos_envia_contrato_con_mensaje_especifico` que verifica el payload del webhook para este caso.
+
+## [3.14.15] - 2026-05-23
+
+### Añadido
+
+- `config.py` — constantes de límites para el preprocesamiento de Excel:
+  `EXCEL_MAX_FILAS_LECTURA` (10.000, filas leídas por hoja), `EXCEL_MAX_FILAS_POR_HOJA` (500, filas serializadas por hoja) y `EXCEL_MAX_CHARS_POR_ARCHIVO` (80.000, presupuesto total de caracteres). Centralizan los topes que acotan el texto enviado a Gemini y el consumo de memoria.
+- `Extraccion/extractor.py` (`_normalizar_enteros`) — nuevo helper que convierte a `Int64` (entero nullable) las columnas `float64` cuyos valores no nulos son todos enteros. Calamine fuerza `float64` en columnas numéricas con alguna celda vacía, lo que generaba dos formas de ruido sin valor: el sufijo `.0` en cada entero y notación científica en enteros grandes (que volvía ilegibles IDs/NITs). La conversión es vectorizada por columna y no muta el DataFrame de entrada. Las columnas con decimales reales (p. ej. tarifas) se conservan intactas.
+- `tests/test_preprocesado_excel.py` — cobertura de `_normalizar_enteros` y `preprocesar_excel_limpio` (sin `.0`, sin notación científica, decimales preservados, truncado por hoja, reparto del presupuesto entre hojas con arrastre, multi-hoja y limpieza de vacíos).
+
+### Cambiado
+
+- `Extraccion/extractor.py` (`preprocesar_excel_limpio`) — reescrito para reducir el consumo de la ventana de contexto y de memoria:
+  - Lectura **hoja por hoja** con `pd.ExcelFile(..., engine="calamine")` + `del` por hoja, en lugar de `pd.read_excel(sheet_name=None)` que mantenía todas las hojas en memoria a la vez. El pico de memoria pasa a ser ~una hoja (crítico en Cloud Run 2 GB / 1 vCPU).
+  - Topes configurables desde `config.py`: truncado por hoja (`EXCEL_MAX_FILAS_POR_HOJA`) y presupuesto de caracteres por archivo (`EXCEL_MAX_CHARS_POR_ARCHIVO`), reemplazando el `MAX_FILAS_TEXTO = 10_000` hardcodeado. Todo truncado se anota en el texto (`[...truncado N filas...]` / `[...hoja truncada por presupuesto...]`) y se registra en log.
+  - El presupuesto de caracteres se **reparte entre las hojas** en lugar de consumirse por orden de llegada: cada hoja recibe una cuota dinámica (`presupuesto_restante / hojas_restantes`) y el sobrante de las hojas pequeñas se arrastra a las siguientes. Así ninguna hoja se omite por completo (cada una conserva al menos su encabezado de columnas + nota) y el total sigue acotado a `EXCEL_MAX_CHARS_POR_ARCHIVO`. Tradeoff aceptado: al ser un solo pase (sin doble lectura del workbook, por costo en Cloud Run 2 GB / 1 vCPU), el reparto depende del orden de las hojas. Un techo duro final se conserva como salvaguarda.
+  - Higiene numérica vía `_normalizar_enteros` aplicada en `_dataframe_a_texto_tabular`. Medición real: el export `C1 Bases Fommur_linea3.xlsx` tenía ~22 % del texto en sufijos `.0` (54.154 ocurrencias); ahora 0. Los IDs/NITs dejan de salir en notación científica.
+
+### Notas
+
+- Precisión: enteros de más de 15 dígitos (p. ej. IDs compuestos de encuesta) ya perdían precisión al ser leídos como `float64` por calamine; `_normalizar_enteros` los muestra como entero limpio (mejor que la notación científica previa) aunque los últimos dígitos puedan diferir. Los NIT colombianos (≤10 dígitos) y los valores monetarios son exactos en `float64`, por lo que no se ven afectados.
+
+## [3.14.14] - 2026-05-23
+
+### Corregido
+
+- Excel (.xlsx/.xls): eliminado el doble parseo en el flujo híbrido. En `Extraccion/extractor.py` (`procesar_archivo`), los archivos Excel ya no se extraen en el primer pase (`extraer_texto_excel`); su texto lo produce únicamente `preprocesar_excel_limpio` en `app/extraccion_hibrida.py` (`_preprocesar_excel`). Antes, cada Excel se leía y parseaba dos veces completas con `pd.read_excel(..., sheet_name=None)` y el resultado del primer pase —además **sin límite de filas**— siempre se descartaba. Reduce a la mitad el trabajo CPU por Excel y elimina el mayor pico de memoria (crítico en Cloud Run 2 GB / 1 vCPU). `procesar_archivo` ahora detecta Excel antes de leer el binario y devuelve un placeholder que `_preprocesar_excel` sobrescribe.
+- `Extraccion/extractor.py` (`procesar_multiples_archivos`): el log `"Archivo procesado y guardado: ..."` ya no se emite para `.xlsx/.xls`. Tras diferir el Excel, ese log era engañoso (no se procesa ni guarda nada en esa etapa para Excel); la detección ya queda registrada por `"Excel detectado, extraccion diferida..."`. Solo logging, sin cambio funcional.
+
+### Arquitectura
+
+- `Extraccion/extractor.py` — removidas `extraer_texto_excel` y `_extraer_texto_excel_sync` por quedar sin uso tras diferir la extracción de Excel al preprocesamiento. Se conserva `_dataframe_a_texto_tabular`, usado por `preprocesar_excel_limpio`.
+- Efecto colateral: el Excel subido directo deja de generar el artefacto de auditoría `Results/Extracciones/<fecha>/*_EXCEL_*.txt` (sigue generándose `extracciones/*_preprocesado.txt`). Queda igual que el Excel dentro de ZIP/email, que ya operaba así.
+
+## [3.14.13] - 2026-05-20
+
+### Corregido
+
+- `Liquidador/liquidador.py` (`_validar_naturaleza_tercero`) — el corte por régimen SIMPLE exigía `es_persona_natural == False`, por lo que un proveedor persona natural en régimen SIMPLE atravesaba la validación de naturaleza y luego moría en la validación posterior de conceptos mapeados, devolviendo `preliquidacion_sin_finalizar` con el mensaje "El concepto facturado no se identifica en los soportes adjuntos" cuando la causa real era el régimen. Ahora cualquier proveedor en régimen SIMPLE (natural o jurídico) corta con `estado: "no_aplica_impuesto"` y mensaje "Régimen Simple de Tributación - NO aplica retención en la fuente". El proveedor SIMPLE está exento de retefuente por normativa, independientemente del tipo de persona.
+
+## [3.14.12] - 2026-05-20
+
+### Cambiado
+
+- `Extraccion/extractor.py` — lectura de Excel migrada al engine `python-calamine` (Rust, libera el GIL) en lugar de `openpyxl`. Aplica a las dos rutas: `preprocesar_excel_limpio` (`pd.read_excel(..., engine="calamine")`) y `extraer_texto_excel` (a través del nuevo helper `_extraer_texto_excel_sync`).
+- `Extraccion/extractor.py` — serialización de DataFrames a texto reemplazada de `DataFrame.to_string(...)` por `to_csv(sep='\t', index=False, na_rep='')` mediante el nuevo helper `_dataframe_a_texto_tabular`. `to_string` formatea celda a celda calculando anchos por columna (~O(n^2) en filas); `to_csv` está vectorizado en C y es 5–20× más rápido en DataFrames grandes. El separador `\t` mantiene la lectura tabular para Gemini y evita ambigüedad con comas dentro de celdas.
+- `Extraccion/extractor.py` — `extraer_texto_excel` (método async) ahora delega su trabajo CPU-bound a un thread vía `asyncio.to_thread(_extraer_texto_excel_sync, ...)`, evitando que la lectura y serialización bloqueen el event loop. `preprocesar_excel_limpio` ya estaba delegada vía `run_in_executor` en `app/extraccion_hibrida.py:206` y `:298`, por lo que no se tocó esa cadena.
+- `requirements.txt` — `pandas` subido de `2.1.3` a `>=2.2.2,<2.3` (engine calamine soportado nativamente desde pandas 2.2). Agregada dependencia `python-calamine>=0.2.0`. `openpyxl` se conserva como fallback.
+
+### Corregido
+
+- Preprocesamiento de Excel grandes (caso real: `C1 Bases Fommur_linea3.xlsx`, 3 hojas, ~1.7M caracteres) pasa de ~16 min a segundos en Cloud Run (1 vCPU / 2 GiB). Causa raíz: combinación de `openpyxl` (parser XML puro en Python) + `DataFrame.to_string` con `max_rows=None`, ambos cuellos de CPU que se sumaban en hardware modesto.
+
+## [3.14.11] - 2026-05-19
+
+### Corregido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`) — `regimen_tributario` devolvía `null` de forma intermitente (~2 de cada 10 intentos) cuando el documento no declara el régimen explícitamente pero sí da una pista inequívoca. Causa raíz: el prompt ordenaba `null` si no había texto exacto y la prohibición absoluta "NO deduzcas el régimen tributario" vetaba la única inferencia válida; los aciertos eran el modelo desobedeciendo el prompt, por eso ajustar la temperatura producía resultados erráticos y no monótonos. Solución (sin tocar temperatura): bloque RÉGIMEN TRIBUTARIO reescrito con prioridades explícitas (1: texto exacto + código DIAN R-99-PN; 2: inferencia acotada por la pista documental "depuración art. 383 del ET" manifestada por persona natural → ORDINARIO, con la lógica tributaria que la justifica; 3: `null`), exigencia de registrar en `observaciones` la frase textual de la pista usada, y excepción explícita y acotada abierta en PROHIBICIONES ABSOLUTAS para esa única pista.
+
+## [3.14.10] - 2026-05-18
+
+### Añadido
+
+- `tools/benchmark_prompt_caching.py` — herramienta de desarrollo: mini servidor FastAPI independiente (`POST /benchmark`, parámetro `archivos` multipart) que corre el fan-out real (bootstrap config + UVT + DB como `main.py`) e instrumenta el único chokepoint `ProcesadorGemini._ejecutar_con_retry` para comparar, llamada por llamada, latencia y tokens cacheados del orden NUEVO `[documentos..., prompt]` vs. el ANTERIOR `[prompt, documentos...]`. N pasadas configurables por orden. No se monta en `main.py` ni altera código de producción.
+
+## [3.14.9] - 2026-05-18
+
+### Añadido
+
+- `Clasificador/clasificador.py` — medición agregada de tokens Gemini por factura. Hook único en el punto de `return` de `_ejecutar_con_retry` (parámetro opcional `contexto`) que captura el 100% de las llamadas, incluidas las 2 de ICA que antes no se medían. Acumulador `_uso_acumulado` por instancia (la instancia es por factura) y `_log_resumen_uso_tokens()` que emite `RESUMEN Gemini factura: N llamadas | prompt_total=... cacheados_total=... (X% ahorro) ... | desglose por contexto`. NO se modificó la lógica de retry/recreación de cliente SSL-TLS.
+- `Background/background_processor.py` — llamada a `_log_resumen_uso_tokens()` en bloque `finally` (resumen siempre, aun si falla una tarea).
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — ambas llamadas a Gemini (identificar ubicaciones, relacionar actividades) reordenadas a `[documentos..., prompt]` para coherencia con la Fase 1 (release 3.14.8) y habilitar el implicit caching también en ICA.
+- `Clasificador/clasificador.py` — centralizada la instrumentación: eliminadas las 3 llamadas redundantes a `_log_uso_tokens` introducidas en 3.14.8 (`_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura`, `_llamar_gemini`); ahora pasan `contexto=` a `_ejecutar_con_retry`, que loguea y acumula en un solo sitio (evita doble conteo).
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` — ampliado: cobertura del reorden de ICA (`[documentos..., prompt]`) y de `_log_resumen_uso_tokens` (suma correcta de `_uso_acumulado`).
+
+## [3.14.8] - 2026-05-18
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — `_llamar_gemini_hibrido` y `_llamar_gemini_hibrido_factura`: invertido el orden de `contenido_multimodal` a `[documentos..., prompt]` (antes `[prompt, documentos...]`). El texto variable (prompt por impuesto) iba primero y rompía el prefijo común entre las ~8 llamadas del fan-out, inhabilitando el implicit caching de Gemini 2.5. Con los documentos como prefijo estable (idénticos y en el mismo orden porque vienen del mismo `cache_archivos`), Gemini reutiliza el prefill del documento en lugar de re-procesarlo N veces, reduciendo latencia y costo. NO se modificó `_ejecutar_con_retry` ni la lógica de retry/recreación de cliente SSL/TLS.
+
+### Añadido
+
+- `Clasificador/clasificador.py` — nuevo helper `_log_uso_tokens(respuesta, contexto)` que loguea `prompt_token_count`, `cached_content_token_count` y `candidates_token_count` de `usage_metadata` tras cada respuesta de Gemini (en `_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura` y `_llamar_gemini`). Permite cuantificar el % de tokens servidos desde el implicit cache. Defensivo: nunca rompe el flujo si falta `usage_metadata`.
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` (nuevo) — verifica que el último elemento enviado a `generate_content` es el prompt (str) y los previos son documentos, en clasificación y análisis de factura; y que `_log_uso_tokens` no rompe sin `usage_metadata`.
+
+## [3.14.7] - 2026-05-18
+
+### Corregido
+
+- `Clasificador/clasificador_ica.py` — un timeout de Gemini ya NO se reporta como si la IA no hubiera identificado la ubicación/actividad. Antes, `_identificar_ubicaciones_gemini` no tenía handler de `asyncio.TimeoutError`: caía en el `except Exception` genérico, devolvía lista vacía y `_validar_ubicaciones_manualmente` producía "No se pudo identificar el municipio de la actividad gravada." (mensaje engañoso). Lo mismo ocurría en `_relacionar_actividades_gemini` (timeout → `{}` → "No se pudo identificar la actividad económica facturada"). Ahora se distingue el fallo técnico: la 1ª llamada retorna una 4-tupla con `error_tecnico` y la 2ª un dict con clave `error_tecnico`; `analizar_ica` corta temprano con observaciones "Error analizando ubicaciones ICA..." / "Error mapeando actividades ICA..." (con texto específico para timeout: "el servicio de IA no respondió a tiempo"). El caso genuino (Gemini sin datos) conserva sus mensajes originales.
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — timeout de las 2 llamadas a Gemini de ICA aumentado a 240s: identificación de ubicaciones 60s → 240s, mapeo de actividades 180s → 240s. Causa: prompts grandes (muchas ubicaciones/actividades en BD) y carga en Cloud Run hacían superar los límites anteriores.
+
+### Tests
+
+- `tests/test_clasificador_ica_timeout.py` (nuevo) — cobertura de `ClasificadorICA.analizar_ica`: timeout en ubicaciones → "Error analizando ubicaciones ICA"; timeout en actividades → "Error mapeando actividades ICA"; regresión del caso genuino que conserva "No se pudo identificar el municipio de la actividad gravada.".
+
+## [3.14.6] - 2026-05-18
+
+### Corregido
+
+- `utils/mockups.py` — corregida la errata `preliquidacion_sin_finalzar` → `preliquidacion_sin_finalizar` (faltaba la 2ª "i") en 10 puntos: `estado_procesamiento`/`razon_fallo` de `crear_respuesta_error_validacion` y el campo `estado`/`estado_liquidacion` de los 8 helpers `_crear_mock_*_validacion`. Antes el estado por-impuesto no coincidía con el valor canónico usado en el resto del sistema, lo que podía romper el frontend si discrimina por ese campo.
+- `Clasificador/clasificador.py` — los fallos `httpx.ConnectError` / `httpcore.ConnectError` (falla de handshake TLS hacia Google Gemini API desde Cloud Run) ya NO abortan la clasificación sin reintentar. Causa: `"connecterror"` no estaba en la lista de patrones reintentables y `httpx.ConnectError` no deriva de `ssl.SSLError`/`ConnectionError`, por lo que `_ejecutar_con_retry` lo trataba como no transitorio. Además `client.aio.files.get()` (línea ~360) no tenía ninguna protección de reintento. Se añadieron patrones de conexión y tipos `httpx`/`httpcore` a la detección de transitoriedad, extraída a `_es_error_transitorio()`, y un nuevo `_files_get_con_retry()` con el mismo backoff + reinicialización de cliente. El mensaje del `ValueError` ya no queda vacío (`Error en clasificación híbrida: `) cuando `str(e)` es vacío: ahora incluye `type(e).__name__`.
+
+### Arquitectura
+
+- `utils/mockups.py` — nueva función pública `crear_respuesta_preliquidacion_sin_finalizar(mensaje, codigo_del_negocio, diagnostico)` que sigue el patrón de `crear_respuesta_error_validacion`, reutilizando los helpers `_crear_mock_*_validacion`. Devuelve la forma normal del contrato con `estado_procesamiento="preliquidacion_sin_finalizar"`, todos los impuestos presentes y un bloque `diagnostico_error` (sin traceback crudo). Exportada en `utils/__init__.py`.
+- `Background/background_processor.py` — el `except` de `procesar_factura_background` ya NO envía al webhook el blob ad-hoc `{"status":"error","error_traceback":...}` que rompía el frontend. Ahora envía el payload de contrato vía `crear_respuesta_preliquidacion_sin_finalizar` con un mensaje claro y sin nombre de proveedor ("No se pudo conectar con el servicio de procesamiento. Preliquidación sin finalizar..."). El proveedor de IA (`Google Gemini API`) solo se conserva en `diagnostico_error.servicio_externo`, no en las `observaciones` visibles al usuario. El traceback técnico completo se sigue logueando y guardando en `error_procesamiento_*` (uso interno de soporte), no en el payload al frontend.
+
+### Tests
+
+- `tests/test_preliquidacion_sin_finalizar.py` (nuevo) — cobertura de `crear_respuesta_preliquidacion_sin_finalizar` (claves de contrato, `estado_procesamiento`, todos los impuestos con `estado`/`aplica:false`, `diagnostico_error` sin `error_traceback`), de `_es_error_transitorio` / `_files_get_con_retry` ante `httpx.ConnectError`, y test de integración de `BackgroundProcessor.procesar_factura_background` que verifica que ante un fallo (502/bad_gateway IA o genérico) el webhook recibe el payload de contrato y NO el blob `{"status":"error"}`.
+
+## [3.14.5] - 2026-05-14
+
+### Corregido
+
+- `Liquidador/liquidador_consorcios.py` — `_liquidar_consorciado_individual`: validación explícita cuando Gemini devuelve `porcentaje_participacion: null` (caso permitido por `prompts/prompt_retefuente.py:559` cuando el porcentaje no se identifica en el documento). Antes `float(consorciado.get('porcentaje_participacion', 0))` lanzaba `TypeError: float() argument must be a string or a real number, not 'NoneType'` porque `dict.get(key, default)` no usa el default cuando la clave existe pero su valor es `None`. La excepción caía en el `try/except` genérico de `liquidar_consorcio` y reseteaba toda la respuesta a `es_consorcio=False, consorciados=[], procesamiento_exitoso=False`, ocultando los datos extraídos. Ahora el caso se reporta como "Información incompleta: falta el porcentaje de participación del consorciado X" reutilizando el flujo existente de `_campo_faltante` / `error_naturaleza_incompleta`. El usuario recibe `procesamiento_exitoso=False`, `estado="preliquidación_sin_finalizar"`, la lista completa de consorciados con la observación específica y el `valor_factura_sin_iva` preservado.
+
+### Arquitectura
+
+- `Liquidador/liquidador_consorcios.py` — eliminado el antipatrón `dict.get(key, 0)` → `float(...)`/`Decimal(str(...))` en 9 puntos (líneas 400, 413, 469, 481, 582, 675, 703, 718, 854). Reemplazado por `dict.get(key) or 0` en cada caso. Razón: `dict.get` con default ignora el default cuando el valor existe pero es `None`, lo que convertía cualquier `null` de Gemini en `TypeError`/`InvalidOperation` aguas abajo. El bug del `porcentaje_participacion` fue una manifestación; el resto de los puntos eran bombas latentes equivalentes (`valor_total`, `tarifa_retencion`, `base_gravable`).
+
+### Tests
+
+- `tests/test_liquidador_consorcios.py` (nuevo) — 6 casos en dos clases `IsolatedAsyncioTestCase`. Cobertura del fix de `porcentaje_participacion` (3 casos: null aislado reproduce el incidente real, null junto a otros consorciados válidos verifica preservación, 0 verifica que es valor numérico válido y no "incompleto") y del hardening del antipatrón `None`-vs-default (3 casos: `valor_total` null, `tarifa_retencion` null, `base_gravable` null).
+
 ## [3.14.4] - 2026-05-06
 
 ### Corregido

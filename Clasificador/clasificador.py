@@ -15,6 +15,8 @@ import asyncio
 import logging
 import traceback
 import ssl
+import httpx
+import httpcore
 from datetime import datetime
 from typing import Dict, Any, Tuple
 from pathlib import Path
@@ -107,9 +109,13 @@ class ProcesadorGemini:
         # NUEVO: Inicializar Files Manager (SRP: gestión de archivos)
         self.files_manager = GeminiFilesManager(api_key=self.api_key)
 
+        # Acumulador de uso de tokens por factura (la instancia es por factura).
+        # Lo llena _log_uso_tokens; lo resume _log_resumen_uso_tokens.
+        self._uso_acumulado: list = []
+
         # Configuración de generación estándar
         self.generation_config = {
-            'temperature': 0.4,
+            'temperature': 0.3,
             'max_output_tokens': 65536,
             'candidate_count': 1
         }
@@ -356,8 +362,9 @@ class ProcesadorGemini:
 
                 # Agregar referencias de Files API al contenido
                 for file_ref in uploaded_files_refs:
-                    # Obtener objeto File usando la referencia
-                    file_obj = await self.client.aio.files.get(name=file_ref.name)
+                    # Obtener objeto File usando la referencia (con retry ante
+                    # errores de conexion transitorios hacia Files API)
+                    file_obj = await self._files_get_con_retry(name=file_ref.name)
                     contents.append(file_obj)
                     logger.info(f"Referencia Files API agregada: {file_ref.name}")
             
@@ -436,7 +443,10 @@ class ProcesadorGemini:
             
             logger.error(f" Archivos directos fallidos: {archivos_fallidos_nombres}")
             logger.error(f" Textos preprocesados fallidos: {list(textos_preprocesados.keys())}")
-            raise ValueError(f"Error en clasificación híbrida: {str(e)}")
+            # str(e) puede ser vacio (p. ej. httpx.ConnectError) -> incluir el tipo
+            # para que el mensaje nunca quede como "Error en clasificación híbrida: "
+            detalle_error = str(e) or f"{type(e).__name__}: fallo de conexión con Google Gemini API"
+            raise ValueError(f"Error en clasificación híbrida: {detalle_error}")
 
         finally:
             # PASO 9 (NUEVO v3.0): Cleanup omitido intencionalmente.
@@ -444,7 +454,188 @@ class ProcesadorGemini:
             # via cache en GeminiFilesManager. El cleanup final ocurre en _llamar_gemini_hibrido_factura().
             pass
 
-    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3):
+    # Patrones de error (en str(e).lower()) considerados transitorios y reintentables.
+    # Incluye fallos SSL/EOF historicos y fallos de conexion/TLS hacia Gemini
+    # (httpx/httpcore ConnectError) que antes NO se reintentaban.
+    ERRORES_REINTENTABLES = (
+        "unexpected_eof",
+        "unexpected eof",
+        "ssl",
+        "ssleof",
+        "connection reset",
+        "connectionreset",
+        "broken pipe",
+        "brokenpipe",
+        "max retries exceeded",
+        "connection aborted",
+        "remotedisconnected",
+        "remote end closed connection",
+        "connecterror",
+        "connect error",
+        "connecttimeout",
+        "connect timeout",
+        "connection refused",
+        "temporary failure in name resolution",
+        "all connection attempts failed",
+    )
+
+    # Tipos de excepcion considerados transitorios a nivel de clase.
+    TIPOS_TRANSITORIOS = (
+        ssl.SSLError,
+        ConnectionError,
+        ConnectionResetError,
+        BrokenPipeError,
+        httpx.ConnectError,
+        httpx.ConnectTimeout,
+        httpx.ReadTimeout,
+        httpx.RemoteProtocolError,
+        httpx.TransportError,
+        httpcore.ConnectError,
+        httpcore.ConnectTimeout,
+    )
+
+    def _es_error_transitorio(self, e: Exception) -> bool:
+        """
+        Determina si una excepcion es un error de conexion/SSL transitorio
+        que vale la pena reintentar.
+
+        Combina deteccion por tipo (TIPOS_TRANSITORIOS) y por substring del
+        mensaje (ERRORES_REINTENTABLES). httpx.ConnectError tiene str() vacio,
+        por eso la deteccion por tipo es indispensable.
+        """
+        if isinstance(e, self.TIPOS_TRANSITORIOS):
+            return True
+        error_str = str(e).lower()
+        return any(patron in error_str for patron in self.ERRORES_REINTENTABLES)
+
+    async def _files_get_con_retry(self, name, max_reintentos: int = 3):
+        """
+        Obtiene un objeto File de la Files API con reintentos ante errores
+        de conexion transitorios (mismo criterio que _ejecutar_con_retry).
+
+        Antes esta llamada no tenia proteccion: un httpx.ConnectError aqui
+        abortaba toda la clasificacion con un mensaje vacio.
+
+        Args:
+            name: Nombre/referencia del archivo en Files API
+            max_reintentos: Numero maximo de intentos (default 3)
+
+        Returns:
+            Objeto File de Gemini Files API
+
+        Raises:
+            Exception: Si todos los reintentos fallan, relanza la ultima excepcion
+        """
+        ultima_excepcion = None
+
+        for intento in range(1, max_reintentos + 1):
+            try:
+                file_obj = await self.client.aio.files.get(name=name)
+                if intento > 1:
+                    logger.info(f"files.get exitoso en reintento {intento}/{max_reintentos}")
+                return file_obj
+
+            except Exception as e:
+                ultima_excepcion = e
+
+                if not self._es_error_transitorio(e):
+                    raise
+
+                if intento < max_reintentos:
+                    espera = 2 ** (intento - 1)
+                    logger.warning(
+                        f"Error transitorio en files.get intento {intento}/{max_reintentos}: "
+                        f"{type(e).__name__}: {e}. Reintentando en {espera}s..."
+                    )
+                    await asyncio.sleep(espera)
+
+                    try:
+                        self.client = genai.Client(api_key=self.api_key)
+                        logger.info("Cliente Gemini reinicializado con nueva conexion")
+                    except Exception as reinit_error:
+                        logger.warning(f"Error reinicializando cliente: {reinit_error}")
+                else:
+                    logger.error(
+                        f"Error de conexion persistente en files.get despues de "
+                        f"{max_reintentos} intentos: {type(e).__name__}: {e}"
+                    )
+
+        raise ultima_excepcion
+
+    def _log_uso_tokens(self, respuesta, contexto: str) -> None:
+        """
+        Loguea el uso de tokens de una respuesta de Gemini para medir el
+        impacto del implicit caching de Gemini 2.5.
+
+        Defensivo: usage_metadata y sus campos pueden no existir o ser None
+        segun la version del SDK / la respuesta. Nunca debe romper el flujo.
+
+        Args:
+            respuesta: GenerateContentResponse de Gemini
+            contexto: Etiqueta para identificar la llamada (ej. "clasificacion")
+        """
+        try:
+            um = getattr(respuesta, "usage_metadata", None)
+            if um is None:
+                return
+
+            prompt_tokens = getattr(um, "prompt_token_count", None) or 0
+            cacheados = getattr(um, "cached_content_token_count", None) or 0
+            salida = getattr(um, "candidates_token_count", None) or 0
+
+            pct = (cacheados / prompt_tokens * 100) if prompt_tokens else 0.0
+            logger.info(
+                f"Tokens Gemini [{contexto}]: prompt={prompt_tokens} "
+                f"cacheados={cacheados} ({pct:.0f}%) salida={salida}"
+            )
+
+            # Acumular por factura (la instancia de ProcesadorGemini es por
+            # factura, ver background_processor.py). Permite el resumen agregado.
+            self._uso_acumulado.append({
+                "contexto": contexto,
+                "prompt": prompt_tokens,
+                "cacheados": cacheados,
+                "salida": salida,
+            })
+        except Exception as e:
+            logger.debug(f"No se pudo loguear usage_metadata [{contexto}]: {e}")
+
+    def _log_resumen_uso_tokens(self) -> None:
+        """
+        Loguea el total agregado de tokens Gemini de TODAS las llamadas de esta
+        factura (incluye ICA). Defensivo: nunca rompe el flujo.
+        """
+        try:
+            registros = getattr(self, "_uso_acumulado", [])
+            if not registros:
+                return
+
+            n = len(registros)
+            prompt_total = sum(r["prompt"] for r in registros)
+            cacheados_total = sum(r["cacheados"] for r in registros)
+            salida_total = sum(r["salida"] for r in registros)
+            pct = (cacheados_total / prompt_total * 100) if prompt_total else 0.0
+
+            # Desglose por contexto: cacheados/prompt
+            por_ctx = {}
+            for r in registros:
+                acc = por_ctx.setdefault(r["contexto"], [0, 0, 0])
+                acc[0] += r["prompt"]
+                acc[1] += r["cacheados"]
+                acc[2] += 1
+            desglose = " ".join(
+                f"{ctx}(x{c}:{cac}/{pr})" for ctx, (pr, cac, c) in por_ctx.items()
+            )
+
+            logger.info(
+                f"RESUMEN Gemini factura: {n} llamadas | "
+                f"prompt_total={prompt_total} cacheados_total={cacheados_total} "
+                f"({pct:.0f}% ahorro) salida_total={salida_total} | {desglose}"
+            )
+        except Exception as e:
+            logger.debug(f"No se pudo loguear resumen de uso de tokens: {e}")
+
+    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3, contexto: str = "gemini"):
         """
         Ejecuta llamada a Gemini con cliente async nativo y reintentos para errores SSL transitorios.
 
@@ -464,21 +655,6 @@ class ProcesadorGemini:
         Raises:
             Exception: Si todos los reintentos fallan, relanza la ultima excepcion
         """
-        errores_reintentables = (
-            "unexpected_eof",
-            "unexpected eof",
-            "ssl",
-            "ssleof",
-            "connection reset",
-            "connectionreset",
-            "broken pipe",
-            "brokenpipe",
-            "max retries exceeded",
-            "connection aborted",
-            "remotedisconnected",
-            "remote end closed connection",
-        )
-
         ultima_excepcion = None
 
         for intento in range(1, max_reintentos + 1):
@@ -495,6 +671,11 @@ class ProcesadorGemini:
                 if intento > 1:
                     logger.info(f"Llamada a Gemini exitosa en reintento {intento}/{max_reintentos}")
 
+                # Hook de medicion: unico punto de retorno -> captura el 100%
+                # de llamadas (incl. ICA). NO altera la logica de
+                # retry/except/TLS de abajo.
+                self._log_uso_tokens(respuesta, contexto)
+
                 return respuesta
 
             except asyncio.TimeoutError:
@@ -503,14 +684,9 @@ class ProcesadorGemini:
 
             except Exception as e:
                 ultima_excepcion = e
-                error_str = str(e).lower()
 
                 # Verificar si es un error SSL/conexion transitorio
-                es_transitorio = any(patron in error_str for patron in errores_reintentables)
-
-                # Verificar excepciones SSL a nivel de tipo
-                if isinstance(e, (ssl.SSLError, ConnectionError, ConnectionResetError, BrokenPipeError)):
-                    es_transitorio = True
+                es_transitorio = self._es_error_transitorio(e)
 
                 if not es_transitorio:
                     # Error no transitorio, propagar inmediatamente
@@ -560,14 +736,14 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt + {len(contents) - 1} archivos directos")
             
             #  CREAR CONTENIDO MULTIMODAL CORRECTO
+            # Orden: documentos primero, prompt al final. El prefijo estable
+            # (documentos identicos entre los ~8 clasificadores) habilita el
+            # implicit caching de Gemini 2.5 y evita re-procesar el doc N veces.
             contenido_multimodal = []
-            
-            # Agregar prompt (primer elemento)
-            if contents:
-                prompt_texto = contents[0]
-                contenido_multimodal.append(prompt_texto)
-                logger.info(f" Prompt agregado: {len(prompt_texto):,} caracteres")
-            
+
+            # El prompt se anexa al FINAL (despues de los archivos)
+            prompt_texto = contents[0] if contents else None
+
             #  PROCESAR ARCHIVOS DIRECTOS CORRECTAMENTE
             archivos_directos = contents[1:] if len(contents) > 1 else []
             for i, archivo_elemento in enumerate(archivos_directos):
@@ -657,13 +833,20 @@ class ProcesadorGemini:
                     logger.error(f" Error procesando archivo {i+1}: {e}")
                     continue
             
+            # Anexar el prompt al FINAL (sufijo variable; el prefijo de
+            # documentos queda estable para el implicit caching de Gemini 2.5)
+            if prompt_texto is not None:
+                contenido_multimodal.append(prompt_texto)
+                logger.info(f" Prompt agregado al final: {len(prompt_texto):,} caracteres")
+
             # Llamar a Gemini con retry automatico para errores SSL
             logger.info(f"Enviando a Gemini (con retry SSL): {len(contenido_multimodal)} elementos")
 
             respuesta = await self._ejecutar_con_retry(
                 contenido=contenido_multimodal,
                 config=self.generation_config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="clasificacion"
             )
 
             if not respuesta:
@@ -818,11 +1001,9 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt de análisis + {len(archivos_directos)} archivos directos")
 
             #  CREAR CONTENIDO MULTIMODAL CORRECTO PARA ANÁLISIS
+            # Orden: documentos primero, prompt al final, para habilitar el
+            # implicit caching de Gemini 2.5 (prefijo de documentos estable).
             contenido_multimodal = []
-
-            # Agregar prompt de análisis (primer elemento)
-            contenido_multimodal.append(prompt)
-            logger.info(f"Prompt de análisis agregado: {len(prompt):,} caracteres")
 
             # NUEVO v3.0: PROCESAR ARCHIVOS CON FILES API + VALIDACIÓN ROBUSTA
             uploaded_files_refs = []
@@ -933,7 +1114,9 @@ class ProcesadorGemini:
                 logger.info(f" Referencia Files API agregada (recién subido): {file_ref.name}")
             
             #  VALIDACIÓN FINAL: Verificar que tenemos contenido válido para enviar
-            archivos_validos = len(contenido_multimodal) - 1  # -1 porque el primer elemento es el prompt
+            # En este punto contenido_multimodal solo tiene Part de archivos
+            # (el prompt se anexa despues, al final).
+            archivos_validos = len(contenido_multimodal)
 
             if archivos_validos == 0 and len(archivos_directos) > 0:
                 # Solo lanzar error si se esperaban archivos pero ninguno fue validado
@@ -948,13 +1131,19 @@ class ProcesadorGemini:
                 archivos_omitidos = len(archivos_directos) - archivos_validos
                 logger.warning(f"Se omitieron {archivos_omitidos} archivos problemáticos de {len(archivos_directos)} archivos totales")
             
+            # Anexar el prompt de analisis al FINAL (sufijo variable; el
+            # prefijo de documentos queda estable para el implicit caching)
+            contenido_multimodal.append(prompt)
+            logger.info(f"Prompt de análisis agregado al final: {len(prompt):,} caracteres")
+
             # Llamar a Gemini con retry automatico para errores SSL
             logger.info(f"Enviando analisis a Gemini (con retry SSL): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
 
             respuesta = await self._ejecutar_con_retry(
                 contenido=contenido_multimodal,
                 config=self.generation_config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="analisis_factura"
             )
 
             if not respuesta:
@@ -1094,7 +1283,7 @@ class ProcesadorGemini:
 
         logger.info(f" {len(archivos_referencias)} referencias Files API listas para worker")
         return archivos_referencias
-    
+
     # ===============================
     #  FUNCIÓN COORDINADORA PARA CONCURRENCIA
     # ===============================
@@ -1363,7 +1552,8 @@ class ProcesadorGemini:
             respuesta = await self._ejecutar_con_retry(
                 contenido=[prompt],
                 config=config,
-                timeout_segundos=timeout_segundos
+                timeout_segundos=timeout_segundos,
+                contexto="consorcio" if usar_modelo_consorcio else "texto"
             )
 
             if not respuesta:

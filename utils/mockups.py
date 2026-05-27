@@ -381,7 +381,7 @@ def crear_respuesta_error_validacion(
         "nombre_entidad": "",
         "timestamp": datetime.now().isoformat(),
         "version": "3.0.0",
-        "estado_procesamiento": "preliquidacion_sin_finalzar",
+        "estado_procesamiento": "preliquidacion_sin_finalizar",
         "errores_validacion": {
             "detectados": True,
             "cantidad_errores": len(errores_validacion),
@@ -406,7 +406,7 @@ def crear_respuesta_error_validacion(
             "valor_total_impuestos": 0.0,
             "impuestos_liquidados": [],
             "procesamiento_exitoso": False,
-            "razon_fallo": "preliquidacion_sin_finalzar"
+            "razon_fallo": "preliquidacion_sin_finalizar"
         },
         "timestamp_procesamiento": datetime.now().isoformat(),
         "es_consorcio": False,
@@ -463,7 +463,7 @@ def _crear_mock_estampilla_universidad_validacion(mensaje: str) -> Dict:
     """Mock de estampilla universidad para errores de validación"""
     return {
         "aplica": False,
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "valor_estampilla": 0,
         "tarifa_aplicada": 0,
         "valor_factura_sin_iva": 0,
@@ -479,7 +479,7 @@ def _crear_mock_contribucion_obra_publica_validacion(mensaje: str) -> Dict:
     """Mock de obra pública para errores de validación"""
     return {
         "aplica": False,
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "tarifa_aplicada": 0.0,
         "valor_contribucion": 0,
         "valor_factura_sin_iva": 0,
@@ -498,7 +498,7 @@ def _crear_mock_iva_reteiva_validacion(mensaje: str) -> Dict:
         "porcentaje_iva": 0.0,
         "tarifa_reteiva": 0.0,
         "es_fuente_nacional": False,
-        "estado_liquidacion": "preliquidacion_sin_finalzar",
+        "estado_liquidacion": "preliquidacion_sin_finalizar",
         "es_responsable_iva": False,
         "observaciones": [mensaje],
         "calculo_exitoso": False
@@ -511,7 +511,7 @@ def _crear_mock_estampillas_generales_validacion(mensaje: str) -> Dict:
         return {
             "nombre": nombre,
             "aplica": False,
-            "estado": "preliquidacion_sin_finalzar",
+            "estado": "preliquidacion_sin_finalizar",
             "informacion_identificada": {
                 "porcentaje": 0,
                 "valor_base": 0,
@@ -542,7 +542,7 @@ def _crear_mock_ica_validacion(mensaje: str) -> Dict:
     """Mock de ICA para errores de validación"""
     return {
         "aplica": False,
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "valor_total_ica": 0.0,
         "actividades_facturadas": [],
         "actividades_relacionadas": [],
@@ -556,7 +556,7 @@ def _crear_mock_sobretasa_bomberil_validacion(mensaje: str) -> Dict:
     """Mock de sobretasa bomberil para errores de validación"""
     return {
         "aplica": False,
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "valor_total_sobretasa": 0,
         "ubicaciones": [],
         "observaciones": mensaje,
@@ -568,7 +568,7 @@ def _crear_mock_timbre_validacion(mensaje: str) -> Dict:
     """Mock de timbre para errores de validación"""
     return {
         "aplica": False,
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "valor": 0,
         "tarifa": 0,
         "tipo_cuantia": "",
@@ -581,7 +581,7 @@ def _crear_mock_timbre_validacion(mensaje: str) -> Dict:
 def _crear_mock_tasa_prodeporte_validacion(mensaje: str) -> Dict:
     """Mock de tasa prodeporte para errores de validación"""
     return {
-        "estado": "preliquidacion_sin_finalzar",
+        "estado": "preliquidacion_sin_finalizar",
         "aplica": False,
         "valor_imp": 0,
         "tarifa": 0,
@@ -594,4 +594,79 @@ def _crear_mock_tasa_prodeporte_validacion(mensaje: str) -> Dict:
         "numero_contrato": "",
         "observaciones": mensaje,
         "fecha_calculo": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+
+def crear_respuesta_preliquidacion_sin_finalizar(
+    mensaje: str,
+    codigo_del_negocio: int,
+    diagnostico: Dict[str, Any] = None
+) -> Dict:
+    """
+    Crea una respuesta que RESPETA EL CONTRATO de la API cuando el
+    procesamiento background falla de forma definitiva (p. ej. fallo de
+    conexion con Google Gemini API).
+
+    En vez del blob ad-hoc {"status": "error", ...} -que rompe el frontend-,
+    devuelve la misma forma que un resultado normal: todos los impuestos
+    presentes con estado "preliquidacion_sin_finalizar" y un bloque de
+    metadatos de diagnostico (sin traceback crudo) para soporte.
+
+    Sigue el mismo patron que crear_respuesta_error_validacion(), reutilizando
+    los helpers _crear_mock_*_validacion existentes.
+
+    Args:
+        mensaje: Mensaje claro para el usuario (sin traceback), se inyecta en
+            las observaciones de cada impuesto.
+        codigo_del_negocio: Codigo del negocio en proceso (para diagnostico).
+        diagnostico: Metadatos adicionales del error (tipo_error,
+            timestamp_error, etc.). Opcional.
+
+    Returns:
+        dict: Estructura completa con el contrato normal y todos los impuestos
+            marcados como "preliquidacion_sin_finalizar".
+    """
+    diagnostico = diagnostico or {}
+
+    diagnostico_error = {
+        "tipo_error": diagnostico.get("tipo_error", "error_procesamiento"),
+        "servicio_externo": diagnostico.get("servicio_externo", "Google Gemini API"),
+        "causa_resumida": mensaje,
+        "timestamp_error": diagnostico.get("timestamp_error", datetime.now().isoformat()),
+        "retry_sugerido": diagnostico.get("retry_sugerido", True),
+        "codigo_del_negocio": codigo_del_negocio,
+    }
+
+    return {
+        "impuestos_procesados": [],
+        "nit_administrativo": "0",
+        "nombre_entidad": "",
+        "timestamp": datetime.now().isoformat(),
+        "version": "3.0.0",
+        "estado_procesamiento": "preliquidacion_sin_finalizar",
+        "diagnostico_error": diagnostico_error,
+        "impuestos": {
+            "retefuente": _crear_mock_retefuente_validacion(mensaje),
+            "estampilla_universidad": _crear_mock_estampilla_universidad_validacion(mensaje),
+            "contribucion_obra_publica": _crear_mock_contribucion_obra_publica_validacion(mensaje),
+            "iva_reteiva": _crear_mock_iva_reteiva_validacion(mensaje),
+            "estampillas_generales": _crear_mock_estampillas_generales_validacion(mensaje),
+            "ica": _crear_mock_ica_validacion(mensaje),
+            "sobretasa_bomberil": _crear_mock_sobretasa_bomberil_validacion(mensaje),
+            "timbre": _crear_mock_timbre_validacion(mensaje),
+            "tasa_prodeporte": _crear_mock_tasa_prodeporte_validacion(mensaje)
+        },
+        "resumen_total": {
+            "valor_total_impuestos": 0.0,
+            "impuestos_liquidados": [],
+            "procesamiento_exitoso": False,
+            "razon_fallo": "preliquidacion_sin_finalizar"
+        },
+        "timestamp_procesamiento": datetime.now().isoformat(),
+        "es_consorcio": False,
+        "es_facturacion_extranjera": False,
+        "documentos_procesados": 0,
+        "documentos_clasificados": [],
+        "version_sistema": "3.0.0",
+        "modulos_utilizados": ["Background", "ErrorHandlers"]
     }

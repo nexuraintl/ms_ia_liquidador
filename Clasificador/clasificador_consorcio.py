@@ -194,7 +194,7 @@ class ClasificadorConsorcio:
                         "nombre_concepto": "CONCEPTO_NO_IDENTIFICADO",
                         "concepto": "CONCEPTO_NO_IDENTIFICADO",
                         "concepto_index": 0,
-                        "justificacion": "No se identificaron conceptos en la primera llamada"
+                        "razonamiento": "No se identificaron conceptos en la primera llamada"
                     }]
                 }
             else:
@@ -249,7 +249,8 @@ class ClasificadorConsorcio:
                     "nombre_concepto": nombre_concepto,
                     "concepto": concepto_mapeado.get("concepto", "CONCEPTO_NO_IDENTIFICADO"),
                     "concepto_index": concepto_mapeado.get("concepto_index", 0),
-                    "base_gravable": base_gravable
+                    "base_gravable": base_gravable,
+                    "razonamiento": concepto_mapeado.get("razonamiento")
                 }
                 conceptos_identificados.append(concepto_identificado)
 

@@ -197,9 +197,25 @@ class ClasificadorICA:
             logger.info(f"Ubicaciones obtenidas de BD: {len(ubicaciones_bd)}")
 
             # PASO 3: Primera llamada Gemini - Identificar ubicaciones (MULTIMODAL)
-            ubicaciones_identificadas, aplica_ica, obs_gemini = await self._identificar_ubicaciones_gemini(
+            ubicaciones_identificadas, aplica_ica, obs_gemini, error_tecnico_ubic = await self._identificar_ubicaciones_gemini(
                 ubicaciones_bd, textos_documentos, archivos_directos, nit_administrativo
             )
+
+            # Si hubo un fallo TECNICO (timeout/excepcion) no enmascararlo como
+            # "no se pudo identificar el municipio": reportarlo distinto.
+            if error_tecnico_ubic is not None:
+                resultado_base["estado"] = "preliquidacion_sin_finalizar"
+                if error_tecnico_ubic == "timeout":
+                    resultado_base["observaciones"].append(
+                        "Error analizando ubicaciones ICA "
+                        ". Por favor intente nuevamente."
+                    )
+                else:
+                    resultado_base["observaciones"].append(
+                        "Error analizando ubicaciones ICA. Por favor intente nuevamente."
+                    )
+                logger.warning(f"Fallo técnico identificando ubicaciones ICA: {error_tecnico_ubic}")
+                return resultado_base
 
             logger.info(f"Ubicaciones identificadas por Gemini: {len(ubicaciones_identificadas)}")
 
@@ -251,6 +267,24 @@ class ClasificadorICA:
                 archivos_directos,
                 nit_administrativo
             )
+
+            # Fallo TECNICO al mapear actividades (timeout/excepcion): no confundir
+            # con "Gemini no identificó la actividad".
+            if isinstance(datos_actividades, dict) and datos_actividades.get("error_tecnico"):
+                resultado_base["estado"] = "preliquidacion_sin_finalizar"
+                if datos_actividades["error_tecnico"] == "timeout":
+                    resultado_base["observaciones"].append(
+                        "Error mapeando actividades ICA "
+                        " Por favor intente nuevamente."
+                    )
+                else:
+                    resultado_base["observaciones"].append(
+                        "Error mapeando actividades ICA. Por favor intente nuevamente."
+                    )
+                logger.warning(
+                    f"Fallo técnico mapeando actividades ICA: {datos_actividades['error_tecnico']}"
+                )
+                return resultado_base
 
             if not datos_actividades:
                 resultado_base["estado"] = "preliquidacion_sin_finalizar"
@@ -369,7 +403,7 @@ class ClasificadorICA:
         textos_documentos: Dict[str, str],
         archivos_directos: List[Any],
         nit_administrativo: str = None
-    ) -> Tuple[List[Dict[str, Any]], bool, str]:
+    ) -> Tuple[List[Dict[str, Any]], bool, str, Optional[str]]:
         """
         Primera llamada a Gemini para identificar ubicaciones de la actividad (MULTIMODAL).
 
@@ -388,7 +422,10 @@ class ClasificadorICA:
             nit_administrativo: NIT para organizar archivos guardados (opcional)
 
         Returns:
-            Tuple[List[Dict[str, Any]], bool, str]: (ubicaciones, aplica_ica, observaciones)
+            Tuple[List[Dict[str, Any]], bool, str, Optional[str]]:
+                (ubicaciones, aplica_ica, observaciones, error_tecnico).
+                error_tecnico es None en exito; "timeout" o "error" ante un fallo tecnico
+                (no es lo mismo que Gemini no haber identificado ubicaciones).
         """
         logger.info("Primera llamada Gemini: identificando ubicaciones (MULTIMODAL)...")
 
@@ -404,8 +441,10 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1)
+            # para habilitar el implicit caching de Gemini 2.5.
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
@@ -414,11 +453,15 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f"📎 ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
 
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
+
             # Llamar a Gemini con retry automatico para errores SSL
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=self.procesador_gemini.generation_config,
-                timeout_segundos=60.0
+                timeout_segundos=240.0,
+                contexto="ica_ubicaciones"
             )
 
             # Limpiar y parsear respuesta
@@ -437,21 +480,25 @@ class ClasificadorICA:
             # Validar estructura
             if not validar_estructura_ubicaciones(data):
                 logger.error("Estructura de JSON de ubicaciones inválida")
-                return [], True, "Estructura de JSON inválida"
+                return [], True, "Estructura de JSON inválida", "error"
 
             ubicaciones = data.get("ubicaciones", [])
             aplica_ica = data.get("aplica_ica", True)
             observaciones = data.get("observaciones", "")
-            
-            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones. Aplica ICA: {aplica_ica}")
-            return ubicaciones, aplica_ica, observaciones
 
+            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones. Aplica ICA: {aplica_ica}")
+            return ubicaciones, aplica_ica, observaciones, None
+
+        except asyncio.TimeoutError:
+            logger.error("Timeout en llamada a Gemini (ubicaciones): la respuesta superó 240s. "
+                         "Posible causa: prompt muy grande (muchas ubicaciones en BD) o carga en Cloud Run.")
+            return [], True, "", "timeout"
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (ubicaciones): {e}")
-            return [], True, f"Error parseando JSON: {e}"
+            return [], True, f"Error parseando JSON: {e}", "error"
         except Exception as e:
             logger.error(f"Error en llamada a Gemini (ubicaciones): {e}")
-            return [], True, f"Error en llamada a Gemini: {e}"
+            return [], True, f"Error en llamada a Gemini: {e}", "error"
 
     def _validar_ubicaciones_manualmente(
         self,
@@ -708,8 +755,9 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1).
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
@@ -717,6 +765,9 @@ class ClasificadorICA:
                 archivos_procesados = await self._procesar_archivos_para_gemini(archivos_directos)
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f" ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para relacionar actividades")
+
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
 
             # Override local: temperature reducida para tarea deterministica de matching.
             # No se modifica generation_config global (compartido con otros 8 clasificadores).
@@ -727,7 +778,8 @@ class ClasificadorICA:
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=config_matching,
-                timeout_segundos=180.0
+                timeout_segundos=240.0,
+                contexto="ica_actividades"
             )
 
             # Limpiar y parsear respuesta
@@ -764,15 +816,15 @@ class ClasificadorICA:
             }
 
         except asyncio.TimeoutError:
-            logger.error("Timeout en llamada a Gemini (actividades): la respuesta superó 180s. "
+            logger.error("Timeout en llamada a Gemini (actividades): la respuesta superó 240s. "
                          "Posible causa: prompt muy grande (muchas actividades en BD) o carga en Cloud Run.")
-            return {}
+            return {"error_tecnico": "timeout"}
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (actividades): {e}")
-            return {}
+            return {"error_tecnico": "error"}
         except Exception as e:
             logger.error(f"Error en llamada a Gemini (actividades): {e}")
-            return {}
+            return {"error_tecnico": "error"}
 
     def _validar_actividades_manualmente(
         self,

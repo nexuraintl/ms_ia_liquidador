@@ -1,5 +1,17 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.15.0] - 2026-05-26
+
+### Añadido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`, `PROMPT_MATCHING_CONCEPTOS`) — rúbrica explícita de 4 criterios (chain-of-thought) para el matching de conceptos de retención en la fuente nacional, replicando el patrón ya validado en ICA. La rúbrica fuerza a Gemini a evaluar 2-3 candidatos del diccionario y a citar pistas contextuales reales (objeto del contrato, cotizaciones, CIIU del RUT, nombre del proveedor) cuando el ítem facturado es genérico, antes de elegir. Incluye few-shots para ítem genérico con proveedor revelador, ítem específico confirmado por cotización, ambigüedad con regla de desempate y caso sin coincidencia. El prompt de facturación extranjera (`PROMPT_ANALISIS_FACTURA_EXTRANJERA`) NO se modifica: su diccionario de conceptos es reducido y el matching es directo.
+- `modelos/modelos.py` (`ConceptoIdentificado.razonamiento`) — nuevo campo `Optional[str]` que persiste el chain-of-thought del matching para auditoría/observabilidad. Retrocompatible: respuestas previas sin el campo siguen siendo válidas.
+- `Clasificador/clasificador_consorcio.py` — propaga el `razonamiento` retornado por `PROMPT_MATCHING_CONCEPTOS` al `ConceptoIdentificado` final del consorcio.
+
+### Cambiado
+
+- `prompts/prompt_retefuente.py` (`PROMPT_MATCHING_CONCEPTOS`) — el campo de explicación del matching se renombró de `justificacion` (opcional) a `razonamiento` (obligatorio) por consistencia con ICA y con el resto de prompts de retefuente. La segunda llamada de consorcios queda limitada a Criterios 1 y 2 (semántica + especificidad) porque no tiene acceso a los documentos originales.
+
 ## [3.14.17] - 2026-05-25
 
 ### Añadido

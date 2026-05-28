@@ -927,10 +927,18 @@ class NexuraAPIDatabase(DatabaseInterface):
         self.auth_provider = auth_provider
         self.timeout = timeout
 
+        # Feature flag experimental: consultar la tabla normalizada /retefuenteNew/
+        # en lugar de /retefuente/. Solo afecta a obtener_conceptos_retefuente()
+        # y obtener_concepto_por_index(); el resto del sistema es agnostico.
+        self._use_retefuente_new = os.getenv("USE_RETEFUENTE_NEW", "false").lower() == "true"
+
         # Configuracion robusta de session HTTP (SRP: metodo dedicado)
         self.session = self._configurar_session_robusta()
 
-        logger.info(f"NexuraAPIDatabase inicializado: {self.base_url}")
+        logger.info(
+            f"NexuraAPIDatabase inicializado: {self.base_url} "
+            f"(USE_RETEFUENTE_NEW={self._use_retefuente_new})"
+        )
 
         # Validar autenticacion
         if not self.auth_provider.is_authenticated():
@@ -1180,6 +1188,69 @@ class NexuraAPIDatabase(DatabaseInterface):
         }
 
         return concepto_mapeado
+
+    def _mapear_conceptos_retefuente_new(self, data_nexura: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Mapea conceptos del endpoint experimental /retefuenteNew/ al formato interno.
+
+        El endpoint nuevo trae conceptos mas normalizados con campos:
+        id, numero_item, categoria, concepto, base_uvt, base, porcentaje.
+        Solo necesitamos 'concepto' (como descripcion) y 'id' (como index)
+        para mantener compatibilidad con el resto del sistema.
+        """
+        if not data_nexura:
+            return []
+
+        conceptos_mapeados = []
+        for concepto_raw in data_nexura:
+            conceptos_mapeados.append({
+                'descripcion_concepto': concepto_raw.get('concepto'),
+                'index': concepto_raw.get('id')
+            })
+        return conceptos_mapeados
+
+    def _mapear_concepto_individual_new(self, data_nexura: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """
+        Mapea un concepto individual del endpoint experimental /retefuenteNew/.
+
+        Diferencias con el endpoint legacy:
+        - 'concepto' en vez de 'descripcion_concepto'.
+        - 'base' puede venir como string con separador de miles ("1.414.098") o como "1".
+        - 'porcentaje' viene como numero (no como string con coma).
+        - No existe 'codigo_concepto' -> se setea como cadena vacia.
+        """
+        if not data_nexura or len(data_nexura) == 0:
+            return None
+
+        concepto_raw = data_nexura[0]
+
+        base_raw = concepto_raw.get('base', 0)
+        porcentaje_raw = concepto_raw.get('porcentaje', 0)
+
+        try:
+            if isinstance(base_raw, str):
+                base = float(base_raw.replace('.', '').replace(',', '.'))
+            elif base_raw is not None:
+                base = float(base_raw)
+            else:
+                base = 0.0
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Error convirtiendo base de retefuenteNew '{base_raw}': {e}")
+            base = 0.0
+
+        try:
+            porcentaje = float(porcentaje_raw) if porcentaje_raw is not None else 0.0
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Error convirtiendo porcentaje de retefuenteNew '{porcentaje_raw}': {e}")
+            porcentaje = 0.0
+
+        return {
+            'descripcion_concepto': concepto_raw.get('concepto', ''),
+            'base': base,
+            'porcentaje': porcentaje,
+            'index': concepto_raw.get('id'),
+            'codigo_concepto': ''
+        }
 
     def obtener_por_codigo(self, codigo: str) -> Dict[str, Any]:
         """
@@ -1580,10 +1651,17 @@ class NexuraAPIDatabase(DatabaseInterface):
             }
         """
         try:
+            if self._use_retefuente_new:
+                endpoint = '/preliquidador/retefuenteNew/'
+                params = {}
+            else:
+                endpoint = '/preliquidador/retefuente/'
+                params = {'estructuraContable': estructura_contable}
+
             response = self._hacer_request(
-                endpoint='/preliquidador/retefuente/',
+                endpoint=endpoint,
                 method='GET',
-                params={'estructuraContable': estructura_contable}
+                params=params
             )
 
             error_info = response.get('error', {})
@@ -1593,7 +1671,10 @@ class NexuraAPIDatabase(DatabaseInterface):
                 data_array = response.get('data', [])
 
                 if data_array and len(data_array) > 0:
-                    conceptos_mapeados = self._mapear_conceptos_retefuente(data_array)
+                    if self._use_retefuente_new:
+                        conceptos_mapeados = self._mapear_conceptos_retefuente_new(data_array)
+                    else:
+                        conceptos_mapeados = self._mapear_conceptos_retefuente(data_array)
 
                     return {
                         'success': True,
@@ -1707,13 +1788,17 @@ class NexuraAPIDatabase(DatabaseInterface):
             }
         """
         try:
+            if self._use_retefuente_new:
+                endpoint = '/preliquidador/retefuenteNew/'
+                params = {'id': index}
+            else:
+                endpoint = '/preliquidador/retefuente/'
+                params = {'id': index, 'estructuraContable': estructura_contable}
+
             response = self._hacer_request(
-                endpoint='/preliquidador/retefuente/',
+                endpoint=endpoint,
                 method='GET',
-                params={
-                    'id': index,
-                    'estructuraContable': estructura_contable
-                }
+                params=params
             )
 
             error_info = response.get('error', {})
@@ -1723,7 +1808,10 @@ class NexuraAPIDatabase(DatabaseInterface):
                 data_array = response.get('data', [])
 
                 if data_array and len(data_array) > 0:
-                    concepto_mapeado = self._mapear_concepto_individual(data_array)
+                    if self._use_retefuente_new:
+                        concepto_mapeado = self._mapear_concepto_individual_new(data_array)
+                    else:
+                        concepto_mapeado = self._mapear_concepto_individual(data_array)
 
                     if concepto_mapeado:
                         concepto_mapeado['estructura_contable'] = estructura_contable

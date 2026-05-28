@@ -196,9 +196,37 @@ CRITERIO 4 - Genérico contextual:
      unívocamente a un concepto específico del diccionario, las pistas
      PREVALECEN sobre la literalidad del ítem genérico.
 
+CRITERIO 5 - Elección entre conceptos "espejo" (declarante / no declarante):
+   - Aplicar SOLO cuando los Criterios 1-4 reducen a dos o más candidatos
+     que describen el MISMO servicio y solo difieren en "declarante" vs
+     "no declarante" (ej. "Compras declarante" idx N vs "Compras no
+     declarante" idx M).
+   - Reusa los códigos DIAN ya detectados en el PASO 2 — no vuelvas a
+     buscarlos en los documentos.
+   - Regla de elección por evidencia disponible:
+     ├─ RUT, sección "Responsabilidades, Calidades y Atributos"
+     │  contiene código "05"                                  → DECLARANTE
+     ├─ Factura electrónica trae "O-13" en responsabilidades
+     │  fiscales del emisor                                   → DECLARANTE
+     ├─ Factura electrónica trae "O-15" (autorretenedor)      → DECLARANTE
+     │  
+     ├─ es_persona_natural==false (Persona juridica colombiana) sin "47"/"O-47"
+     │  visibles                                              → DECLARANTE por defecto
+     └─ es_persona_natural==true sin "05" ni "O-13" visibles  → NO DECLARANTE
+        (default conservador fiscal)
+   - Si aplicas el default conservador (PN sin códigos visibles), AGREGA
+     a "observaciones" la frase: "Régimen de declarancia asumido por
+     default conservador (sin códigos DIAN visibles en RUT ni factura)."
+   - Cita textualmente el código DIAN visto (o "sin códigos visibles") en
+     el campo "razonamiento".
+
 REGLA DE DESEMPATE:
-   - Si tras los 4 criterios siguen empatados dos candidatos, elige el de
-     MENOR concepto_index y regístralo en el campo razonamiento.
+   - Si tras los 5 criterios siguen empatados dos candidatos que NO son
+     espejo declarante/no declarante (ej. dos conceptos de honorarios
+     PJ con tarifa idéntica), elige el de MENOR concepto_index y
+     regístralo en el campo razonamiento.
+   - NO uses esta regla para elegir entre conceptos espejo: para ese caso
+     usa SIEMPRE el CRITERIO 5.
 
 LÍMITE DEL CAMPO razonamiento:
    - Máximo 80 palabras. Conciso, citando indices candidatos y pistas
@@ -206,8 +234,11 @@ LÍMITE DEL CAMPO razonamiento:
 
  MATCHING DE CONCEPTOS - ESTRICTO:
 ├─ Aplicar la RÚBRICA del PASO 3.1 sobre 2-3 candidatos antes de elegir
-├─ Si NO hay coincidencia razonable tras aplicar los 4 criterios → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
-├─  NUNCA inventes un concepto que no esté en la lista
+├─ Si NO hay coincidencia razonable tras aplicar los 5 criterios → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
+├─ NUNCA inventes un concepto que no esté en la lista
+├─ El valor de "concepto" en el JSON debe ser EXACTAMENTE la clave del
+│  diccionario CONCEPTOS VÁLIDOS, copiada tal cual (incluyendo paréntesis,
+│  guiones y referencias normativas). NO la abrevies ni resumas.
 └─ REVISA TODA LA LISTA DE CONCEPTOS VALIDOS ANTES DE ASIGNARLO
 
  EXTRACCIÓN DE VALORES:
@@ -259,15 +290,20 @@ LÍMITE DEL CAMPO razonamiento:
  EJEMPLOS DE RAZONAMIENTO (FEW-SHOTS):
 ═══════════════════════════════════════════════════════════════════
 
+NOTA SOBRE LOS EJEMPLOS: el campo "concepto" se muestra abreviado con
+[...] solo para legibilidad de los ejemplos. En tu respuesta real DEBES
+copiar la clave completa del diccionario CONCEPTOS VÁLIDOS, sin abreviar.
+Los "idx" de los ejemplos son ilustrativos: usa los del diccionario real.
+
 EJEMPLO 1 - Ítem genérico, proveedor revela el giro:
 {{
     "conceptos_identificados": [
         {{
             "concepto_facturado": "Servicios prestados mes de octubre 2025",
-            "concepto": "Honorarios",
-            "concepto_index": 12,
+            "concepto": "Honorarios y comisiones - Beneficiario persona jurídica o asimilada [...texto completo del diccionario...]",
+            "concepto_index": 1,
             "base_gravable": 4500000.0,
-            "razonamiento": "Facturado: 'Servicios prestados mes octubre' (genérico). Pistas: proveedor 'KPMG Advisory Services SAS', CIIU RUT 6920 'Actividades de contabilidad'. Candidatos: (a) idx 12 'Honorarios'; (b) idx 5 'Servicios generales'. Elegido (a) por Criterio 4 (giro contable del proveedor + CIIU 6920 prevalecen sobre ítem genérico). (b) descartado por Criterio 2 (más genérico)."
+            "razonamiento": "Facturado: 'Servicios prestados mes octubre' (genérico). Pistas: proveedor 'KPMG Advisory Services SAS' (PJ), CIIU RUT 6920 'Actividades de contabilidad'. Candidatos: (a) idx 1 'Honorarios PJ'; (b) idx 36 'Servicios en general PJ'. Elegido (a) por Criterio 4 (CIIU contable + razón social apuntan a honorarios sobre servicios generales)."
         }}
     ],
     "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
@@ -275,39 +311,55 @@ EJEMPLO 1 - Ítem genérico, proveedor revela el giro:
     "observaciones": []
 }}
 
-EJEMPLO 2 - Ítem específico confirmado por cotización:
+EJEMPLO 2 - Ítem específico con base AIU (vigilancia/aseo):
 {{
     "conceptos_identificados": [
         {{
-            "concepto_facturado": "Mantenimiento preventivo plataforma SAP",
-            "concepto": "Servicios técnicos",
-            "concepto_index": 8,
-            "base_gravable": 12000000.0,
-            "razonamiento": "Facturado: 'Mantenimiento preventivo plataforma SAP'. Pistas: cotización detalla 'soporte técnico nivel 2 sobre módulos FI/CO'. Candidatos: (a) idx 8 'Servicios técnicos'; (b) idx 5 'Servicios generales'. Elegido (a) por Criterio 1 (sinónimo directo soporte técnico) y Criterio 2 (más específico que servicios generales)."
+            "concepto_facturado": "Servicios de vigilancia mes octubre 2025",
+            "concepto": "Servicios de vigilancia y aseo prestados por empresas especializadas - Base: AIU [...texto completo...]",
+            "concepto_index": 43,
+            "base_gravable": 25000000.0,
+            "razonamiento": "Facturado: 'Servicios de vigilancia'. Pistas: cotización detalla 'puestos de vigilancia 24h'; factura emisor 'Seguridad XYZ SAS' (PJ). Candidatos: (a) idx 43 'Vigilancia y aseo - Base AIU'; (b) idx 36 'Servicios en general PJ'. Elegido (a) por Criterio 1 (equivalencia directa vigilancia) y Criterio 2 (más específico)."
         }}
     ],
     "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
-    "valor_total": 12000000.0,
+    "valor_total": 25000000.0,
     "observaciones": []
 }}
 
-EJEMPLO 3 - Desempate por menor concepto_index:
+EJEMPLO 3 - Elección entre conceptos ESPEJO por declarancia (Criterio 5):
 {{
     "conceptos_identificados": [
         {{
-            "concepto_facturado": "Asesoría profesional contrato 2025-44",
-            "concepto": "Honorarios",
-            "concepto_index": 12,
-            "base_gravable": 8000000.0,
-            "razonamiento": "Facturado: 'Asesoría profesional'. Pistas: objeto contrato 'prestar asesoría jurídica recurrente'. Candidatos tras Criterios 1-3 empatados: (a) idx 12 'Honorarios'; (b) idx 18 'Honorarios consultoría'. Ambos cumplen Criterio 1 y 3. Elegido (a) por REGLA DE DESEMPATE (menor concepto_index)."
+            "concepto_facturado": "Cono de señalización con base naranja 90 cm",
+            "concepto": "Compras generales y otros ingresos tributarios - Beneficiario declarante de renta (Art. 401 E.T.) [...texto completo...]",
+            "concepto_index": 22,
+            "base_gravable": 8374800.0,
+            "razonamiento": "Facturado: 'Cono de señalización' (bien físico). Criterios 1-4 reducen a candidatos espejo: (a) idx 22 'Compras declarante'; (b) idx 23 'Compras no declarante'. Aplicar Criterio 5: factura electrónica del emisor trae 'O-13' en responsabilidades fiscales → DECLARANTE. Elegido (a)."
         }}
     ],
-    "naturaleza_tercero": {{"es_persona_natural": true, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
-    "valor_total": 8000000.0,
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
+    "valor_total": 8374800.0,
     "observaciones": []
 }}
 
-EJEMPLO 4 - Sin coincidencia razonable:
+EJEMPLO 4 - Espejo con default conservador (PN sin códigos visibles):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Servicios de fotografía evento corporativo",
+            "concepto": "Servicios en general - Beneficiario persona natural no declarante de renta [...texto completo...]",
+            "concepto_index": 38,
+            "base_gravable": 3500000.0,
+            "razonamiento": "Facturado: 'Servicios de fotografía'. Candidatos espejo: (a) idx 37 'Servicios PN declarante'; (b) idx 38 'Servicios PN no declarante'. Criterio 5: persona natural sin códigos '05' ni 'O-13' visibles → NO DECLARANTE (default conservador). Elegido (b)."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": true, "regimen_tributario": null, "es_autorretenedor": false}},
+    "valor_total": 3500000.0,
+    "observaciones": ["Régimen de declarancia asumido por default conservador (sin códigos DIAN visibles en RUT ni factura)."]
+}}
+
+EJEMPLO 5 - Sin coincidencia razonable:
 {{
     "conceptos_identificados": [
         {{
@@ -315,7 +367,7 @@ EJEMPLO 4 - Sin coincidencia razonable:
             "concepto": "CONCEPTO_NO_IDENTIFICADO",
             "concepto_index": 0,
             "base_gravable": 1500000.0,
-            "razonamiento": "Facturado: 'Pago varios' (sin descripción adicional). Pistas: RUT, contrato y cotización NO disponibles; proveedor sin giro determinable. Candidatos evaluados: (a) idx 5 'Servicios generales'; (b) idx 12 'Honorarios'. Ninguno cumple Criterio 1 (sin equivalencia semántica) ni Criterio 3 (sin pistas). Reportar como CONCEPTO_NO_IDENTIFICADO."
+            "razonamiento": "Facturado: 'Pago varios' (sin descripción adicional). Pistas: RUT, contrato y cotización NO disponibles; proveedor sin giro determinable. Candidatos evaluados: (a) idx 36 'Servicios PJ'; (b) idx 22 'Compras declarante'. Ninguno cumple Criterio 1 (sin equivalencia semántica) ni Criterio 3 (sin pistas). Reportar como CONCEPTO_NO_IDENTIFICADO."
         }}
     ],
     "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": null, "es_autorretenedor": false}},

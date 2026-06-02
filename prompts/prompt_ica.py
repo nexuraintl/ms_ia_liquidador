@@ -457,6 +457,11 @@ PROCESO OBLIGATORIO:
 
 4. EXTRAER DEL RUT (Formulario de Registro Unico Tributario):
     -  Busca literalmente en el RUT "AUTORRETENEDOR DE ICA", Si encuentras en el RUT que el proovedor es AUTORRETENEDOR DE ICA , marca el parametro "autorretenedor_ica": true en el JSON de respuesta, de lo contrario marca "autorretenedor_ica": false
+    -  REGIMEN TRIBUTARIO (la evidencia textual del RUT SIEMPRE manda, en este orden de prioridad):
+       ├─ Si encuentras "REGIMEN SIMPLE", "REGIMEN SIMPLE DE TRIBUTACION", "SIMPLE" o el codigo "O-47" -> "regimen_tributario": "SIMPLE"
+       ├─ Si encuentras "REGIMEN ORDINARIO", "ORDINARIO" o el codigo DIAN "R-99-PN" -> "regimen_tributario": "ORDINARIO"
+       ├─ Si encuentras "REGIMEN ESPECIAL", "ESPECIAL" o "SIN ANIMO DE LUCRO" -> "regimen_tributario": "ESPECIAL"
+       └─ Si no encuentras ninguna evidencia textual del regimen -> "regimen_tributario": null
 
 ═══════════════════════════════════════════════════════════════════════
 PASO 6: FORMATO DE RESPUESTA JSON (OBLIGATORIO)
@@ -481,7 +486,8 @@ Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": true | false
+  "autorretenedor_ica": true | false,
+  "regimen_tributario": "SIMPLE" | "ORDINARIO" | "ESPECIAL" | null
 }}
 
 EJEMPLO 1 - Una actividad, una ubicación no autorretenedor de ica :
@@ -496,7 +502,8 @@ EJEMPLO 1 - Una actividad, una ubicación no autorretenedor de ica :
     }}
   ],
   "valor_factura_sin_iva": 5000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": "ORDINARIO"
 }}
 
 EJEMPLO 2 - Múltiples actividades facturadas, múltiples ubicaciones, no autorretenedor de ica :
@@ -517,7 +524,8 @@ EJEMPLO 2 - Múltiples actividades facturadas, múltiples ubicaciones, no autorr
     }}
   ],
   "valor_factura_sin_iva": 10000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
 }}
 
 EJEMPLO 3 - Múltiples actividades, una ubicación, autorretenedor de ica :
@@ -532,7 +540,8 @@ EJEMPLO 3 - Múltiples actividades, una ubicación, autorretenedor de ica :
     }}
   ],
   "valor_factura_sin_iva": 5000000.0,
-  "autorretenedor_ica": true
+  "autorretenedor_ica": true,
+  "regimen_tributario": "ORDINARIO"
 }}
 
 EJEMPLO 4 - NO se pudo relacionar, no autorretenedor de ica :
@@ -547,7 +556,8 @@ EJEMPLO 4 - NO se pudo relacionar, no autorretenedor de ica :
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
 }}
 
 EJEMPLO 5 - NO se pudo identificar la actividad facturada, no autorretenedor de ica :
@@ -562,7 +572,8 @@ EJEMPLO 5 - NO se pudo identificar la actividad facturada, no autorretenedor de 
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
 }}
 
 EJEMPLO 6 - Caso AMBIGUO con varios candidatos parecidos:
@@ -577,7 +588,24 @@ EJEMPLO 6 - Caso AMBIGUO con varios candidatos parecidos:
     }}
   ],
   "valor_factura_sin_iva": 2500000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": "ORDINARIO"
+}}
+
+EJEMPLO 7 - Proveedor del Regimen Simple de Tributacion (RUT indica "REGIMEN SIMPLE" / codigo O-47):
+{{
+  "actividades_facturadas": ["Servicios de aseo y cafetería"],
+  "actividades_relacionadas": [
+    {{
+      "nombre_act_rel": "Servicios de limpieza general",
+      "codigo_actividad": 812000,
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Aseo y cafetería']. Candidatos BOGOTA: (a) 812000 'Limpieza general' SERVICIOS; (b) 999999 'Otros' SERVICIOS. Elegido (a) por Criterio 1 (sinonimo directo)."
+    }}
+  ],
+  "valor_factura_sin_iva": 3000000.0,
+  "autorretenedor_ica": false,
+  "regimen_tributario": "SIMPLE"
 }}
 
 IMPORTANTE:
@@ -710,7 +738,16 @@ def validar_estructura_actividades(data: Dict[str, Any]) -> bool:
     if not isinstance(data["valor_factura_sin_iva"], (int, float)):
         return False
       
-    if not isinstance(data["autorretenedor_ica"], bool):   
+    if not isinstance(data["autorretenedor_ica"], bool):
         return False
+
+    # Validacion INFORMATIVA de regimen_tributario (campo opcional, no bloquea el flujo).
+    # Si Gemini lo omite o lo envia con un tipo inesperado, se continua y el liquidador
+    # lo tratara como None (no aplica el corte por Regimen Simple).
+    if "regimen_tributario" in data and not isinstance(data["regimen_tributario"], (str, type(None))):
+        _logger.warning(
+            "Campo 'regimen_tributario' con tipo inesperado (%s). El flujo continua.",
+            type(data["regimen_tributario"]).__name__
+        )
 
     return True

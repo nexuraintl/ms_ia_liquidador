@@ -129,7 +129,8 @@ class LiquidadorICA:
             "actividades_facturadas": [],
             "actividades_relacionadas": [],
             "valor_factura_sin_iva": 0.0,  # NUEVO FORMATO v3.0 - consistencia
-            "autorretenedor_ica": False,  # NUEVO 
+            "autorretenedor_ica": False,  # NUEVO
+            "regimen_tributario": None,  # Regimen tributario del proveedor (RUT)
             "observaciones": analisis_clasificador.get("observaciones", []),
             "fecha_liquidacion": datetime.now().isoformat()
         }
@@ -169,13 +170,39 @@ class LiquidadorICA:
             valor_factura_sin_iva = analisis_clasificador.get("valor_factura_sin_iva", 0.0)
             ubicaciones_identificadas = analisis_clasificador.get("ubicaciones_identificadas", [])
             autorretenedor_ica = analisis_clasificador.get("autorretenedor_ica", False)
-            
+            regimen_tributario = analisis_clasificador.get("regimen_tributario")
+
+            # Corte por Regimen Simple de Tributacion (RST): los contribuyentes del SIMPLE
+            # no son sujetos de retencion de ICA, por lo que el impuesto no aplica.
+            if regimen_tributario and str(regimen_tributario).strip().upper() == "SIMPLE":
+                resultado["estado"] = "no_aplica_impuesto"
+                resultado["observaciones"].append(
+                    "El proveedor pertenece al Regimen Simple de Tributacion (RST); "
+                    "los contribuyentes del SIMPLE no son sujetos de retencion de ICA, "
+                    "por lo cual no aplica este impuesto."
+                )
+                resultado["actividades_facturadas"] = actividades_facturadas
+                resultado["valor_factura_sin_iva"] = valor_factura_sin_iva  # Preservar estructura completa
+                resultado["autorretenedor_ica"] = autorretenedor_ica
+                resultado["regimen_tributario"] = regimen_tributario
+                logger.info("Proveedor en Regimen Simple (SIMPLE), no aplica retencion de ICA.")
+                # Convertir si es USD
+                if tipoMoneda and tipoMoneda.upper() == "USD":
+                    try:
+                        with ConversorTRM(timeout=30) as conversor:
+                            trm_valor = conversor.obtener_trm_valor()
+                            resultado = self._convertir_resultado_ica_usd_a_cop(resultado, trm_valor)
+                    except Exception as e:
+                        logger.warning(f"No se pudo convertir resultado ICA (regimen simple): {e}")
+                return resultado
+
             if autorretenedor_ica:
                 resultado["estado"] = "no_aplica_impuesto"
                 resultado["observaciones"].append("El sujeto pasivo es autorretenedor de ICA, no aplica retención.")
                 resultado["actividades_facturadas"] = actividades_facturadas
                 resultado["valor_factura_sin_iva"] = valor_factura_sin_iva  # Preservar estructura completa
                 resultado["autorretenedor_ica"] = autorretenedor_ica
+                resultado["regimen_tributario"] = regimen_tributario
                 logger.info("Sujeto pasivo es autorretenedor de ICA, no aplica retención.")
                 # Convertir si es USD
                 if tipoMoneda and tipoMoneda.upper() == "USD":
@@ -262,6 +289,7 @@ class LiquidadorICA:
             resultado["actividades_facturadas"] = actividades_facturadas
             resultado["actividades_relacionadas"] = actividades_liquidadas
             resultado["valor_factura_sin_iva"] = valor_factura_sin_iva  # Preservar estructura completa
+            resultado["regimen_tributario"] = regimen_tributario
 
             logger.info(f"Liquidación ICA exitosa - Total: ${valor_total_ica:,.2f}")
 

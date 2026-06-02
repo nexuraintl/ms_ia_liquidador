@@ -1,5 +1,14 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.17.0] - 2026-06-01
+
+### Añadido
+
+- ICA — nueva validación: cuando el régimen tributario del proveedor es **SIMPLE** (Régimen Simple de Tributación), el estado del impuesto ICA queda en `no_aplica_impuesto` y se agrega una observación explicando que los contribuyentes del SIMPLE no son sujetos de retención de ICA. Replica el corte que ya existía en retención en la fuente (`Liquidador/liquidador.py`), siguiendo el mismo patrón que `autorretenedor_ica` dentro del flujo de ICA.
+  - `prompts/prompt_ica.py` (`crear_prompt_relacionar_actividades`) — el prompt de relación de actividades ahora extrae también `regimen_tributario` del RUT (SIMPLE / ORDINARIO / ESPECIAL / null) con reglas de texto exacto (códigos DIAN O-47, R-99-PN). Se añade el campo al formato JSON y a los ejemplos. `validar_estructura_actividades` lo valida de forma opcional y no bloqueante (retrocompatible con respuestas sin el campo).
+  - `Clasificador/clasificador_ica.py` (`_relacionar_actividades_gemini`, `analizar_ica`) — propaga `regimen_tributario` desde Gemini hasta el resultado entregado al liquidador.
+  - `Liquidador/liquidador_ica.py` (`liquidar_ica`) — nuevo corte por Régimen Simple antes del cálculo de actividades; preserva la estructura del resultado y la conversión USD→COP.
+
 ## [3.16.0-experimental] - 2026-05-27
 
 ### Añadido

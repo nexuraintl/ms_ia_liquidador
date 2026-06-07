@@ -158,6 +158,27 @@ class DatabaseInterface(ABC):
         """
         pass
 
+    @abstractmethod
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio que aplican Estampilla Pro Universidad
+        Nacional y Contribucion a Obra Publica.
+
+        SRP: Solo consulta el endpoint de codigos de negocio (Data Access Layer)
+        DIP: Abstraccion que permite multiples implementaciones
+
+        Endpoint: GET /preliquidador/codigoNegociosFiduciaria/
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': { "69164": "PATRIMONIO ...", ... } | None,  # codigo(str) -> nombre
+                'message': str
+            }
+        """
+        pass
+
 
 # ================================
 #  IMPLEMENTACIÓN SUPABASE
@@ -880,6 +901,24 @@ class SupabaseDatabase(DatabaseInterface):
             'message': (
                 'Error consultando a la base de datos, Timeouts y retrys excedidos.'
             )
+        }
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Implementacion Supabase para codigos de negocio fiduciaria.
+
+        NOTA: No soportado en Supabase, retorna error descriptivo.
+        OCP: Preparada para extension futura si se crea la fuente.
+        """
+        logger.warning(
+            "SupabaseDatabase: codigos de negocio fiduciaria no implementado. "
+            "Use NexuraAPIDatabase."
+        )
+
+        return {
+            'success': False,
+            'data': None,
+            'message': 'Codigos de negocio fiduciaria no soportado en Supabase'
         }
 
     def health_check(self) -> bool:
@@ -3254,6 +3293,79 @@ class NexuraAPIDatabase(DatabaseInterface):
         logger.debug(f"Rangos consolidados: {len(rangos)} → {len(consolidados)}")
         return consolidados
 
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio que aplican Estampilla Pro Universidad
+        Nacional y Contribucion a Obra Publica desde Nexura API.
+
+        SRP: Solo consulta el endpoint de codigos de negocio (Data Access Layer)
+
+        Endpoint: GET /preliquidador/codigoNegociosFiduciaria/
+        Sin parametros requeridos.
+
+        Respuesta esperada de la API:
+            { "error": {"code": 0, ...},
+              "data": { "69164": "PATRIMONIO ...", ... } }   # codigo(str) -> nombre
+
+        Returns:
+            Dict con estructura estandar {success, data, message} donde data es el
+            objeto crudo { codigo(str): nombre(str) }.
+        """
+        logger.info("Consultando codigos de negocio desde Nexura API: /preliquidador/codigoNegociosFiduciaria/")
+
+        try:
+            response = self._hacer_request(
+                endpoint='/preliquidador/codigoNegociosFiduciaria/',
+                method='GET'
+            )
+
+            error_info = response.get('error', {})
+            error_code = error_info.get('code', -1)
+
+            if error_code == 0:
+                data_obj = response.get('data', {})
+
+                if data_obj and isinstance(data_obj, dict):
+                    logger.info(f"Codigos de negocio obtenidos exitosamente: {len(data_obj)} codigos")
+                    return {
+                        'success': True,
+                        'data': data_obj,
+                        'message': f'{len(data_obj)} codigos de negocio obtenidos desde Nexura API'
+                    }
+
+                logger.warning("API retorno respuesta exitosa pero sin codigos de negocio")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'No se encontraron codigos de negocio en la base de datos'
+                }
+
+            error_message = error_info.get('message', 'Error desconocido')
+            logger.error(f"Error de API al consultar codigos de negocio: Code={error_code}, Message={error_message}")
+            return {
+                'success': False,
+                'data': None,
+                'message': f"Error de API al consultar codigos de negocio: {error_message}"
+            }
+
+        except requests.exceptions.Timeout:
+            logger.error("Timeout al consultar codigos de negocio")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'Timeout',
+                'message': 'Timeout al consultar codigos de negocio. Intente nuevamente.'
+            }
+
+        except Exception as e:
+            logger.error(f"Error inesperado al consultar codigos de negocio: {e}", exc_info=True)
+            return {
+                'success': False,
+                'data': None,
+                'error': str(e),
+                'message': f"Error inesperado al consultar codigos de negocio: {str(e)}"
+            }
+
     def health_check(self) -> bool:
         """
         Verifica si la conexion a Nexura API funciona
@@ -3548,6 +3660,14 @@ class DatabaseManager:
             - data: List de rangos con desde_uvt, hasta_uvt, tarifa
         """
         return self.db_connection.obtener_rangos_estampilla_universidad()
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio (estampilla / obra publica).
+
+        SRP: Delega a la implementacion configurada (Strategy Pattern)
+        """
+        return self.db_connection.obtener_codigos_negocios_fiduciaria()
 
 
 def ejecutar_pruebas_completas(db_manager: DatabaseManager):
@@ -3900,6 +4020,14 @@ class DatabaseWithFallback(DatabaseInterface):
             'obtener_rangos_estampilla_universidad',
             self.primary_db.obtener_rangos_estampilla_universidad,
             self.fallback_db.obtener_rangos_estampilla_universidad
+        )
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """Obtiene los codigos de negocio (estampilla / obra publica) con fallback automatico"""
+        return self._ejecutar_con_fallback(
+            'obtener_codigos_negocios_fiduciaria',
+            self.primary_db.obtener_codigos_negocios_fiduciaria,
+            self.fallback_db.obtener_codigos_negocios_fiduciaria
         )
 
 

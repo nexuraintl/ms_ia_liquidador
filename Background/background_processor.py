@@ -257,6 +257,10 @@ class BackgroundProcessor:
             error_str = str(e).lower()
             tipo_error = type(e).__name__
             es_limite_archivos = "demasiados archivos directos" in error_str
+            # Fallo al cargar los codigos de negocio (estampilla / obra publica)
+            # desde la API Nexura. Se usa un substring ASCII estable del mensaje
+            # del RuntimeError de config.refrescar_codigos_negocio (evita acentos).
+            es_fallo_codigos_negocio = "negocio desde la api" in error_str
             es_fallo_conexion_ia = (
                 "connecterror" in error_str
                 or "connecttimeout" in error_str
@@ -271,6 +275,11 @@ class BackgroundProcessor:
             if es_limite_archivos:
                 mensaje_usuario = (
                     "Error en el procesamiento, Límite de archivos adjuntos superado."
+                )
+            elif es_fallo_codigos_negocio:
+                mensaje_usuario = (
+                    "No se pudo consultar la configuración de negocios (códigos de "
+                    "estampilla y obra pública). Preliquidación sin finalizar, intente nuevamente."
                 )
             elif es_fallo_conexion_ia:
                 mensaje_usuario = (
@@ -296,6 +305,15 @@ class BackgroundProcessor:
                     "servicio_externo": "Validacion de archivos",
                     "timestamp_error": datetime.now().isoformat(),
                     "retry_sugerido": False,
+                }
+            elif es_fallo_codigos_negocio:
+                # Fallo de la API Nexura / base de datos al cargar los codigos de
+                # negocio; reintentar tiene sentido si la caida fue transitoria.
+                diagnostico = {
+                    "tipo_error": tipo_error,
+                    "servicio_externo": "API Nexura / Base de datos",
+                    "timestamp_error": datetime.now().isoformat(),
+                    "retry_sugerido": True,
                 }
             else:
                 diagnostico = {

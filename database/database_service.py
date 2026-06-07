@@ -47,6 +47,17 @@ class IBusinessDataService(ABC):
         """
         pass
 
+    @abstractmethod
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los códigos de negocio que aplican Estampilla Pro Universidad
+        Nacional y Contribución a Obra Pública.
+
+        Returns:
+            Dict {success, data, message} donde data es { codigo(str): nombre(str) }
+        """
+        pass
+
 
 # ===============================
 # IMPLEMENTACIÓN CONCRETA
@@ -147,6 +158,37 @@ class BusinessDataService(IBusinessDataService):
                 "codigo_consultado": codigo_negocio,
                 "database_available": True,
                 "error_details": str(e)
+            }
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los códigos de negocio (estampilla / obra pública) desde la BD.
+
+        SRP: Solo delega la consulta al database manager y normaliza el caso sin DB.
+        DIP: Depende del database manager inyectado.
+
+        Returns:
+            Dict {success, data, message} donde data es { codigo(str): nombre(str) }
+        """
+        if not self.database_manager:
+            warning_msg = "DatabaseManager no está disponible para obtener códigos de negocio"
+            logger.warning(f" {warning_msg}")
+            return {
+                "success": False,
+                "data": None,
+                "message": warning_msg
+            }
+
+        try:
+            return self.database_manager.obtener_codigos_negocios_fiduciaria()
+        except Exception as e:
+            error_msg = f"Error consultando códigos de negocio: {str(e)}"
+            logger.error(f" {error_msg}")
+            return {
+                "success": False,
+                "data": None,
+                "message": error_msg,
+                "error": str(e)
             }
 
     def _crear_respuesta_sin_database(self, codigo_negocio: int, mensaje: str) -> Dict[str, Any]:
@@ -396,8 +438,15 @@ class MockBusinessDataService(IBusinessDataService):
     PRINCIPIO LSP: Puede sustituir a BusinessDataService en tests
     """
 
-    def __init__(self, mock_data: Dict[int, Dict[str, Any]] = None):
+    def __init__(self, mock_data: Dict[int, Dict[str, Any]] = None,
+                 mock_codigos_negocio: Dict[str, str] = None):
         self.mock_data = mock_data or {}
+        # Códigos de negocio de prueba (mismos que la API real por defecto)
+        self.mock_codigos_negocio = mock_codigos_negocio if mock_codigos_negocio is not None else {
+            "69164": "PATRIMONIO AUTONOMO INNPULSA COLOMBIA",
+            "69166": "PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA",
+            "99664": "PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE"
+        }
         logger.info("MockBusinessDataService inicializado para testing")
 
     def obtener_datos_negocio(self, codigo_negocio: int) -> Dict[str, Any]:
@@ -418,3 +467,11 @@ class MockBusinessDataService(IBusinessDataService):
                 "codigo_consultado": codigo_negocio,
                 "database_available": True
             }
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """Mock: retorna los códigos de negocio predefinidos"""
+        return {
+            "success": True,
+            "data": dict(self.mock_codigos_negocio),
+            "message": f"Mock: {len(self.mock_codigos_negocio)} códigos de negocio"
+        }

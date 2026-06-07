@@ -12,7 +12,7 @@ ARQUITECTURA SOLID v3.1:
 
 from .clasificador import ProcesadorGemini
 from .clasificador_retefuente import ClasificadorRetefuente
-from prompts.prompt_clasificador import PROMPT_CLASIFICACION
+from prompts.prompt_clasificador import PROMPT_CLASIFICACION, PROMPT_CLASIFICACION_LOTE, PROMPT_ANALISIS_GLOBAL
 from prompts.prompt_retefuente import PROMPT_ANALISIS_FACTURA
 from .clasificador_tp import ClasificadorTasaProdeporte
 from .clasificador_estampillas_g import ClasificadorEstampillasGenerales
@@ -24,6 +24,8 @@ __all__ = [
     'ProcesadorGemini',
     'ClasificadorRetefuente',
     'PROMPT_CLASIFICACION',
+    'PROMPT_CLASIFICACION_LOTE',
+    'PROMPT_ANALISIS_GLOBAL',
     'PROMPT_ANALISIS_FACTURA',
     'ProcesadorConsorcios',
     'ClasificadorTasaProdeporte',

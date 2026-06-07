@@ -1,5 +1,26 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.0] - 2026-06-07
+
+### Añadido
+
+- **Clasificación de documentos en dos fases**: Se dividió el proceso de clasificación en dos llamadas consecutivas a Gemini: una primera llamada por lotes de clasificación (`PROMPT_CLASIFICACION_LOTE` para determinar tipo y relevancia) y una posterior de análisis global (`PROMPT_ANALISIS_GLOBAL` sobre los relevantes para consorcios, recursos y facturación extranjera, y ubicación).
+- **Entrada ilimitada de archivos**: Se eliminó el tope duro de 20 archivos de entrada, procesando ahora cualquier volumen de documentos en lotes de hasta 10 mediante ejecución paralela (`asyncio.gather`).
+- **Filtro conservador de relevancia**: Identificación de documentos irrelevantes para descartar archivos que no aportan valor tributario, preservando siempre planillas PILA y certificados de deducción del Artículo 383.
+- **Recorte por prioridad fiscal**: Si el conjunto de documentos relevantes supera los 20 permitidos por el pipeline downstream, se recortan siguiendo la prioridad: `FACTURA > RUT > contrato > planillas/certificados (Art. 383) > resto`.
+- **Hard stop sin factura**: Interrupción inmediata del flujo con estado `preliquidacion_sin_finalizar` si tras clasificar todos los lotes no se identifica ninguna factura.
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — Se reestructuró `clasificar_documentos` para subir archivos una sola vez al Files API, realizar clasificación en lotes y ejecutar el análisis global consolidado.
+- `app/clasificacion_documentos.py` — Propagación del campo `relevante`, validación de hard stop por ausencia de factura y algoritmo de ordenamiento/recorte por prioridad fiscal de relevantes. El nuevo tipo `CONTRATO` se mapea al string canónico `ANEXO CONCEPTO DE CONTRATO` y el texto de documentos no relevantes se excluye de las llamadas downstream.
+
+### Corregido
+
+- **Falso positivo de FACTURA en correos de notificación de la DIAN**: se endureció `PROMPT_CLASIFICACION_LOTE` para exigir que una FACTURA contenga valores monetarios detallados (subtotal/IVA/total) e ítems, y para clasificar como DESCARTABLE los correos que solo notifican/enlazan a una factura adjunta (p. ej. "Pulse el link para ver el documento", remitente `facturacionelectronica@dian.gov.co`, factura real dentro de un `.zip`). Antes estos correos se clasificaban como FACTURA por mencionar "Factura Electrónica número ...".
+- **Texto del contrato (OBJETO DEL CONTRATO) ahora llega a las llamadas downstream**: se corrigió una desincronización pre-existente por la cual el documento de contrato no era enrutado a su sección dedicada en `retefuente`, `iva`, `obra_uni`, `estampillas_generales` ni `consorcio` (esperaban el string `ANEXO CONCEPTO DE CONTRATO`, que la clasificación no emitía). Ahora la clasificación emite el string canónico y `clasificador_tp.py` también lo reconoce. Esto puede modificar resultados de impuestos al usar el objeto del contrato como pista (ej. matching de conceptos en retefuente, clasificación de tipo de contrato en obra pública).
+- `app/preparacion_tareas_analisis.py` — Se actualizó `preparar_cache` para filtrar los archivos compartidos con el downstream al subconjunto de relevantes.
+
 ## [3.18.0] - 2026-06-06
 
 ### Cambiado

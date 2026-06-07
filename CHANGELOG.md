@@ -1,5 +1,33 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.17.0] - 2026-06-01
+
+### Añadido
+
+- ICA — nueva validación: cuando el régimen tributario del proveedor es **SIMPLE** (Régimen Simple de Tributación), el estado del impuesto ICA queda en `no_aplica_impuesto` y se agrega una observación explicando que los contribuyentes del SIMPLE no son sujetos de retención de ICA. Replica el corte que ya existía en retención en la fuente (`Liquidador/liquidador.py`), siguiendo el mismo patrón que `autorretenedor_ica` dentro del flujo de ICA.
+  - `prompts/prompt_ica.py` (`crear_prompt_relacionar_actividades`) — el prompt de relación de actividades ahora extrae también `regimen_tributario` del RUT (SIMPLE / ORDINARIO / ESPECIAL / null) con reglas de texto exacto (códigos DIAN O-47, R-99-PN). Se añade el campo al formato JSON y a los ejemplos. `validar_estructura_actividades` lo valida de forma opcional y no bloqueante (retrocompatible con respuestas sin el campo).
+  - `Clasificador/clasificador_ica.py` (`_relacionar_actividades_gemini`, `analizar_ica`) — propaga `regimen_tributario` desde Gemini hasta el resultado entregado al liquidador.
+  - `Liquidador/liquidador_ica.py` (`liquidar_ica`) — nuevo corte por Régimen Simple antes del cálculo de actividades; preserva la estructura del resultado y la conversión USD→COP.
+
+## [3.16.0-experimental] - 2026-05-27
+
+### Añadido
+
+- `database/database.py` (`NexuraAPIDatabase`) — feature flag `USE_RETEFUENTE_NEW` (variable de entorno, default `false`) que conmuta la consulta de conceptos de retención en la fuente al endpoint experimental `/preliquidador/retefuenteNew/` de Nexura. El nuevo endpoint trae los conceptos con textos más normalizados (campo `concepto` más descriptivo, ya con categoría y referencia normativa) para mejorar el matching que hace Gemini en el clasificador.
+- `database/database.py` (`_mapear_conceptos_retefuente_new`, `_mapear_concepto_individual_new`) — mappers nuevos que adaptan la estructura del endpoint experimental (`id, numero_item, categoria, concepto, base_uvt, base, porcentaje`) al formato interno (`descripcion_concepto, index, base, porcentaje, codigo_concepto`). En modo nuevo, `codigo_concepto` queda vacío (la nueva tabla no lo trae) y los campos `numero_item`, `categoria` y `base_uvt` se ignoran en esta primera prueba.
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`) — endurecimiento del prompt para mejor rendimiento con Gemini 2.5 Flash:
+  - Nuevo CRITERIO 5 "Elección entre conceptos espejo (declarante / no declarante)" como decisor independiente, separado del CRITERIO 3 (pistas contextuales). Antes era un sub-criterio (e) ambiguo; ahora es secuencial: 1-4 identifican el giro, 5 elige entre espejos. Códigos DIAN: 05/O-13 → declarante; O-15 → declarante (con prioridad de autorretenedor en PASO 2); PJ sin 47/O-47 → declarante por defecto; PN sin 05/O-13 → no declarante (default conservador con observación obligatoria).
+  - REGLA DE DESEMPATE acotada: solo aplica a candidatos NO espejo. Elimina el riesgo de sub-retención sistemática por elegir "menor concepto_index" entre conceptos espejo declarante/no declarante.
+  - Few-shots reescritos (5 ejemplos, antes 4) con texto e IDs reales de la tabla `retefuenteNew` (id=1 Honorarios PJ, id=22/23 Compras declarante/no declarante, id=38 Servicios PN no declarante, id=43 Vigilancia base AIU). Antes los ejemplos usaban etiquetas cortas ("Honorarios", "Servicios técnicos") que no existen en la tabla nueva e inducían a Flash a abreviar el campo `concepto`.
+  - Contrato del campo `concepto` reforzado: debe ser EXACTAMENTE la clave del diccionario, sin abreviar.
+  - "RUT casilla 53" reemplazado por "sección Responsabilidades, Calidades y Atributos" para robustez ante texto OCR donde la etiqueta literal "casilla 53" no aparece.
+  - O-15 documentado como pista ambivalente (declarante + autorretenedor), con instrucción explícita de respetar la prioridad del flag `es_autorretenedor` que ya maneja el liquidador.
+  - Cambio aislado al prompt: no toca modelos, mappers, liquidador ni validadores.
+
+### Arquitectura
+
+- El cambio se aísla por completo en `NexuraAPIDatabase`: la firma pública de `obtener_conceptos_retefuente()` y `obtener_concepto_por_index()` se mantiene, así que `Clasificador/`, `prompts/`, `Liquidador/`, `app/` y `modelos/` no se tocan. En modo `USE_RETEFUENTE_NEW=true`, la lista de conceptos es global (no se filtra por `estructuraContable`).
+
 ## [3.15.0] - 2026-05-26
 
 ### Añadido

@@ -167,6 +167,7 @@ class ClasificadorICA:
             "actividades_facturadas": [],
             "actividades_relacionadas": [],  # NUEVO FORMATO v3.0
             "valor_factura_sin_iva": 0.0,  # NUEVO FORMATO v3.0
+            "regimen_tributario": None,  # Regimen tributario del proveedor (RUT)
             "observaciones": [],
             "fecha_analisis": datetime.now().isoformat()
         }
@@ -299,6 +300,7 @@ class ClasificadorICA:
             actividades_relacionadas = datos_actividades.get("actividades_relacionadas", [])
             valor_factura_sin_iva = datos_actividades.get("valor_factura_sin_iva", 0.0)
             autorretenedor_ica = datos_actividades.get("autorretenedor_ica", False)
+            regimen_tributario = datos_actividades.get("regimen_tributario")
 
             logger.info(f"Actividades facturadas: {len(actividades_facturadas)}, Actividades relacionadas: {len(actividades_relacionadas)}")
 
@@ -321,7 +323,8 @@ class ClasificadorICA:
                 resultado_base["actividades_facturadas"] = actividades_facturadas
                 resultado_base["actividades_relacionadas"] = actividades_relacionadas
                 resultado_base["valor_factura_sin_iva"] = valor_factura_sin_iva
-                resultado_base["autorretenedor_ica"] = autorretenedor_ica   
+                resultado_base["autorretenedor_ica"] = autorretenedor_ica
+                resultado_base["regimen_tributario"] = regimen_tributario
                 resultado_base["observaciones"].extend(validacion_actividades["errores"])
                 resultado_base["observaciones"].extend(validacion_actividades.get("advertencias", []))
                 logger.warning(f"Validación de actividades falló: {validacion_actividades['errores']}")
@@ -341,8 +344,10 @@ class ClasificadorICA:
             resultado_base["actividades_relacionadas"] = actividades_relacionadas
             resultado_base["valor_factura_sin_iva"] = valor_factura_sin_iva
             resultado_base["autorretenedor_ica"] = autorretenedor_ica
-            
+            resultado_base["regimen_tributario"] = regimen_tributario
+
             logger.info(f"autorretenedor detectado: {autorretenedor_ica} ")
+            logger.info(f"regimen tributario detectado: {regimen_tributario}")
 
             # Aquí el liquidador se encargará del cálculo
             logger.info("Análisis ICA completado exitosamente")
@@ -805,6 +810,7 @@ class ClasificadorICA:
             actividades_relacionadas = data.get("actividades_relacionadas", [])
             valor_factura_sin_iva = data.get("valor_factura_sin_iva", 0.0)
             autorretenedor_ica = data.get("autorretenedor_ica", False)
+            regimen_tributario = data.get("regimen_tributario")
 
             logger.info(f"Gemini identificó {len(actividades_facturadas)} actividades facturadas y {len(actividades_relacionadas)} actividades relacionadas")
 
@@ -812,7 +818,8 @@ class ClasificadorICA:
                 "actividades_facturadas": actividades_facturadas,
                 "actividades_relacionadas": actividades_relacionadas,
                 "valor_factura_sin_iva": valor_factura_sin_iva,
-                "autorretenedor_ica": autorretenedor_ica
+                "autorretenedor_ica": autorretenedor_ica,
+                "regimen_tributario": regimen_tributario
             }
 
         except asyncio.TimeoutError:

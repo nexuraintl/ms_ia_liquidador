@@ -1,5 +1,20 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.18.0] - 2026-06-06
+
+### Cambiado
+
+- Los códigos de negocio (patrimonios autónomos) que aplican **Estampilla Pro Universidad Nacional** y **Contribución a Obra Pública** dejan de estar hardcodeados en `config.py` y ahora se cargan desde la API Nexura (`GET /preliquidador/codigoNegociosFiduciaria/`). Se consultan **por solicitud** con **caché en memoria con TTL de 10 minutos**; sin **fallback** a valores hardcodeados: si la API falla y no hay caché válido, la preliquidación de esa factura se **aborta con error claro** (no se calculan estos impuestos con datos posiblemente obsoletos).
+  - `database/database.py` — nuevo método `obtener_codigos_negocios_fiduciaria()` en `DatabaseInterface` (ABC) e implementado en `NexuraAPIDatabase` (vía `_hacer_request`), `SupabaseDatabase` (no soportado) y `DatabaseWithFallback`/`DatabaseManager` (delegación).
+  - `database/database_service.py` — passthrough `obtener_codigos_negocios_fiduciaria()` en `IBusinessDataService`, `BusinessDataService` y `MockBusinessDataService` (mock con los 3 patrimonios por defecto).
+  - `config.py` — `CODIGOS_NEGOCIO_ESTAMPILLA`, `CODIGOS_NEGOCIO_OBRA_PUBLICA` y `TERCEROS_RECURSOS_PUBLICOS` arrancan vacíos y se pueblan vía nueva función `refrescar_codigos_negocio(business_service)` (caché TTL + mutación en sitio para preservar los `from config import` de otros módulos). `detectar_impuestos_aplicables_por_codigo()` la invoca al inicio. Se añade `limpiar_cache_codigos_negocio()`. El mensaje de validación de NIT `830054060` ahora lista los códigos vigentes dinámicamente. Se elimina el `assert` de `TERCEROS_RECURSOS_PUBLICOS` en `inicializar_configuracion()` (se puebla por solicitud).
+  - `Background/background_processor.py` — el manejo de error de `procesar_factura_background` clasifica el fallo de carga de códigos de negocio: la respuesta de contrato (`preliquidacion_sin_finalizar`) lleva `servicio_externo: "API Nexura / Base de datos"` (antes caía en el genérico "Google Gemini API") con mensaje de usuario específico y `retry_sugerido: True`.
+
+### Arquitectura
+
+- `Liquidador/liquidador_estampilla.py` y `prompts/prompt_estampilla_obra_publica.py` **no se modifican**: como `refrescar_codigos_negocio` muta los mismos objetos dict en sitio, ven los datos frescos automáticamente. El refresco corre en `detectar_impuestos_aplicables_por_codigo` (flujo de `validacion_negocios`), antes de la clasificación/liquidación de estampilla.
+- **Cloud Run (1 CPU / worker async único)**: el refresco queda serializado por el fetch bloqueante (`requests`), por lo que la mutación en sitio es segura sin lock. El caché es por-instancia (cada instancia consulta la API la primera vez y refresca cada 10 min).
+
 ## [3.17.0] - 2026-06-01
 
 ### Añadido

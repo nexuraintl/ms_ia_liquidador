@@ -582,16 +582,15 @@ def obtener_constantes_articulo_383() -> Dict[str, Any]:
 # IMPORTANTE: Desde 2025, estampilla pro universidad nacional y contribución
 # a obra pública aplican para los MISMOS códigos de negocio
 
-# Códigos de negocio válidos para AMBOS impuestos (estampilla + obra pública)
-# Estos códigos identifican a los negocios que aplican estos dos impuestos
-CODIGOS_NEGOCIO_ESTAMPILLA = {
-    69164: "PATRIMONIO AUTONOMO INNPULSA COLOMBIA",
-    69166: "PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA",
-    99664: "PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE"
-}
+# Códigos de negocio válidos para AMBOS impuestos (estampilla + obra pública).
+# Ya NO se hardcodean: se cargan por solicitud desde la API
+# (/preliquidador/codigoNegociosFiduciaria/) con caché TTL, vía
+# refrescar_codigos_negocio(). Se mutan EN SITIO (clear()+update()) para no
+# romper los `from config import ...` que hacen otros módulos.
+CODIGOS_NEGOCIO_ESTAMPILLA = {}
 
-# Alias para compatibilidad hacia atrás - MISMO contenido
-CODIGOS_NEGOCIO_OBRA_PUBLICA = CODIGOS_NEGOCIO_ESTAMPILLA.copy()
+# Alias hacia atrás - se llena con el mismo contenido en cada refresco
+CODIGOS_NEGOCIO_OBRA_PUBLICA = {}
 
 # NITs administrativos válidos para Estampilla Universidad y Obra Pública
 # Estos NITs determinan si se deben liquidar estos impuestos
@@ -608,11 +607,9 @@ NITS_REQUIEREN_VALIDACION_CODIGO = {"830054060"}
 # DEPRECATED: Mantener por compatibilidad legacy (NO USAR en nuevo código)
 NITS_ESTAMPILLA_UNIVERSIDAD = {}
 NITS_CONTRIBUCION_OBRA_PUBLICA = {}
-TERCEROS_RECURSOS_PUBLICOS = {
-    "PATRIMONIO AUTONOMO INNPULSA COLOMBIA": True,
-    "PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA": True,
-    "PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE": True
-}
+# Se deriva de los nombres de CODIGOS_NEGOCIO_ESTAMPILLA en cada refresco
+# (ver refrescar_codigos_negocio). Arranca vacío y se llena por solicitud.
+TERCEROS_RECURSOS_PUBLICOS = {}
 
 # Objetos de contrato que aplican para estampilla universidad
 OBJETOS_CONTRATO_ESTAMPILLA = {
@@ -660,6 +657,91 @@ RANGOS_ESTAMPILLA_UNIVERSIDAD = [
     {"desde_uvt": 52652, "hasta_uvt": 157904, "tarifa": 0.01},   # 1.0%
     {"desde_uvt": 157904, "hasta_uvt": float('inf'), "tarifa": 0.02}  # 2.0%
 ]
+
+# ===============================
+# CARGA DE CÓDIGOS DE NEGOCIO DESDE API (caché TTL)
+# ===============================
+
+# Caché en memoria con expiración. Cada instancia (worker) mantiene su propia
+# copia y la refresca al expirar el TTL. Ver "Consideraciones Cloud Run" en el
+# plan: con 1 CPU / worker async único el refresco queda serializado por el
+# fetch bloqueante, por lo que no se requiere lock.
+_cache_codigos_negocio_timestamp = None
+_CODIGOS_NEGOCIO_TTL_SEGUNDOS = 600  # 10 min
+
+
+def refrescar_codigos_negocio(business_service=None) -> None:
+    """
+    Asegura que CODIGOS_NEGOCIO_ESTAMPILLA / CODIGOS_NEGOCIO_OBRA_PUBLICA /
+    TERCEROS_RECURSOS_PUBLICOS estén poblados con datos frescos desde la API
+    (/preliquidador/codigoNegociosFiduciaria/).
+
+    Comportamiento:
+    - Si el caché está fresco (dentro del TTL y no vacío), no llama a la API.
+    - Si está vacío o expirado, consulta la API y MUTA EN SITIO los 3 dicts.
+    - Si la API falla y no hay caché válido, lanza RuntimeError (se aborta la
+      preliquidación; NO se usan valores hardcodeados).
+
+    SRP: Solo gestiona la carga/caché de los códigos de negocio.
+    DIP: Recibe business_service como dependencia inyectada.
+    """
+    global _cache_codigos_negocio_timestamp
+
+    # Caché fresco: nada que hacer
+    if (_cache_codigos_negocio_timestamp is not None
+            and CODIGOS_NEGOCIO_ESTAMPILLA
+            and (datetime.now() - _cache_codigos_negocio_timestamp).total_seconds() < _CODIGOS_NEGOCIO_TTL_SEGUNDOS):
+        logger.debug("Códigos de negocio: usando caché vigente")
+        return
+
+    if business_service is None:
+        raise RuntimeError(
+            "No se pudieron obtener los códigos de negocio desde la API "
+            "(business_service no disponible) y no hay caché válido; se aborta la preliquidación"
+        )
+
+    logger.info("Obteniendo códigos de negocio desde la API (/preliquidador/codigoNegociosFiduciaria/)")
+    resultado = business_service.obtener_codigos_negocios_fiduciaria()
+
+    if not resultado or not resultado.get("success") or not resultado.get("data"):
+        mensaje = (resultado or {}).get("message", "respuesta vacía")
+        raise RuntimeError(
+            f"No se pudieron obtener los códigos de negocio desde la API y no hay caché válido; "
+            f"se aborta la preliquidación. Detalle: {mensaje}"
+        )
+
+    data = resultado["data"]  # { "69164": "PATRIMONIO ...", ... }
+
+    try:
+        nuevos_codigos = {int(codigo): nombre for codigo, nombre in data.items()}
+    except (ValueError, TypeError) as e:
+        raise RuntimeError(
+            f"Códigos de negocio con formato inválido desde la API: {e}; se aborta la preliquidación"
+        ) from e
+
+    nuevos_terceros = {str(nombre).upper().strip(): True for nombre in data.values()}
+
+    # Mutación EN SITIO de los mismos objetos importados por otros módulos
+    CODIGOS_NEGOCIO_ESTAMPILLA.clear()
+    CODIGOS_NEGOCIO_ESTAMPILLA.update(nuevos_codigos)
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.clear()
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.update(nuevos_codigos)
+    TERCEROS_RECURSOS_PUBLICOS.clear()
+    TERCEROS_RECURSOS_PUBLICOS.update(nuevos_terceros)
+
+    _cache_codigos_negocio_timestamp = datetime.now()
+    logger.info(f"Códigos de negocio cargados desde API: {len(nuevos_codigos)} códigos")
+
+
+def limpiar_cache_codigos_negocio() -> None:
+    """Limpia el caché de códigos de negocio (vacía los 3 dicts + timestamp). Para tests/refresh manual."""
+    global _cache_codigos_negocio_timestamp
+    CODIGOS_NEGOCIO_ESTAMPILLA.clear()
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.clear()
+    TERCEROS_RECURSOS_PUBLICOS.clear()
+    _cache_codigos_negocio_timestamp = None
+    logger.info("Caché de códigos de negocio limpiado")
+
 
 # ===============================
 # FUNCIONES ESTAMPILLA UNIVERSIDAD
@@ -714,7 +796,7 @@ def validar_nit_administrativo_para_impuestos(nit_administrativo: str, codigo_ne
                 "nit_valido": True,
                 "requiere_validacion_codigo": True,
                 "codigo_valido": False,
-                "razon_no_aplica": f"El NIT {nit_administrativo} ({nombre_entidad}) requiere que el código de negocio sea uno de los patrimonios autónomos válidos (69164, 69166, 99664)",
+                "razon_no_aplica": f"El NIT {nit_administrativo} ({nombre_entidad}) requiere que el código de negocio sea uno de los patrimonios autónomos válidos {tuple(CODIGOS_NEGOCIO_ESTAMPILLA.keys())}",
                 "nombre_entidad": nombre_entidad
             }
 
@@ -1009,7 +1091,13 @@ def detectar_impuestos_aplicables_por_codigo(codigo_negocio: int, nombre_negocio
         - Si no se proporciona nit_administrativo, solo valida por código de negocio (compatibilidad)
         - Si se proporciona nit_administrativo, valida PRIMERO el NIT, DESPUÉS el código
         - Si se proporciona business_service, valida tipo de recurso (Públicos/Privados) en BD
+        - Refresca los códigos de negocio desde la API (caché TTL) antes de validar;
+          si la fuente falla sin caché válido, lanza RuntimeError (aborta la preliquidación)
     """
+    # Cargar/refrescar códigos de negocio desde la API antes de leerlos.
+    # Si falla sin caché válido, propaga el error y la factura se aborta.
+    refrescar_codigos_negocio(business_service)
+
     nombre_registrado = CODIGOS_NEGOCIO_ESTAMPILLA.get(codigo_negocio, nombre_negocio or "Desconocido")
 
 
@@ -1549,13 +1637,14 @@ def inicializar_configuracion():
     try:
         # UVT se valida despues de obtenerlo desde la API
         assert SMMLV_2025 > 0, "SMMLV_2025 debe ser mayor a 0"
-        assert len(TERCEROS_RECURSOS_PUBLICOS) > 0, "Debe haber terceros configurados"
+        # TERCEROS_RECURSOS_PUBLICOS se puebla por solicitud desde la API
+        # (refrescar_codigos_negocio), por eso ya no se valida aquí.
         assert len(CONCEPTOS_RETEFUENTE) > 0, "Debe haber conceptos de retefuente configurados"
         assert len(NITS_IVA_RETEIVA) > 0, "Debe haber NITs configurados para IVA y ReteIVA"
-        
+
         logger.info(" Configuración inicializada correctamente")
         logger.info(f"   - UVT 2025: pendiente (se obtendra desde API)")
-        logger.info(f"   - Terceros: {len(TERCEROS_RECURSOS_PUBLICOS)}")
+        logger.info(f"   - Terceros: pendiente (se obtendra desde API por solicitud)")
         logger.info(f"   - Conceptos ReteFuente: {len(CONCEPTOS_RETEFUENTE)}")
         logger.info(f"   - NITs IVA y ReteIVA: {len(NITS_IVA_RETEIVA)}")
         

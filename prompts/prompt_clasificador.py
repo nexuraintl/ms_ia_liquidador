@@ -367,18 +367,37 @@ Debes clasificar EXACTAMENTE {total_archivos} documento(s) en UNA de estas categ
 
 6. **DESCARTABLE** - Documento sin relevancia fiscal directa o sin contenido útil.
    Incluye correos de notificación/transaccionales (p. ej. de la DIAN) que solo anuncian
-   o enlazan a una factura adjunta sin contener su detalle monetario ni los ítems.
+   o enlazan a una factura adjunta sin contener su detalle monetario ni los ítems, y
+   entregables/datos operativos del servicio facturado (bases de datos, volcados, listados
+   de registros, muestras de datos), aunque tengan muchas cifras.
+
+REGLA ESPECIAL DE PRECEDENCIA:
+• Si un documento combina varios tipos de información, clasifícalo por su función PRINCIPAL.
+• Si DENTRO de un documento aparece una FACTURA, cuenta de cobro o documento equivalente CON sus
+  valores e ítems (según la definición de FACTURA de arriba), aunque venga mezclada con anexos,
+  RUT, datos, soportes o ruido, clasifica ESE documento OBLIGATORIAMENTE como FACTURA.
+• La presencia de una factura/cobro real PREVALECE sobre cualquier otra clasificación
+  (DESCARTABLE, ANEXO, CONTRATO, COTIZACION). Aplica haya uno o varios archivos.
 
 ═══════════════════════════════════════════════════════════════════════
 PASO 2: INSTRUCCIÓN CONSERVADORA DE RELEVANCIA
 ═══════════════════════════════════════════════════════════════════════
 Debes indicar si cada documento es "relevante" (relevante = true o false) para el proceso de liquidación tributaria.
+
+PRINCIPIO: relevante = información TRIBUTARIA/CONTABLE, NO el producto del trabajo facturado.
+Que un documento contenga muchas cifras o datos NO lo hace relevante. No necesitamos pruebas
+de que se ejecutó lo facturado, solo la información que permite el análisis tributario.
+
 Sigue estrictamente esta regla:
 - **DESCARTAR (relevante = false)** únicamente lo que NINGUNA llamada de impuestos/retenciones usaría. Por ejemplo:
   • Pantallazos sin datos/cifras
   • Correos con cuerpo vacío
   • Correos de notificación que solo referencian/enlazan a una factura adjunta (la factura real viene en el adjunto/ZIP)
   • Archivos de Excel sin cifras fiscales o vacíos
+  • Entregables, productos o pruebas de ejecución del servicio facturado, AUNQUE contengan
+    muchísimas cifras o datos. Ejemplos: bases de datos, volcados o muestras de datos, listados
+    de registros (hojas con columnas tipo id, nombre, teléfono, correo, organización, beneficiario),
+    informes de resultados o data procesada/normalizada entregada al cliente.
   • Firmas aisladas o páginas de firmas sin datos contractuales/facturación
   • Cotizaciones sin valor o informativas que no acompañan a un cobro real
   • Documentos marcados como tipo DESCARTABLE
@@ -389,6 +408,10 @@ Sigue estrictamente esta regla:
   • Planillas de seguridad social (PILA) - ¡SIEMPRE relevantes!
   • Certificados de deducción del Artículo 383 o retención - ¡SIEMPRE relevantes!
   • Cualquier documento que contenga valores, fechas, conceptos o NITs aplicables.
+  • IMPORTANTE: un Excel/anexo es relevante SOLO si aporta información de naturaleza tributaria o
+    del cobro (valores de factura, subtotal, IVA, base gravable, retenciones, conceptos facturados,
+    NIT/RUT, datos del contrato, planillas PILA o certificados de deducción). Una tabla de datos
+    operativos o del negocio del cliente, sin esa naturaleza fiscal, es DESCARTABLE.
 
 **factura_identificada = true** si en ESTE lote encuentras alguna FACTURA o equivalente.
 **rut_identificado = true** si en ESTE lote encuentras algún RUT.
@@ -424,7 +447,8 @@ FORMATO DE RESPUESTA OBLIGATORIO (JSON ESTRICTO)
 
 RECORDATORIOS FINALES:
 • Clasifica TODOS los documentos del lote.
-• Si hay solo UN DOCUMENTO con múltiples funciones, clasifícalo como FACTURA.
+• Recuerda la REGLA ESPECIAL DE PRECEDENCIA: un documento que contenga una factura real
+  (con valores e ítems) es FACTURA, por encima de cualquier otra clasificación.
 • Devuelve un JSON válido.
 """
 

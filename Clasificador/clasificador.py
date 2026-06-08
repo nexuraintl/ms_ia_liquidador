@@ -393,9 +393,21 @@ class ProcesadorGemini:
                 
                 logger.info(f"Enviando lote {idx+1}/{len(lotes)} a Gemini (con {len(lote)} documentos)...")
                 respuesta = await self._llamar_gemini_hibrido(contents)
-                
+
                 respuesta_limpia = self._limpiar_respuesta_json(respuesta)
-                resultado = json.loads(respuesta_limpia)
+                try:
+                    resultado = json.loads(respuesta_limpia)
+                except json.JSONDecodeError as e:
+                    # La respuesta cruda (respuesta) solo existe en este scope; se loguea aqui
+                    # para diagnostico antes de propagar un error claro por lote.
+                    logger.error(
+                        f"Lote {idx+1}/{len(lotes)}: JSON invalido de Gemini ({e}). "
+                        f"Respuesta (500 chars): {respuesta[:500]}"
+                    )
+                    raise ValueError(
+                        f"Gemini devolvio JSON invalido para el lote {idx+1}/{len(lotes)} "
+                        f"({len(lote)} documento(s)): {e}"
+                    )
                 return resultado
 
             # Ejecutar lotes en paralelo
@@ -505,9 +517,10 @@ class ProcesadorGemini:
             return clasificacion_consolidada, es_consorcio, es_recurso_extranjero, es_facturacion_extranjera
             
         except json.JSONDecodeError as e:
+            # El detalle de la respuesta cruda se loguea dentro de procesar_lote / análisis
+            # global, donde la variable de respuesta está en scope (tras el refactor a lotes).
             logger.error(f" Error parseando JSON híbrido de Gemini: {e}")
-            logger.error(f"Respuesta problemática: {respuesta}")
-            
+
             raise ValueError(f"Error en JSON clasificación híbrida: {str(e)}")
         
         except Exception as e:

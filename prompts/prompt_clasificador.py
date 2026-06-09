@@ -395,6 +395,15 @@ NO es relevante el PRODUCTO del trabajo facturado, ni un asset decorativo sin da
 cifras NO implica relevancia; no tener datos fiscales legibles ⇒ no es relevante. No necesitamos
 pruebas de que se ejecutó lo facturado, solo lo que permite el análisis tributario.
 
+PRUEBA DECISIVA (aplícala ante la duda): pregúntate qué DESCRIBE el documento.
+• Describe el COBRO o la relación tributaria (factura, contrato, régimen/NIT/RUT del PROVEEDOR,
+  retenciones, conceptos facturados, o la distribución de la EJECUCIÓN del servicio por municipio)
+  → relevante.
+• Describe el RESULTADO ENTREGADO al cliente (registros, beneficiarios, clientes, padrones, datos
+  procesados/normalizados, bases de datos) → es el PRODUCTO del trabajo → DESCARTABLE, AUNQUE
+  contenga NITs, montos, ciudades o miles de filas. Esos NITs/cifras/ciudades son CONTENIDO del
+  entregable, no la relación de cobro del proveedor.
+
 INVARIANTE DE COHERENCIA: si el tipo es DESCARTABLE, "relevante" DEBE ser false, sin excepción.
 Y si un documento es relevante para algún impuesto, NO lo marques DESCARTABLE.
 
@@ -408,9 +417,14 @@ Anclas de calibración (representativas, NO exhaustivas — razona por analogía
     cifras: bases de datos, volcados o muestras de datos, listados de registros (hojas con columnas
     tipo id, nombre, teléfono, correo, organización, beneficiario), informes de resultados o data
     procesada/normalizada entregada al cliente.
-    EXCEPCIÓN: si ese documento/correo/anexo trae la DISTRIBUCIÓN TERRITORIAL del servicio
-    (ciudad/municipio de ejecución o prestación, o porcentajes por ciudad/municipio), NO lo
-    descartes: es insumo de ICA y se CONSERVA (ver abajo).
+    Pista de nombre: archivos llamados "Bases", "Base de datos", "BD", "padrón", "listado", "data"
+    o "registros" suelen ser entregables → DESCARTABLE, salvo que la PRUEBA DECISIVA indique lo contrario.
+    EXCEPCIÓN ACOTADA (insumo de ICA): consérvalo SOLO si declara cómo se DISTRIBUYE LA EJECUCIÓN
+    DEL SERVICIO/CONTRATO del proveedor entre municipios (p. ej. "el servicio se prestó 60% en
+    Bogotá, 40% en Cali", "municipios donde se ejecutó el contrato", tabla de municipios con % de
+    ejecución del contrato). NO aplica a un dato geográfico que sea CONTENIDO del entregable (una
+    columna de ciudad/departamento de los registros, beneficiarios o clientes): eso sigue siendo
+    entregable → DESCARTABLE.
   - Cotizaciones informativas que no acompañan a un cobro real.
 
 • RELEVANTE (relevante = true):
@@ -419,16 +433,21 @@ Anclas de calibración (representativas, NO exhaustivas — razona por analogía
   - Contratos.
   - Planillas de seguridad social (PILA) — SIEMPRE relevantes.
   - Certificados de deducción del Artículo 383 o de retención — SIEMPRE relevantes.
-  - Cualquier documento con valores, fechas, conceptos o NITs aplicables al análisis tributario.
-  - Distribución territorial del servicio (insumo de ICA): cualquier documento, correo o anexo que
-    indique lugar/ciudad/municipio de ejecución o prestación, o porcentajes de ejecución por
-    ciudad/municipio (p. ej. "Ciudad servicio", "% de ejecución por ciudad", "distribución por
-    municipio", tablas de ciudades con porcentajes). Determinan en qué municipios se distribuye el
-    ICA: SIEMPRE relevantes (tipo ANEXO + relevante=true, NUNCA DESCARTABLE).
+  - Cualquier documento con valores, fechas, conceptos facturados o NIT/RUT DEL PROVEEDOR/COMPRADOR
+    o del contrato, aplicables al análisis tributario. (NO cuentan los NITs/valores que aparezcan
+    como dato DENTRO de un entregable o base de datos.)
+  - Distribución de la EJECUCIÓN del servicio del proveedor (insumo de ICA): documento, correo o
+    anexo que declara en qué municipios el PROVEEDOR ejecutó o prestó el servicio/contrato, o los
+    porcentajes de ejecución por municipio (p. ej. "% de ejecución del contrato por ciudad",
+    "distribución del servicio por municipio", tabla de municipios con % de ejecución). Determinan
+    en qué municipios se distribuye el ICA: SIEMPRE relevantes (tipo ANEXO + relevante=true, NUNCA
+    DESCARTABLE). OJO: NO es esto una columna geográfica de los registros/beneficiarios dentro de un
+    entregable (eso es DESCARTABLE).
   - Regla para Excel/anexo: es relevante SOLO si aporta naturaleza tributaria o del cobro (valores
-    de factura, subtotal, IVA, base gravable, retenciones, conceptos facturados, NIT/RUT, datos del
-    contrato, PILA, certificados de deducción) o la distribución territorial para ICA. Una tabla de
-    datos operativos/del negocio del cliente, sin esa naturaleza fiscal, es DESCARTABLE.
+    de factura, subtotal, IVA, base gravable, retenciones, conceptos facturados, NIT/RUT del
+    proveedor/comprador, datos del contrato, PILA, certificados de deducción) o la distribución de la
+    ejecución del servicio por municipio para ICA. Una tabla de datos operativos/del negocio del
+    cliente, sin esa naturaleza fiscal, es DESCARTABLE.
 
 **factura_identificada = true** si en ESTE lote encuentras alguna FACTURA o equivalente.
 **rut_identificado = true** si en ESTE lote encuentras algún RUT.

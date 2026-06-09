@@ -1,5 +1,30 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.3] - 2026-06-09
+
+### Corregido
+
+- **Contenido de un PDF propagado a otros archivos distintos en la clasificación**: Gemini clasificaba 3 PDFs distintos como "primera/segunda/tercera página" de la misma factura. La causa era el ensamblado del contenido multimodal en `_llamar_gemini_hibrido` (`Clasificador/clasificador.py`): los PDFs se enviaban como un stream de Parts consecutivos `[<PDF1>, <PDF2>, <PDF3>, PROMPT]` y los nombres de archivo solo viajaban como una lista de texto dentro del prompt, sin vínculo explícito nombre↔contenido. Gemini debía adivinar la correspondencia y la alineaba posicionalmente, tratando 3 archivos distintos como páginas de uno solo. Ahora cada archivo se antecede con un Part de texto delimitador `===== DOCUMENTO ADJUNTO: <nombre> =====`, que vincula nombre y contenido de forma inequívoca. El delimitador es determinista y va al inicio, por lo que preserva el implicit caching de Gemini 2.5. Aplica a la clasificación por lotes y al análisis global (ambos pasan por `_llamar_gemini_hibrido`). Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla de identidad de los adjuntos: cada archivo es un documento independiente y completo, y no debe asumirse que varios archivos son páginas del mismo documento.
+
+## [3.19.2] - 2026-06-09
+
+### Cambiado
+
+- **`PROMPT_CLASIFICACION_LOTE` reescrito de marco "literal" a juicio fiscal calibrado**: el prompt arrancaba con "Eres un CLASIFICADOR LITERAL" y una regla anti-alucinación que prohibía "deducir, interpretar o suponer" y obligaba a usar "SOLO texto explícito". Pero la tarea de tipo/relevancia es de criterio (decidir si un Excel es un entregable o un dato tributario, o si un correo es la factura o solo la transporta, es interpretación). El marco rígido anulaba el razonamiento del modelo y, como es imposible enumerar todos los casos, cada caso nuevo se parchaba con otra regla, dejando aún falsos positivos. Ahora el encabezado posiciona a Gemini como ANALISTA FISCAL EXPERTO que razona sobre la FUNCIÓN de cada documento; la regla anti-alucinación se reorienta a "no inventes DATOS, pero SÍ usa tu juicio para inferir la función/relevancia". Las enumeraciones se conservan pero reetiquetadas como ANCLAS DE CALIBRACIÓN no exhaustivas, con permiso explícito de razonar por analogía. Se preservan intactos los guardrails duros: precedencia de FACTURA, coherencia `DESCARTABLE ⇒ relevante=false`, distribución territorial de ICA siempre relevante, entregables/datos operativos no relevantes (aunque tengan muchas cifras), notificaciones DIAN como DESCARTABLE, y PILA/Art. 383 siempre relevantes.
+- **Nuevo campo `motivo` en el JSON de clasificación por documento** (CoT ligero): cada documento responde primero un `motivo` breve (≤15 palabras con su función) antes de `tipo` y `relevante`, forzando el razonamiento antes de comprometer la etiqueta y dejando traza auditable. Es aditivo: `Clasificador/clasificador.py` solo lee `tipo`/`relevante` y preserva las claves extra; no cambia el contrato downstream.
+
+### Corregido
+
+- **Imágenes decorativas infladas a relevante=true**: firmas de correo, logos, iconos y banners embebidos (assets tipo `Outlook-*.png`, `image00X.png`) se marcaban como ANEXO/relevante=true y entraban como ruido a las llamadas de impuestos. El prompt ahora trata como DESCARTABLE cualquier imagen/pantallazo sin datos fiscales legibles, sin importar el nombre del archivo, y exige tratar de forma CONSISTENTE a los archivos de la misma naturaleza dentro del lote (antes archivos gemelos salían uno ANEXO y otro DESCARTABLE).
+- **Correos `.msg`/`.eml` clasificados como FACTURA**: se generalizó la regla DIAN a cualquier CORREO-TRANSPORTE: un correo cuyo cuerpo solo saluda, anuncia o adjunta la factura, sin contener él mismo subtotal/IVA/total e ítems, NO es FACTURA. El correo es ANEXO (si aporta contexto fiscal) o DESCARTABLE (si es solo envío); la FACTURA es el adjunto PDF/XML con valores e ítems.
+
+## [3.19.1] - 2026-06-08
+
+### Corregido
+
+- **Inconsistencia DESCARTABLE + relevante=true**: la clasificación por lotes podía devolver documentos con `{"tipo": "DESCARTABLE", "relevante": true}` (Gemini contradecía su propia instrucción). Se fuerza el invariante en `Clasificador/clasificador.py`: al consolidar los lotes, un documento de tipo DESCARTABLE siempre queda `relevante=false`, aguas arriba de todo consumidor del flag. Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla dura: si `tipo == DESCARTABLE` entonces `relevante` DEBE ser `false`. Evita que correos de notificación marcados DESCARTABLE entren como ruido (y gasten tokens) en las llamadas de impuestos.
+- **Datos territoriales de ICA ya no se descartan**: el criterio de relevancia de `PROMPT_CLASIFICACION_LOTE` no contemplaba la distribución territorial del servicio (ciudad/municipio de ejecución, porcentajes de ejecución por municipio), insumo directo de ICA para distribuir el impuesto. Un correo/anexo que solo aportara esa distribución podía caer como DESCARTABLE y, con el invariante anterior, perder su texto en la llamada de ICA (`app/clasificacion_documentos.py` vacía el texto de los no relevantes). Ahora el prompt conserva explícitamente estos documentos como tipo ANEXO + relevante=true (nunca DESCARTABLE).
+
 ## [3.19.0] - 2026-06-07
 
 ### Añadido

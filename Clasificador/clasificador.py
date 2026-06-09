@@ -392,7 +392,7 @@ class ProcesadorGemini:
                 contents = [prompt_lote] + lote_gemini_parts
                 
                 logger.info(f"Enviando lote {idx+1}/{len(lotes)} a Gemini (con {len(lote)} documentos)...")
-                respuesta = await self._llamar_gemini_hibrido(contents)
+                respuesta = await self._llamar_gemini_hibrido(contents, nombres_archivos=lote_nombres_directos)
 
                 respuesta_limpia = self._limpiar_respuesta_json(respuesta)
                 try:
@@ -422,6 +422,11 @@ class ProcesadorGemini:
                 lote_clasificacion = res.get("clasificacion", {})
                 for k, v in lote_clasificacion.items():
                     if isinstance(v, dict):
+                        # Invariante: un documento DESCARTABLE nunca es relevante.
+                        # Gemini puede devolver la contradiccion {DESCARTABLE, relevante:true};
+                        # se corrige aqui, aguas arriba de todo consumidor de "relevante".
+                        if str(v.get("tipo", "")).upper() == "DESCARTABLE":
+                            v["relevante"] = False
                         clasificacion_consolidada[k] = v
                     else:
                         clasificacion_consolidada[k] = {
@@ -465,7 +470,7 @@ class ProcesadorGemini:
                 
                 contents_global = [prompt_global] + archivos_directos_relevantes
                 logger.info(f"Enviando {len(archivos_directos_relevantes) + 1} elementos a Gemini para Análisis Global...")
-                respuesta_global = await self._llamar_gemini_hibrido(contents_global)
+                respuesta_global = await self._llamar_gemini_hibrido(contents_global, nombres_archivos=nombres_archivos_relevantes_directos)
                 
                 respuesta_global_limpia = self._limpiar_respuesta_json(respuesta_global)
                 resultado_global = json.loads(respuesta_global_limpia)
@@ -802,18 +807,25 @@ class ProcesadorGemini:
         # Si llegamos aqui, todos los reintentos fallaron
         raise ultima_excepcion
 
-    async def _llamar_gemini_hibrido(self, contents: List) -> str:
+    async def _llamar_gemini_hibrido(self, contents: List, nombres_archivos: List[str] = None) -> str:
         """
         Llamada especial a Gemini para contenido híbrido (prompt + archivos directos).
-        
+
         CORREGIDO: Ahora crea objetos con formato correcto para Gemini multimodal.
-        
+
         Args:
             contents: Lista con prompt + archivos UploadFile [prompt_str, archivo1_UploadFile, archivo2_UploadFile, ...]
-            
+            nombres_archivos: Nombres de los archivos directos en el MISMO orden que contents[1:].
+                Cuando se provee, cada archivo se antecede con un Part de texto delimitador
+                (===== DOCUMENTO ADJUNTO: <nombre> =====) que vincula explicitamente el nombre
+                con su contenido. Sin esto, Gemini recibe los PDFs como un stream concatenado
+                y adivina la correspondencia nombre<->contenido (p. ej. tratando 3 archivos
+                distintos como 3 paginas de la misma factura). El delimitador es determinista
+                y va al inicio, por lo que preserva el implicit caching de Gemini 2.5.
+
         Returns:
             str: Respuesta de Gemini
-            
+
         Raises:
             ValueError: Si hay error en la llamada a Gemini
         """
@@ -832,6 +844,14 @@ class ProcesadorGemini:
             # El prompt se anexa al FINAL (despues de los archivos)
             prompt_texto = contents[0] if contents else None
 
+            # Etiqueta determinista que vincula cada nombre con su Part. Usa el indice
+            # del archivo original, por lo que la correspondencia se conserva aunque alguna
+            # rama haga continue por error.
+            def _etiqueta(idx):
+                if nombres_archivos and idx < len(nombres_archivos):
+                    return f"\n===== DOCUMENTO ADJUNTO: {nombres_archivos[idx]} =====\n"
+                return None
+
             #  PROCESAR ARCHIVOS DIRECTOS CORRECTAMENTE
             archivos_directos = contents[1:] if len(contents) > 1 else []
             for i, archivo_elemento in enumerate(archivos_directos):
@@ -845,6 +865,9 @@ class ProcesadorGemini:
                                 file_uri=archivo_elemento.uri
                             )
                         )
+                        etq = _etiqueta(i)
+                        if etq:
+                            contenido_multimodal.append(etq)
                         contenido_multimodal.append(file_part)
                         logger.info(f" Archivo Files API agregado: {archivo_elemento.name} ({archivo_elemento.mime_type})")
                         continue
@@ -915,6 +938,9 @@ class ProcesadorGemini:
                             mime_type="application/octet-stream"
                         )
 
+                    etq = _etiqueta(i)
+                    if etq:
+                        contenido_multimodal.append(etq)
                     contenido_multimodal.append(archivo_objeto)
 
                 except Exception as e:

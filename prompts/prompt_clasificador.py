@@ -295,6 +295,7 @@ def PROMPT_CLASIFICACION_LOTE(textos_preprocesados: Dict[str, str], nombres_arch
     {
         "clasificacion": {
             "nombre_archivo_1": {
+                "motivo": "razonamiento breve de la funcion del documento",
                 "tipo": "FACTURA|RUT|CONTRATO|COTIZACION|ANEXO|DESCARTABLE",
                 "relevante": true/false
             },
@@ -303,6 +304,11 @@ def PROMPT_CLASIFICACION_LOTE(textos_preprocesados: Dict[str, str], nombres_arch
         "factura_identificada": true/false,
         "rut_identificado": true/false
     }
+
+    Nota: el prompt usa un encuadre de juicio fiscal (analista experto) en lugar de
+    extraccion literal, conservando los guardrails duros (precedencia de FACTURA,
+    coherencia DESCARTABLE->relevante=false, territorial ICA). El campo "motivo" es
+    aditivo (CoT ligero) y los consumidores downstream solo leen "tipo"/"relevante".
     """
     todos_los_archivos = nombres_archivos_directos + list(textos_preprocesados.keys())
     total_archivos = len(todos_los_archivos)
@@ -312,106 +318,117 @@ def PROMPT_CLASIFICACION_LOTE(textos_preprocesados: Dict[str, str], nombres_arch
         contexto_proveedor = f"\n**PROVEEDOR ESPERADO:** {proveedor}\n"
 
     return f"""
-ROL: Eres un CLASIFICADOR LITERAL de documentos fiscales colombianos.
-Tu función es ÚNICAMENTE identificar y clasificar cada documento en un lote basándote en lo que está escrito textualmente.
+ROL: Eres un ANALISTA FISCAL EXPERTO en documentos colombianos. Para cada documento de un lote
+decides DOS cosas usando tu criterio profesional: (1) su TIPO según la FUNCIÓN que cumple, y
+(2) si es RELEVANTE para liquidar impuestos. Razonas sobre el PROPÓSITO del documento; no haces
+simple coincidencia de palabras.
 {contexto_proveedor}
 
- REGLA FUNDAMENTAL ANTI-ALUCINACIÓN:
-• PROHIBIDO deducir, interpretar o suponer información
-• SOLO usa texto que puedas CITAR LITERALMENTE del documento
-• Si no encuentras evidencia textual explícita → marca como false/descartable
-• NO uses contexto implícito, SOLO texto explícito
-• NO clasifiques página por página, clasifica el documento completo
+GROUNDING (no alucinar, pero sí razonar):
+• No inventes DATOS que no estén en el documento (cifras, NITs, nombres, fechas, conceptos).
+• SÍ usa tu juicio para inferir la FUNCIÓN del documento y su RELEVANCIA fiscal, aunque no haya
+  una frase literal que lo diga. Esta tarea es de criterio, no de copiar texto.
+• Clasifica el documento COMPLETO, no página por página.
+• Los ejemplos de abajo son ANCLAS DE CALIBRACIÓN, no una lista cerrada: para casos no listados,
+  razona POR ANALOGÍA con el principio que ilustran.
+• Ante duda sobre el TIPO, elige el que mejor describe su función PRINCIPAL. Ante duda sobre
+  RELEVANCIA, aplica el PRINCIPIO RECTOR del PASO 2.
 
 ═══════════════════════════════════════════════════════════════════════
-PASO 1: CLASIFICACIÓN DE DOCUMENTOS (POR LOTE)
+PASO 1: TIPO DE DOCUMENTO (POR FUNCIÓN)
 ═══════════════════════════════════════════════════════════════════════
 
 Debes clasificar EXACTAMENTE {total_archivos} documento(s) en UNA de estas categorías:
 
-1. **FACTURA** - Documento que ES la factura/cobro en sí mismo. DEBE contener:
-   ✓ Número de factura o documento equivalente
-   ✓ Fecha de emisión/venta
+1. **FACTURA** - El documento que ES el cobro en sí mismo. Para serlo DEBE contener su detalle:
+   ✓ Número de factura o documento equivalente y fecha
    ✓ Valores monetarios DETALLADOS: subtotal, IVA y/o total (OBLIGATORIO)
-   ✓ Datos del vendedor/proveedor y comprador
-   ✓ Descripción/ítems de los bienes o servicios vendidos (OBLIGATORIO)
+   ✓ Datos de vendedor/proveedor y comprador
+   ✓ Descripción/ítems de los bienes o servicios (OBLIGATORIO)
+   Cuentan también como FACTURA (si muestran valores e ítems): "SOPORTE EN ADQUISICIONES
+   EFECTUADAS A NO OBLIGADOS A FACTURAR", "CUENTA DE COBRO", "DOCUMENTO EQUIVALENTE", o cualquier
+   estructura de venta/cobro con su detalle.
 
-   CRÍTICO - NO ES FACTURA (clasifícalo como DESCARTABLE) un documento que solo
-   NOTIFICA, ANUNCIA o ENLAZA a una factura sin contener su detalle monetario ni los ítems:
-   • Correo de notificación de la DIAN (remitente "facturacionelectronica@dian.gov.co"
-     o similar) que dice "Pulse el link para ver la información del documento", o que solo
-     menciona el número de factura y un adjunto (.zip) — la factura real viene en el adjunto.
-   • Cualquier mensaje/correo que mencione "Factura Electrónica número ..." pero que NO
-     muestre subtotal, IVA, total ni la lista de ítems facturados.
+   NO es FACTURA un documento que solo MENCIONA, ANUNCIA o ENLAZA a una factura sin traer su
+   detalle monetario ni los ítems. Ejemplos de calibración:
+   • Correo de notificación de la DIAN (remitente tipo "facturacionelectronica@dian.gov.co")
+     que dice "Pulse el link para ver el documento" o solo cita el número y un adjunto .zip.
+   • CORREO-TRANSPORTE: cualquier correo (.msg/.eml) cuyo cuerpo solo saluda, anuncia o adjunta
+     la factura, sin contener él mismo subtotal/IVA/total e ítems. El correo NO es la factura;
+     la FACTURA es el adjunto (PDF/XML) que sí trae el detalle. El correo es ANEXO si aporta
+     contexto fiscal (NIT, contrato, distribución territorial) o DESCARTABLE si es solo envío.
 
-   SE PUEDE CLASIFICAR COMO FACTURA TAMBIÉN (siempre que muestren valores e ítems):
-   • "SOPORTE EN ADQUISICIONES EFECTUADAS A NO OBLIGADOS A FACTURAR"
-   • "CUENTA DE COBRO"
-   • "DOCUMENTO EQUIVALENTE"
-   • Cualquier documento con estructura de venta/cobro (con valores e ítems)
+2. **RUT** - Registro Único Tributario: NIT, razón social, responsabilidades tributarias,
+   actividades económicas CIIU.
 
-2. **RUT** - Registro Único Tributario que contiene:
-   ✓ Número de identificación tributaria (NIT)
-   ✓ Razón social
-   ✓ Responsabilidades tributarias
-   ✓ Actividades económicas CIIU
+3. **CONTRATO** - Objeto del contrato, obligaciones contractuales, términos y condiciones.
 
-3. **CONTRATO** - Documento que contiene ESPECÍFICAMENTE:
-   ✓ Objeto del contrato
-   ✓ Obligaciones contractuales
-   ✓ Términos y condiciones del contrato
+4. **COTIZACION** - Oferta comercial o presupuesto que no constituye un cobro/factura definitiva.
 
-4. **COTIZACION** - Oferta comercial o presupuesto que no constituye un cobro o factura definitiva.
+5. **ANEXO** - Otro documento de soporte con contenido fiscal/contractual útil (certificaciones,
+   planillas PILA, anexos de distribución territorial, soportes con datos del cobro, etc.).
 
-5. **ANEXO** - Cualquier otro documento de soporte (certificaciones, planillas PILA, etc.).
+6. **DESCARTABLE** - Documento sin función fiscal: sin datos tributarios legibles o que es solo
+   ruido/decoración. Ejemplos de calibración:
+   • Imágenes/pantallazos SIN datos fiscales legibles: firma de correo, logo, icono, banner,
+     sello, separador. Aplica sin importar el nombre del archivo (p. ej. assets tipo
+     "Outlook-*.png", "image00X.png"). Si la imagen no contiene cifras, NIT ni texto tributario
+     legible, es DESCARTABLE — y trata IGUAL a archivos del mismo tipo (sé consistente).
+   • Correos de notificación/transaccionales que solo anuncian o enlazan una factura adjunta.
+   • Entregables/datos operativos del servicio facturado (ver PASO 2), aunque tengan muchas cifras.
 
-6. **DESCARTABLE** - Documento sin relevancia fiscal directa o sin contenido útil.
-   Incluye correos de notificación/transaccionales (p. ej. de la DIAN) que solo anuncian
-   o enlazan a una factura adjunta sin contener su detalle monetario ni los ítems, y
-   entregables/datos operativos del servicio facturado (bases de datos, volcados, listados
-   de registros, muestras de datos), aunque tengan muchas cifras.
-
-REGLA ESPECIAL DE PRECEDENCIA:
-• Si un documento combina varios tipos de información, clasifícalo por su función PRINCIPAL.
+REGLA DURA DE PRECEDENCIA (no negociable):
 • Si DENTRO de un documento aparece una FACTURA, cuenta de cobro o documento equivalente CON sus
-  valores e ítems (según la definición de FACTURA de arriba), aunque venga mezclada con anexos,
-  RUT, datos, soportes o ruido, clasifica ESE documento OBLIGATORIAMENTE como FACTURA.
+  valores e ítems, aunque venga mezclada con anexos, RUT, datos, soportes o ruido, clasifica ESE
+  documento OBLIGATORIAMENTE como FACTURA.
 • La presencia de una factura/cobro real PREVALECE sobre cualquier otra clasificación
   (DESCARTABLE, ANEXO, CONTRATO, COTIZACION). Aplica haya uno o varios archivos.
 
 ═══════════════════════════════════════════════════════════════════════
-PASO 2: INSTRUCCIÓN CONSERVADORA DE RELEVANCIA
+PASO 2: RELEVANCIA PARA LIQUIDACIÓN
 ═══════════════════════════════════════════════════════════════════════
-Debes indicar si cada documento es "relevante" (relevante = true o false) para el proceso de liquidación tributaria.
+Para cada documento indica "relevante" (true/false).
 
-PRINCIPIO: relevante = información TRIBUTARIA/CONTABLE, NO el producto del trabajo facturado.
-Que un documento contenga muchas cifras o datos NO lo hace relevante. No necesitamos pruebas
-de que se ejecutó lo facturado, solo la información que permite el análisis tributario.
+PRINCIPIO RECTOR (tu norte): un documento es relevante si aporta información de naturaleza
+TRIBUTARIA, CONTABLE o DEL COBRO que alguna liquidación de impuestos/retenciones podría usar.
+NO es relevante el PRODUCTO del trabajo facturado, ni un asset decorativo sin datos. Tener muchas
+cifras NO implica relevancia; no tener datos fiscales legibles ⇒ no es relevante. No necesitamos
+pruebas de que se ejecutó lo facturado, solo lo que permite el análisis tributario.
 
-Sigue estrictamente esta regla:
-- **DESCARTAR (relevante = false)** únicamente lo que NINGUNA llamada de impuestos/retenciones usaría. Por ejemplo:
-  • Pantallazos sin datos/cifras
-  • Correos con cuerpo vacío
-  • Correos de notificación que solo referencian/enlazan a una factura adjunta (la factura real viene en el adjunto/ZIP)
-  • Archivos de Excel sin cifras fiscales o vacíos
-  • Entregables, productos o pruebas de ejecución del servicio facturado, AUNQUE contengan
-    muchísimas cifras o datos. Ejemplos: bases de datos, volcados o muestras de datos, listados
-    de registros (hojas con columnas tipo id, nombre, teléfono, correo, organización, beneficiario),
-    informes de resultados o data procesada/normalizada entregada al cliente.
-  • Firmas aisladas o páginas de firmas sin datos contractuales/facturación
-  • Cotizaciones sin valor o informativas que no acompañan a un cobro real
-  • Documentos marcados como tipo DESCARTABLE
-- **CONSERVAR (relevante = true)** todo lo demás, incluyendo:
-  • Facturas, cuentas de cobro, soportes a no obligados.
-  • RUTs.
-  • Contratos.
-  • Planillas de seguridad social (PILA) - ¡SIEMPRE relevantes!
-  • Certificados de deducción del Artículo 383 o retención - ¡SIEMPRE relevantes!
-  • Cualquier documento que contenga valores, fechas, conceptos o NITs aplicables.
-  • IMPORTANTE: un Excel/anexo es relevante SOLO si aporta información de naturaleza tributaria o
-    del cobro (valores de factura, subtotal, IVA, base gravable, retenciones, conceptos facturados,
-    NIT/RUT, datos del contrato, planillas PILA o certificados de deducción). Una tabla de datos
-    operativos o del negocio del cliente, sin esa naturaleza fiscal, es DESCARTABLE.
+INVARIANTE DE COHERENCIA: si el tipo es DESCARTABLE, "relevante" DEBE ser false, sin excepción.
+Y si un documento es relevante para algún impuesto, NO lo marques DESCARTABLE.
+
+Anclas de calibración (representativas, NO exhaustivas — razona por analogía):
+
+• NO RELEVANTE (relevante = false):
+  - Imágenes/pantallazos sin datos fiscales: firmas, logos, iconos, banners, sellos.
+  - Correos de cuerpo vacío o que solo anuncian/enlazan a una factura adjunta.
+  - Excel sin cifras fiscales o vacíos.
+  - Entregables, productos o pruebas de ejecución del servicio facturado, AUNQUE tengan muchísimas
+    cifras: bases de datos, volcados o muestras de datos, listados de registros (hojas con columnas
+    tipo id, nombre, teléfono, correo, organización, beneficiario), informes de resultados o data
+    procesada/normalizada entregada al cliente.
+    EXCEPCIÓN: si ese documento/correo/anexo trae la DISTRIBUCIÓN TERRITORIAL del servicio
+    (ciudad/municipio de ejecución o prestación, o porcentajes por ciudad/municipio), NO lo
+    descartes: es insumo de ICA y se CONSERVA (ver abajo).
+  - Cotizaciones informativas que no acompañan a un cobro real.
+
+• RELEVANTE (relevante = true):
+  - Facturas, cuentas de cobro, soportes a no obligados.
+  - RUTs.
+  - Contratos.
+  - Planillas de seguridad social (PILA) — SIEMPRE relevantes.
+  - Certificados de deducción del Artículo 383 o de retención — SIEMPRE relevantes.
+  - Cualquier documento con valores, fechas, conceptos o NITs aplicables al análisis tributario.
+  - Distribución territorial del servicio (insumo de ICA): cualquier documento, correo o anexo que
+    indique lugar/ciudad/municipio de ejecución o prestación, o porcentajes de ejecución por
+    ciudad/municipio (p. ej. "Ciudad servicio", "% de ejecución por ciudad", "distribución por
+    municipio", tablas de ciudades con porcentajes). Determinan en qué municipios se distribuye el
+    ICA: SIEMPRE relevantes (tipo ANEXO + relevante=true, NUNCA DESCARTABLE).
+  - Regla para Excel/anexo: es relevante SOLO si aporta naturaleza tributaria o del cobro (valores
+    de factura, subtotal, IVA, base gravable, retenciones, conceptos facturados, NIT/RUT, datos del
+    contrato, PILA, certificados de deducción) o la distribución territorial para ICA. Una tabla de
+    datos operativos/del negocio del cliente, sin esa naturaleza fiscal, es DESCARTABLE.
 
 **factura_identificada = true** si en ESTE lote encuentras alguna FACTURA o equivalente.
 **rut_identificado = true** si en ESTE lote encuentras algún RUT.
@@ -419,6 +436,16 @@ Sigue estrictamente esta regla:
 ═══════════════════════════════════════════════════════════════════════
 DOCUMENTOS A ANALIZAR EN ESTE LOTE
 ═══════════════════════════════════════════════════════════════════════
+
+REGLA DE IDENTIDAD DE LOS ADJUNTOS (crítica):
+• Cada archivo adjunto va precedido por un marcador de texto con su nombre, así:
+  "===== DOCUMENTO ADJUNTO: <nombre> =====". Todo el contenido entre un marcador y el
+  siguiente pertenece EXCLUSIVAMENTE a ese archivo.
+• Cada archivo es un DOCUMENTO INDEPENDIENTE y COMPLETO. NO asumas que varios archivos son
+  páginas del mismo documento, ni propagues el contenido de un archivo a otro.
+• Clasifica cada archivo por SU PROPIO contenido (el que aparece bajo su marcador), aunque otro
+  archivo del lote luzca similar. Un PDF puede tener varias páginas internas; eso NO convierte a
+  los demás archivos en páginas suyas.
 
 **ARCHIVOS DIRECTOS:**
 {_formatear_archivos_directos(nombres_archivos_directos)}
@@ -430,13 +457,19 @@ DOCUMENTOS A ANALIZAR EN ESTE LOTE
 FORMATO DE RESPUESTA OBLIGATORIO (JSON ESTRICTO)
 ═══════════════════════════════════════════════════════════════════════
 
+Para cada documento, escribe PRIMERO "motivo" (máx. 15 palabras: la función del documento y por
+qué ese tipo/relevancia) y LUEGO "tipo" y "relevante". Razonar el motivo antes de etiquetar es
+obligatorio.
+
 {{
     "clasificacion": {{
         "nombre_archivo_1": {{
+            "motivo": "razonamiento breve de la función del documento",
             "tipo": "FACTURA|RUT|CONTRATO|COTIZACION|ANEXO|DESCARTABLE",
             "relevante": true/false
         }},
         "nombre_archivo_2": {{
+            "motivo": "razonamiento breve de la función del documento",
             "tipo": "FACTURA|RUT|CONTRATO|COTIZACION|ANEXO|DESCARTABLE",
             "relevante": true/false
         }}
@@ -447,8 +480,10 @@ FORMATO DE RESPUESTA OBLIGATORIO (JSON ESTRICTO)
 
 RECORDATORIOS FINALES:
 • Clasifica TODOS los documentos del lote.
-• Recuerda la REGLA ESPECIAL DE PRECEDENCIA: un documento que contenga una factura real
-  (con valores e ítems) es FACTURA, por encima de cualquier otra clasificación.
+• REGLA DURA DE PRECEDENCIA: un documento con una factura real (valores e ítems) es FACTURA, por
+  encima de cualquier otra clasificación.
+• INVARIANTE: tipo DESCARTABLE ⇒ relevante=false.
+• Trata de forma CONSISTENTE a los archivos de la misma naturaleza dentro del lote.
 • Devuelve un JSON válido.
 """
 

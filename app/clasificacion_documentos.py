@@ -190,7 +190,7 @@ class ClasificadorDocumentos:
         Notes:
             - Guarda automáticamente clasificación en Results/clasificacion_documentos.json
             - Detecta consorcios y facturación extranjera automáticamente
-            - Soporta hasta 20 archivos directos simultáneos
+            - Soporta archivos ilimitados: clasificación en lotes de 10 (batching)
             - Combina procesamiento híbrido para máxima precisión
             - Resultado soporta desempaquetado con __iter__() para compatibilidad
         """
@@ -198,18 +198,75 @@ class ClasificadorDocumentos:
         logger.info(f"Archivos directos (PDFs/imágenes): {len(archivos_directos)}")
         logger.info(f"Textos preprocesados (Excel/Email/Word): {len(textos_preprocesados)}")
 
-        clasificacion, es_consorcio, es_recurso_extranjero, es_facturacion_extranjera = await self.clasificador.clasificar_documentos(
+        clasificacion_info, es_consorcio, es_recurso_extranjero, es_facturacion_extranjera = await self.clasificador.clasificar_documentos(
             archivos_directos=archivos_directos,
             textos_preprocesados=textos_preprocesados,
             proveedor=provedor
         )
         
-        logger.info(f" Documentos clasificados: {len(clasificacion)}")
+        # Hard stop: si tras la clasificación total no hay ninguna FACTURA, retornar estado preliquidacion_sin_finalizar
+        tiene_factura = False
+        for k, v in clasificacion_info.items():
+            cat = v.get("tipo") if isinstance(v, dict) else v
+            if cat == "FACTURA":
+                tiene_factura = True
+                break
+        
+        if not tiene_factura:
+            logger.error("Hard stop: No se identificó ninguna FACTURA en los soportes adjuntos.")
+            raise ValueError("No se identificó ninguna factura en los soportes adjuntos.")
+
+        # Recorte por prioridad fiscal si el conjunto relevante excede 20
+        archivos_relevantes = []
+        for k, v in clasificacion_info.items():
+            relev = v.get("relevante", True) if isinstance(v, dict) else True
+            if relev:
+                archivos_relevantes.append(k)
+
+        observaciones_recorte = []
+        if len(archivos_relevantes) > 20:
+            logger.warning(f"Se excede el techo de 20 documentos relevantes (total relevantes: {len(archivos_relevantes)}). Aplicando recorte por prioridad fiscal...")
+            
+            def obtener_prioridad(nombre: str) -> int:
+                info = clasificacion_info[nombre]
+                cat = info.get("tipo", "") if isinstance(info, dict) else info
+                nombre_lower = nombre.lower()
+                cat_upper = cat.upper() if cat else ""
+                
+                if "FACTURA" in cat_upper:
+                    return 1
+                if "RUT" in cat_upper:
+                    return 2
+                if "CONTRATO" in cat_upper or "CONTRATO" in nombre_lower:
+                    return 3
+                if any(kw in nombre_lower for kw in ["pila", "seguridad", "383", "certificado", "deduccion"]):
+                    return 4
+                return 5
+
+            archivos_relevantes_ordenados = sorted(archivos_relevantes, key=lambda x: (obtener_prioridad(x), x))
+            relevantes_finales = set(archivos_relevantes_ordenados[:20])
+            recortados = archivos_relevantes_ordenados[20:]
+            
+            for k in clasificacion_info.keys():
+                if k in relevantes_finales:
+                    if isinstance(clasificacion_info[k], dict):
+                        clasificacion_info[k]["relevante"] = True
+                else:
+                    if isinstance(clasificacion_info[k], dict):
+                        clasificacion_info[k]["relevante"] = False
+                    else:
+                        clasificacion_info[k] = {"tipo": clasificacion_info[k], "relevante": False}
+            
+            msg_recorte = f"Límite de 20 relevantes excedido. Se recortaron los siguientes archivos: {', '.join(recortados)}"
+            logger.info(msg_recorte)
+            observaciones_recorte.append(msg_recorte)
+
+        logger.info(f" Documentos clasificados: {len(clasificacion_info)}")
         logger.info(f" Es consorcio: {es_consorcio}")
         logger.info(f" Facturación extranjera: {es_facturacion_extranjera}")
         
         clasificacion_data, documentos_clasificados = self.estructurar_respuesta_clasificacion(
-            clasificacion = clasificacion,
+            clasificacion = clasificacion_info,
             textos_preprocesados = textos_preprocesados,
             es_consorcio = es_consorcio,
             es_recurso_extranjero = es_recurso_extranjero,
@@ -217,24 +274,30 @@ class ClasificadorDocumentos:
             nit_administrativo = nit_administrativo,
             nombre_entidad = nombre_entidad,
             impuestos_a_procesar = impuestos_a_procesar,
-            archivos_directos=archivos_directos)
+            archivos_directos=archivos_directos,
+            observaciones=observaciones_recorte
+        )
         
         guardar_archivo_json(clasificacion_data, "clasificacion_documentos")
         
-        logger.info(f" Clasificación completada: {len(clasificacion)} documentos")
+        logger.info(f" Clasificación completada: {len(clasificacion_info)} documentos")
         logger.info(f" Consorcio detectado: {es_consorcio}")
         logger.info(f" Facturación extranjera: {es_facturacion_extranjera}")
         
+        # Devolver clasificacion simple Dict[str, str] para compatibilidad downstream
+        clasificacion_simple = {k: (v.get("tipo", "ANEXO") if isinstance(v, dict) else v) for k, v in clasificacion_info.items()}
+
         return ResultadoDocumentosClasificados(
             documentos_clasificados=documentos_clasificados,
             es_consorcio=es_consorcio,
             es_recurso_extranjero=es_recurso_extranjero,
             es_facturacion_extranjera=es_facturacion_extranjera,
-            clasificacion=clasificacion)
+            clasificacion=clasificacion_simple
+        )
 
     def estructurar_respuesta_clasificacion(
         self,
-        clasificacion: Dict[str, str],
+        clasificacion: Dict[str, Any],
         textos_preprocesados: Dict[str, str],
         es_consorcio: bool,
         es_recurso_extranjero: bool,
@@ -242,7 +305,8 @@ class ClasificadorDocumentos:
         nit_administrativo: str,
         nombre_entidad: str,
         impuestos_a_procesar: List[str],
-        archivos_directos: List[UploadFile]
+        archivos_directos: List[UploadFile],
+        observaciones: List[str] = None
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
         Estructura la respuesta de clasificación para persistencia y uso posterior.
@@ -253,7 +317,7 @@ class ClasificadorDocumentos:
         2. Documentos clasificados para procesamiento posterior
 
         Args:
-            clasificacion: Diccionario {nombre_archivo: categoria} resultante
+            clasificacion: Diccionario {nombre_archivo: info_dict_o_str} resultante
                           de la clasificación de Gemini.
             textos_preprocesados: Textos extraídos de archivos preprocesados.
             es_consorcio: Indicador si se detectó consorcio.
@@ -263,61 +327,53 @@ class ClasificadorDocumentos:
             nombre_entidad: Nombre de la entidad administrativa.
             impuestos_a_procesar: Lista de códigos de impuestos a procesar.
             archivos_directos: Lista de archivos procesados directamente.
+            observaciones: Observaciones/recortes registrados durante el proceso.
 
         Returns:
             Tupla con dos diccionarios:
             - clasificacion_data: Datos completos con metadatos para persistencia
             - documentos_clasificados: Documentos estructurados para procesamiento
-
-        Example:
-            >>> clasificacion = {"factura.pdf": "FACTURA", "rut.pdf": "RUT"}
-            >>> data, docs = estructurar_respuesta_clasificacion(
-            ...     clasificacion=clasificacion,
-            ...     textos_preprocesados={"anexo.xlsx": "texto..."},
-            ...     es_consorcio=True,
-            ...     es_recurso_extranjero=False,
-            ...     es_facturacion_extranjera=False,
-            ...     nit_administrativo="900123456",
-            ...     nombre_entidad="Universidad Nacional",
-            ...     impuestos_a_procesar=["retefuente"],
-            ...     archivos_directos=[factura_upload, rut_upload]
-            ... )
-            >>> print(docs["factura.pdf"]["categoria"])
-            FACTURA
-            >>> print(data["procesamiento_hibrido"]["total_archivos"])
-            3
-
-        Notes:
-            - Archivos directos se marcan con procesamiento: "directo_gemini"
-            - Archivos preprocesados incluyen el texto extraído
-            - Genera metadatos de procesamiento híbrido automáticamente
         """
         documentos_clasificados = {}
-        for nombre_archivo, categoria in clasificacion.items():
-            # Para archivos directos, el texto no está disponible (se procesó directamente por Gemini)
+        # Mapear el tipo nuevo "CONTRATO" al string canonico que esperan los clasificadores
+        # downstream para enrutar el OBJETO DEL CONTRATO a su seccion dedicada.
+        # 5 de 6 clasificadores comparan contra "ANEXO CONCEPTO DE CONTRATO"; tasa_prodeporte
+        # tambien lo acepta. Asi el texto del contrato llega a todas las llamadas downstream.
+        equivalencias_categoria = {"CONTRATO": "ANEXO CONCEPTO DE CONTRATO"}
+        for nombre_archivo, info in clasificacion.items():
+            categoria = info.get("tipo", "ANEXO") if isinstance(info, dict) else info
+            categoria = equivalencias_categoria.get(categoria, categoria)
+            relevante = info.get("relevante", True) if isinstance(info, dict) else True
+
             if nombre_archivo in textos_preprocesados:
+                # Si el documento no es relevante, su texto no debe llegar a las llamadas
+                # downstream (coherente con el filtrado del cache de archivos directos).
+                texto = textos_preprocesados[nombre_archivo] if relevante else ""
                 documentos_clasificados[nombre_archivo] = {
                     "categoria": categoria,
-                    "texto": textos_preprocesados[nombre_archivo]
+                    "texto": texto,
+                    "relevante": relevante
                 }
             else:
-                # Archivo directo (PDF/imagen) - procesado nativamente por Gemini
                 documentos_clasificados[nombre_archivo] = {
                     "categoria": categoria,
                     "texto": "[ARCHIVO_DIRECTO_MULTIMODAL]",
-                    "procesamiento": "directo_gemini"
+                    "procesamiento": "directo_gemini",
+                    "relevante": relevante
                 }
         
         # Guardar clasificación con información híbrida
+        clasificacion_simple = {k: (v.get("tipo", "ANEXO") if isinstance(v, dict) else v) for k, v in clasificacion.items()}
         clasificacion_data = {
             "timestamp": datetime.now().isoformat(),
             "nit_administrativo": nit_administrativo,
             "nombre_entidad": nombre_entidad,
-            "clasificacion": clasificacion,
+            "clasificacion": clasificacion_simple,
             "es_consorcio": es_consorcio,
             "es_facturacion_extranjera": es_facturacion_extranjera,
             "es_recurso_extranjero": es_recurso_extranjero,
             "impuestos_aplicables": impuestos_a_procesar,
+            "observaciones": observaciones or [],
             "procesamiento_hibrido": {
                 "multimodalidad_activa": True,
                 "archivos_directos": len(archivos_directos),
@@ -325,10 +381,9 @@ class ClasificadorDocumentos:
                 "total_archivos": len(archivos_directos) + len(textos_preprocesados),
                 "nombres_archivos_directos": [archivo.filename for archivo in archivos_directos],
                 "nombres_archivos_preprocesados": list(textos_preprocesados.keys()),
-                "version_multimodal": "2.8.0"
+                "version_multimodal": "3.0.0"
             }
         }
-        
         return clasificacion_data, documentos_clasificados
 
 
@@ -400,7 +455,7 @@ async def clasificar_archivos(
         - Función de conveniencia para simplificar llamadas
         - Crea instancia de ClasificadorDocumentos internamente
         - Guarda automáticamente clasificación en Results/
-        - Soporta hasta 20 archivos directos simultáneos
+        - Soporta archivos ilimitados: clasificación en lotes de 10 (batching)
         - Resultado soporta desempaquetado para compatibilidad con código legacy
     """
     instancia_clasificador = ClasificadorDocumentos(clasificador)

@@ -14,7 +14,11 @@ Arquitectura: SOLID + Clean Architecture
 """
 
 # Prompts clasificador general
-from .prompt_clasificador import PROMPT_CLASIFICACION
+from .prompt_clasificador import (
+    PROMPT_CLASIFICACION,
+    PROMPT_CLASIFICACION_LOTE,
+    PROMPT_ANALISIS_GLOBAL
+)
 
 # Prompts retefuente
 from .prompt_retefuente import (
@@ -49,7 +53,10 @@ from .prompt_tasa_prodeporte import PROMPT_ANALISIS_TASA_PRODEPORTE
 __all__ = [
     # Clasificador general
     'PROMPT_CLASIFICACION',
+    'PROMPT_CLASIFICACION_LOTE',
+    'PROMPT_ANALISIS_GLOBAL',
     # Retefuente
+
     'PROMPT_ANALISIS_FACTURA',
     'PROMPT_ANALISIS_ART_383',
     'PROMPT_EXTRACCION_CONSORCIO',

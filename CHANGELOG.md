@@ -1,5 +1,54 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.3] - 2026-06-09
+
+### Corregido
+
+- **Contenido de un PDF propagado a otros archivos distintos en la clasificación**: Gemini clasificaba 3 PDFs distintos como "primera/segunda/tercera página" de la misma factura. La causa era el ensamblado del contenido multimodal en `_llamar_gemini_hibrido` (`Clasificador/clasificador.py`): los PDFs se enviaban como un stream de Parts consecutivos `[<PDF1>, <PDF2>, <PDF3>, PROMPT]` y los nombres de archivo solo viajaban como una lista de texto dentro del prompt, sin vínculo explícito nombre↔contenido. Gemini debía adivinar la correspondencia y la alineaba posicionalmente, tratando 3 archivos distintos como páginas de uno solo. Ahora cada archivo se antecede con un Part de texto delimitador `===== DOCUMENTO ADJUNTO: <nombre> =====`, que vincula nombre y contenido de forma inequívoca. El delimitador es determinista y va al inicio, por lo que preserva el implicit caching de Gemini 2.5. Aplica a la clasificación por lotes y al análisis global (ambos pasan por `_llamar_gemini_hibrido`). Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla de identidad de los adjuntos: cada archivo es un documento independiente y completo, y no debe asumirse que varios archivos son páginas del mismo documento.
+
+## [3.19.2] - 2026-06-09
+
+### Cambiado
+
+- **`PROMPT_CLASIFICACION_LOTE` reescrito de marco "literal" a juicio fiscal calibrado**: el prompt arrancaba con "Eres un CLASIFICADOR LITERAL" y una regla anti-alucinación que prohibía "deducir, interpretar o suponer" y obligaba a usar "SOLO texto explícito". Pero la tarea de tipo/relevancia es de criterio (decidir si un Excel es un entregable o un dato tributario, o si un correo es la factura o solo la transporta, es interpretación). El marco rígido anulaba el razonamiento del modelo y, como es imposible enumerar todos los casos, cada caso nuevo se parchaba con otra regla, dejando aún falsos positivos. Ahora el encabezado posiciona a Gemini como ANALISTA FISCAL EXPERTO que razona sobre la FUNCIÓN de cada documento; la regla anti-alucinación se reorienta a "no inventes DATOS, pero SÍ usa tu juicio para inferir la función/relevancia". Las enumeraciones se conservan pero reetiquetadas como ANCLAS DE CALIBRACIÓN no exhaustivas, con permiso explícito de razonar por analogía. Se preservan intactos los guardrails duros: precedencia de FACTURA, coherencia `DESCARTABLE ⇒ relevante=false`, distribución territorial de ICA siempre relevante, entregables/datos operativos no relevantes (aunque tengan muchas cifras), notificaciones DIAN como DESCARTABLE, y PILA/Art. 383 siempre relevantes.
+- **Nuevo campo `motivo` en el JSON de clasificación por documento** (CoT ligero): cada documento responde primero un `motivo` breve (≤15 palabras con su función) antes de `tipo` y `relevante`, forzando el razonamiento antes de comprometer la etiqueta y dejando traza auditable. Es aditivo: `Clasificador/clasificador.py` solo lee `tipo`/`relevante` y preserva las claves extra; no cambia el contrato downstream.
+
+### Corregido
+
+- **Imágenes decorativas infladas a relevante=true**: firmas de correo, logos, iconos y banners embebidos (assets tipo `Outlook-*.png`, `image00X.png`) se marcaban como ANEXO/relevante=true y entraban como ruido a las llamadas de impuestos. El prompt ahora trata como DESCARTABLE cualquier imagen/pantallazo sin datos fiscales legibles, sin importar el nombre del archivo, y exige tratar de forma CONSISTENTE a los archivos de la misma naturaleza dentro del lote (antes archivos gemelos salían uno ANEXO y otro DESCARTABLE).
+- **Correos `.msg`/`.eml` clasificados como FACTURA**: se generalizó la regla DIAN a cualquier CORREO-TRANSPORTE: un correo cuyo cuerpo solo saluda, anuncia o adjunta la factura, sin contener él mismo subtotal/IVA/total e ítems, NO es FACTURA. El correo es ANEXO (si aporta contexto fiscal) o DESCARTABLE (si es solo envío); la FACTURA es el adjunto PDF/XML con valores e ítems.
+
+## [3.19.1] - 2026-06-08
+
+### Corregido
+
+- **Inconsistencia DESCARTABLE + relevante=true**: la clasificación por lotes podía devolver documentos con `{"tipo": "DESCARTABLE", "relevante": true}` (Gemini contradecía su propia instrucción). Se fuerza el invariante en `Clasificador/clasificador.py`: al consolidar los lotes, un documento de tipo DESCARTABLE siempre queda `relevante=false`, aguas arriba de todo consumidor del flag. Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla dura: si `tipo == DESCARTABLE` entonces `relevante` DEBE ser `false`. Evita que correos de notificación marcados DESCARTABLE entren como ruido (y gasten tokens) en las llamadas de impuestos.
+- **Datos territoriales de ICA ya no se descartan**: el criterio de relevancia de `PROMPT_CLASIFICACION_LOTE` no contemplaba la distribución territorial del servicio (ciudad/municipio de ejecución, porcentajes de ejecución por municipio), insumo directo de ICA para distribuir el impuesto. Un correo/anexo que solo aportara esa distribución podía caer como DESCARTABLE y, con el invariante anterior, perder su texto en la llamada de ICA (`app/clasificacion_documentos.py` vacía el texto de los no relevantes). Ahora el prompt conserva explícitamente estos documentos como tipo ANEXO + relevante=true (nunca DESCARTABLE).
+
+## [3.19.0] - 2026-06-07
+
+### Añadido
+
+- **Clasificación de documentos en dos fases**: Se dividió el proceso de clasificación en dos llamadas consecutivas a Gemini: una primera llamada por lotes de clasificación (`PROMPT_CLASIFICACION_LOTE` para determinar tipo y relevancia) y una posterior de análisis global (`PROMPT_ANALISIS_GLOBAL` sobre los relevantes para consorcios, recursos y facturación extranjera, y ubicación).
+- **Entrada ilimitada de archivos**: Se eliminó el tope duro de 20 archivos de entrada, procesando ahora cualquier volumen de documentos en lotes de hasta 10 mediante ejecución paralela (`asyncio.gather`).
+- **Filtro conservador de relevancia**: Identificación de documentos irrelevantes para descartar archivos que no aportan valor tributario, preservando siempre planillas PILA y certificados de deducción del Artículo 383.
+- **Recorte por prioridad fiscal**: Si el conjunto de documentos relevantes supera los 20 permitidos por el pipeline downstream, se recortan siguiendo la prioridad: `FACTURA > RUT > contrato > planillas/certificados (Art. 383) > resto`.
+- **Hard stop sin factura**: Interrupción inmediata del flujo con estado `preliquidacion_sin_finalizar` si tras clasificar todos los lotes no se identifica ninguna factura.
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — Se reestructuró `clasificar_documentos` para subir archivos una sola vez al Files API, realizar clasificación en lotes y ejecutar el análisis global consolidado.
+- `app/clasificacion_documentos.py` — Propagación del campo `relevante`, validación de hard stop por ausencia de factura y algoritmo de ordenamiento/recorte por prioridad fiscal de relevantes. El nuevo tipo `CONTRATO` se mapea al string canónico `ANEXO CONCEPTO DE CONTRATO` y el texto de documentos no relevantes se excluye de las llamadas downstream.
+
+### Corregido
+
+- **Crash al fallar el parseo de JSON de un lote de clasificación**: el manejador de error de `clasificar_documentos` referenciaba la variable `respuesta`, que tras el refactor a lotes ya no existe en ese scope, produciendo `NameError: name 'respuesta' is not defined` y enmascarando el error real. Ahora cada lote captura su `JSONDecodeError`, loguea la respuesta cruda en su scope y propaga un error claro indicando qué lote falló.
+- **Precedencia de FACTURA en documentos mixtos**: se restauró en `PROMPT_CLASIFICACION_LOTE` la regla de que un documento que contiene una factura real (con valores e ítems) embebida entre otra información (anexos, RUT, datos, ruido) se clasifica OBLIGATORIAMENTE como FACTURA, con precedencia sobre DESCARTABLE/ANEXO/CONTRATO/COTIZACION, haya uno o varios archivos. Se eliminó el recordatorio "solo un documento" que con el procesamiento por lotes podía forzar erróneamente a FACTURA el último archivo de un lote parcial. Si tras la clasificación no hay ninguna factura, el flujo se corta con normalidad (hard-stop), sin forzar.
+- **Entregables/datos operativos ya no se marcan como relevantes**: se reforzó el criterio de relevancia de `PROMPT_CLASIFICACION_LOTE` para descartar (`DESCARTABLE`, relevante=false) los entregables o pruebas de ejecución del servicio facturado (bases de datos, volcados, listados de registros, muestras) aunque contengan muchísimas cifras. Un Excel/anexo solo es relevante si aporta naturaleza tributaria (valores de factura, IVA, conceptos, NIT/RUT, contrato, planillas PILA, certificados). Evita que adjuntos como BD normalizadas contaminen el análisis downstream.
+- **Falso positivo de FACTURA en correos de notificación de la DIAN**: se endureció `PROMPT_CLASIFICACION_LOTE` para exigir que una FACTURA contenga valores monetarios detallados (subtotal/IVA/total) e ítems, y para clasificar como DESCARTABLE los correos que solo notifican/enlazan a una factura adjunta (p. ej. "Pulse el link para ver el documento", remitente `facturacionelectronica@dian.gov.co`, factura real dentro de un `.zip`). Antes estos correos se clasificaban como FACTURA por mencionar "Factura Electrónica número ...".
+- **Texto del contrato (OBJETO DEL CONTRATO) ahora llega a las llamadas downstream**: se corrigió una desincronización pre-existente por la cual el documento de contrato no era enrutado a su sección dedicada en `retefuente`, `iva`, `obra_uni`, `estampillas_generales` ni `consorcio` (esperaban el string `ANEXO CONCEPTO DE CONTRATO`, que la clasificación no emitía). Ahora la clasificación emite el string canónico y `clasificador_tp.py` también lo reconoce. Esto puede modificar resultados de impuestos al usar el objeto del contrato como pista (ej. matching de conceptos en retefuente, clasificación de tipo de contrato en obra pública).
+- `app/preparacion_tareas_analisis.py` — Se actualizó `preparar_cache` para filtrar los archivos compartidos con el downstream al subconjunto de relevantes.
+
 ## [3.18.0] - 2026-06-06
 
 ### Cambiado

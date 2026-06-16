@@ -1,5 +1,17 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.5] - 2026-06-15
+
+### Corregido
+
+- **Liquidación de consorcios ya no se aborta por un concepto no mapeado**: cuando Gemini no lograba relacionar un concepto facturado con la base de datos (`CONCEPTO_NO_IDENTIFICADO` / `concepto_index` 0), el liquidador de consorcios (`Liquidador/liquidador_consorcios.py`) era "todo o nada" y detenía toda la liquidación devolviendo `preliquidacion_sin_finalizar`, aunque otros conceptos sí mapearan (caso real: consorcio CPAS-3 con la línea `IVA` no mapeable). Ahora `_validar_conceptos_consorcio` acumula los conceptos válidos y registra los no mapeados como alertas en `observaciones` (incluyendo el razonamiento de Gemini); si al menos un concepto mapea, se liquida con esos y se devuelve el resultado (`estado="preliquidado"`, `procesamiento_exitoso=True`). La preliquidación queda sin finalizar solo cuando NINGÚN concepto facturado puede mapearse. El flujo no-consorcio (`Liquidador/liquidador.py`) ya tenía este comportamiento y no se modificó.
+
+## [3.19.4] - 2026-06-15
+
+### Corregido
+
+- **IVA sobre la utilidad (contratos AIU / obra civil) ya no se interpreta como concepto de retención**: en contratos de obra civil con estructura AIU (Administración, Imprevistos, Utilidad), el IVA se calcula como 19% de la Utilidad y el facturador electrónico lo emite como un ítem más dentro de la tabla de productos (no en la columna/total de IVA). Gemini lo extraía como un concepto facturado más, contaminando `conceptos_identificados` (caso real: consorcio CPAS-3, línea `IVAUTIL19` = $10.950.357). Ajuste solo a nivel de prompt en `prompts/prompt_retefuente.py`: tanto `PROMPT_EXTRACCION_CONSORCIO` (PASO C) como `PROMPT_ANALISIS_FACTURA` (PASO 3) ahora instruyen a excluir las líneas de impuestos (IVA, ReteIVA, INC) de los conceptos, dejando una nota en `observaciones` para trazabilidad. No se modificó código Python ni el cálculo de `valor_total` (que ya excluía el IVA).
+
 ## [3.19.3] - 2026-06-09
 
 ### Corregido

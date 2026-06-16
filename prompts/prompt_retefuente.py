@@ -155,6 +155,7 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
 4. IMPORTANTE: Solo puedes relacionar un concepto facturado con UN concepto del diccionario
 5. IMPORTANTE: El diccionario CONCEPTOS VÁLIDOS tiene formato {{descripcion: index}}
 6. PUEDEN HABER MULTIPLES CONCEPTOS FACTURADOS en la misma factura
+7. NO extraigas como concepto facturado ninguna linea cuya naturaleza sea un IMPUESTO (IVA, ReteIVA, INC / impuesto al consumo). En contratos de obra civil/construccion (estructura AIU: Administracion, Imprevistos, Utilidad) el IVA suele aparecer como un item mas dentro de la tabla de productos —comunmente calculado como 19% de la Utilidad, con codigos tipicos "IVAUTIL19" o "IVA"— pero es un IMPUESTO y NO debe incluirse en conceptos_identificados. Si excluyes una linea de IVA, AGREGA a "observaciones" una nota del tipo: "Linea de IVA sobre utilidad ($VALOR) excluida de conceptos por ser impuesto (contrato AIU)".
 
 ═══════════════════════════════════════════════════════════════════
  PASO 3.1: RÚBRICA DE MATCHING (ORDEN DE PRIORIDAD - CHAIN OF THOUGHT)
@@ -261,6 +262,7 @@ LÍMITE DEL CAMPO razonamiento:
  NO deduzcas el régimen tributario por el tipo de empresa, el sector, el concepto facturado ni el nombre del proveedor. ÚNICA excepción permitida: la PISTA "DEPURACIÓN ART. 383" descrita en la PRIORIDAD 2 del bloque RÉGIMEN TRIBUTARIO (manifestación expresa del contribuyente persona natural). Fuera de esa pista documental explícita, el régimen NO se infiere
  NO asumas que alguien es autorretenedor sin confirmación explícita
  NO extraigas conceptos facturados de documentos que NO sean la FACTURA
+ NO extraigas lineas de IVA u otros impuestos (ReteIVA, INC) como conceptos facturados
  NO inventes pistas en el campo "razonamiento": cita SOLO texto realmente presente
    en FACTURA, RUT, ANEXOS, COTIZACIONES u OBJETO DEL CONTRATO. Si una pista no
    aparece textualmente, NO la menciones.
@@ -771,14 +773,19 @@ PASO C: EXTRAER CONCEPTOS LITERALES
 Identificar los servicios/bienes facturados:
 ├─ Extraer el nombre LITERAL del concepto tal como aparece en la factura
 ├─ SOLO extrae el texto exacto que describe el servicio/bien
+├─ NO extraigas como concepto ninguna linea cuya naturaleza sea un IMPUESTO. En contratos de obra civil/construccion (estructura AIU: Administracion, Imprevistos, Utilidad) el IVA suele aparecer como un item mas dentro de la tabla de productos —comunmente calculado como 19% de la Utilidad, con codigos tipicos "IVAUTIL19" o "IVA"— pero es un IMPUESTO, no un concepto facturado sujeto a retencion. EXCLUYELO de conceptos_literales. Lo mismo aplica a lineas de ReteIVA, INC / impuesto al consumo u otros impuestos.
+├─ Si excluyes una linea de IVA, AGREGA a "observaciones" una nota del tipo: "Linea de IVA sobre utilidad ($VALOR) excluida de conceptos por ser impuesto (contrato AIU)".
 └─ Extrae la base_gravable asociada a cada concepto
 
 EJEMPLO:
 Si la factura dice "Servicios de consultoria especializada" → nombre_concepto: "Servicios de consultoria especializada"
 Si dice "Honorarios profesionales mes de octubre" → nombre_concepto: "Honorarios profesionales mes de octubre"
 
+EJEMPLO DE EXCLUSION:
+Si la factura trae una linea "IVA" / "IVA UTILIDAD 19%" / "IVAUTIL19" → NO la incluyas como concepto (es impuesto, no concepto facturado).
+
 PASO D: EXTRAER VALORES
-├─ valor_total: Valor total de la factura SIN IVA
+├─ valor_total: Valor total de la factura SIN IVA (NO incluyas el valor de la linea de IVA aunque aparezca como item de la tabla de productos)
 ├─ base_gravable: Para cada concepto facturado identificado
 └─ Si no encuentras valores claros → usar 0.0
 
@@ -791,6 +798,7 @@ NO deduzcas naturaleza sin informacion especifica
 NO mapees conceptos a categorias tributarias (solo extrae literal)
 NO calcules valores no mostrados
 NO asumas que consorciados tienen misma naturaleza
+NO extraigas lineas de IVA u otros impuestos (ReteIVA, INC) como conceptos facturados
 
 ═══════════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (JSON ESTRICTO):

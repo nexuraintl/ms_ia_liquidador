@@ -120,6 +120,10 @@ BUSCAR EN LA FACTURA:
 1. Actividad facturada
 2. Ubicación textual de la actividad facturada.
 
+NOTA: La "ACTIVIDAD ECONOMICA" / codigo CIIU del ENCABEZADO de la factura es el dato
+de registro del EMISOR/proveedor (una pista), NO la actividad facturada. La actividad
+facturada se lee de las LINEAS / DESCRIPCION del concepto facturado, no del encabezado.
+
 
 UBICACIONES POR ACTIVIDAD FACTURADA:
 
@@ -438,6 +442,19 @@ PROCESO OBLIGATORIO:
 1. EXTRAER de la FACTURA:
    - TODAS las actividades facturadas (TEXTUALES, tal como aparecen en la factura)
    - El valor de la FACTURA SIN IVA (valor único para todas las actividades)
+
+   ACLARACION CRITICA (NO CONFUNDIR EMISOR CON LO FACTURADO):
+   - La "ACTIVIDAD ECONOMICA" / codigo CIIU y la "TARIFA ICA (x 1000)" impresos en
+     el ENCABEZADO o la plantilla de la factura son DATOS DE REGISTRO DEL EMISOR /
+     PROVEEDOR. Son una PISTA de contexto, NO la actividad facturada.
+   - La actividad facturada debe extraerse EXCLUSIVAMENTE de las LINEAS / DESCRIPCION
+     del concepto facturado (la tabla de productos o servicios), NO del encabezado,
+     NO del codigo CIIU del emisor y NO de la tarifa ICA impresa en la plantilla.
+   - Ejemplo de error a EVITAR: tomar "Actividad economica 9411" del encabezado y
+     reportarla como actividad facturada. Eso es el CIIU del emisor, no lo facturado.
+   - Si tras esto la actividad facturada no equivale a ninguna actividad de la BD por
+     ubicacion, deja actividades_relacionadas con codigo_actividad = 0 y
+     codigo_ubicacion = 0 (no fuerces un match con el CIIU del encabezado).
 
 2. RELACIONAR TODAS las actividades facturadas EN CONJUNTO con actividades de la BD:
    - Analizar TODAS las actividades facturadas como un grupo

@@ -665,20 +665,23 @@ class LiquidadorConsorcios:
             if not es_valida:
                 return self._crear_resultado_error(mensaje_error)
 
-            # PASO 2: Validar conceptos identificados
-            conceptos_validos, mensaje_concepto = self._validar_conceptos_consorcio(
+            # PASO 2: Validar conceptos identificados (regla flexible)
+            conceptos_validos, alertas_no_mapeados = self._validar_conceptos_consorcio(
                 analisis_gemini.get('conceptos_identificados', []),
                 diccionario_conceptos
             )
 
+            # Solo se detiene cuando NINGUN concepto facturado pudo mapearse
             if not conceptos_validos:
                 # Preservar valor_total de la factura incluso si hay errores
                 valor_total = Decimal(str(analisis_gemini.get('valor_total') or 0))
+                mensaje_concepto = "No se pudieron relacionar los conceptos facturados con los conceptos almacenados en base de datos"
                 return self._crear_resultado_sin_finalizar(mensaje_concepto, valor_total)
 
             # PASO 3: Validar y liquidar consorciados individuales
             consorciados_liquidados = []
-            observaciones = []
+            # Sembrar alertas no bloqueantes de los conceptos que no mapearon
+            observaciones = list(alertas_no_mapeados)
             error_naturaleza_incompleta = False
             mensajes_error_naturaleza = []
 
@@ -774,18 +777,24 @@ class LiquidadorConsorcios:
 
     def _validar_conceptos_consorcio(self,
                                    conceptos_identificados: List[Dict[str, Any]],
-                                   diccionario_conceptos: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], str]:
+                                   diccionario_conceptos: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[str]]:
         """
         Valida los conceptos identificados contra el diccionario.
+
+        Regla flexible: acumula los conceptos que SI mapean a base de datos y
+        registra los que NO mapean (CONCEPTO_NO_IDENTIFICADO / concepto_index 0)
+        como alertas, sin abortar la liquidacion. El corte bloqueante solo ocurre
+        aguas arriba cuando NINGUN concepto facturado pudo mapearse.
 
         Args:
             conceptos_identificados: Conceptos identificados por Gemini
             diccionario_conceptos: Diccionario de conceptos válidos
 
         Returns:
-            Tuple[List[Dict], str]: (conceptos_validos, mensaje_error)
+            Tuple[List[Dict], List[str]]: (conceptos_validos, alertas_no_mapeados)
         """
         conceptos_validos = []
+        alertas_no_mapeados = []
 
         for concepto_data in conceptos_identificados:
             concepto_nombre = concepto_data.get('concepto', '')
@@ -796,9 +805,22 @@ class LiquidadorConsorcios:
             )
 
             if not es_valido:
-                mensaje_error = "No se pudieron relacionar los conceptos facturados con los conceptos almacenados en base de datos"
-                logger.warning(f"Concepto no válido: {concepto_nombre}")
-                return [], mensaje_error
+                nombre_facturado = (
+                    concepto_data.get('nombre_concepto')
+                    or concepto_data.get('concepto_facturado')
+                    or concepto_nombre
+                    or "(sin nombre)"
+                )
+                razonamiento = concepto_data.get('razonamiento', '')
+                alerta = (
+                    f"Concepto facturado '{nombre_facturado}' no se pudo relacionar con un "
+                    f"concepto de retención en base de datos; no se aplicó retención sobre este ítem."
+                )
+                if razonamiento:
+                    alerta += f" Detalle: {razonamiento}"
+                alertas_no_mapeados.append(alerta)
+                logger.warning(f"Concepto no mapeado (se omite, no aborta): {nombre_facturado}")
+                continue
 
             # Combinar datos de Gemini con datos del diccionario/BD
             concepto_completo = {
@@ -807,7 +829,7 @@ class LiquidadorConsorcios:
             }
             conceptos_validos.append(concepto_completo)
 
-        return conceptos_validos, ""
+        return conceptos_validos, alertas_no_mapeados
 
     def _liquidar_consorciado_individual(self,
                                        consorciado: Dict[str, Any],

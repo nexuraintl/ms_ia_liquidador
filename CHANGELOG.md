@@ -1,5 +1,18 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.7] - 2026-06-15
+
+### Corregido
+
+- **Retefuente: cuando NINGÚN concepto facturado mapea al diccionario, el estado queda `no_aplica_impuesto` y sin mensaje redundante**: si Gemini devuelve `CONCEPTO_NO_IDENTIFICADO` para todos los conceptos (no encuentra relación alguna entre lo facturado y el diccionario de retefuente), el resultado mostraba dos mensajes —"El concepto facturado no se identifica en los soportes adjuntos. Validar soportes." y "No se identificaron conceptos válidos para calcular retención"— y un estado `preliquidacion_sin_finalizar`. Ahora en `Liquidador/liquidador.py` (`calcular_retencion`): (1) el primer mensaje solo se agrega cuando hay conceptos mixtos (algunos identificados y otros no), y (2) cuando todos son no identificados se devuelve `estado="no_aplica_impuesto"` con un único mensaje. El caso mixto conserva su comportamiento (advertencia + cálculo sobre los identificados, `estado="preliquidado"`).
+
+## [3.19.6] - 2026-06-15
+
+### Corregido
+
+- **Retefuente: cuotas / aportes gremiales dejan de mapearse a "Servicios en general"**: una cuota de sostenimiento / aporte / membresía / afiliación a una asociación o gremio se encasillaba en el genérico "Servicios en general - Beneficiario persona jurídica" (4%) y se liquidaba retención indebida (caso real: factura AF3522 de Asociación de Fiduciarias a Fiducoldex). El modelo racionalizaba que "una cuota de sostenimiento es un servicio general de asociación", esquivando la regla anti-comodín. Ajuste solo a nivel de prompt en `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA` PASO 3.0 y `PROMPT_MATCHING_CONCEPTOS` de consorcios): se añade un GATE previo a la rúbrica de matching que identifica la familia cuota/aporte gremial (pertenecer a / sostener una entidad) y la marca como `CONCEPTO_NO_IDENTIFICADO` (`concepto_index` 0), más un ejemplo negativo (few-shot) y una regla anti-racionalización. El gate incluye una acotación de seguridad para NO desviar rentas legítimas no-servicio que sí tienen concepto en la BD (arrendamientos, transporte, rendimientos, dividendos, loterías, indemnizaciones, emolumentos, compras). Complementa la regla anti-comodín ya existente. No se leen leyendas de la factura (para evitar prompt injection).
+- **ICA: se aclara que la actividad económica (CIIU) del encabezado es dato del emisor (pista)**: la "ACTIVIDAD ECONOMICA" / CIIU y la tarifa ICA impresas en el encabezado de la factura son datos de registro del emisor, no la actividad facturada. Ajuste a nivel de prompt en `prompts/prompt_ica.py` (`crear_prompt_relacionar_actividades` y `crear_prompt_identificacion_ubicaciones`): la actividad facturada debe extraerse de las líneas/descripción del concepto, no del encabezado. NOTA: esto NO resuelve por sí solo el caso de cuotas de asociación cuando la BD de ICA contiene una actividad real "actividades de asociaciones empresariales" que coincide semánticamente con la línea facturada; ese match se abordará en una iteración dedicada a ICA.
+
 ## [3.19.5] - 2026-06-15
 
 ### Corregido

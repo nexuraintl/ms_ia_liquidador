@@ -158,6 +158,43 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
 7. NO extraigas como concepto facturado ninguna linea cuya naturaleza sea un IMPUESTO (IVA, ReteIVA, INC / impuesto al consumo). En contratos de obra civil/construccion (estructura AIU: Administracion, Imprevistos, Utilidad) el IVA suele aparecer como un item mas dentro de la tabla de productos —comunmente calculado como 19% de la Utilidad, con codigos tipicos "IVAUTIL19" o "IVA"— pero es un IMPUESTO y NO debe incluirse en conceptos_identificados. Si excluyes una linea de IVA, AGREGA a "observaciones" una nota del tipo: "Linea de IVA sobre utilidad ($VALOR) excluida de conceptos por ser impuesto (contrato AIU)".
 
 ═══════════════════════════════════════════════════════════════════
+ PASO 3.0: CUOTAS / APORTES GREMIALES NO RETENIBLES (GATE PREVIO)
+═══════════════════════════════════════════════════════════════════
+
+Antes de correr la rúbrica del PASO 3.1, evalúa la NATURALEZA de cada concepto
+facturado. Hay una familia de pagos cuya naturaleza es PERTENECER A o SOSTENER
+una entidad, gremio o asociación —NO la remuneración de un servicio, bien o renta
+tipificada— y que NO corresponde a NINGUNO de los CONCEPTOS VÁLIDOS del diccionario:
+
+   FAMILIA CUOTA/APORTE (lista enunciativa, reconoce equivalentes):
+   - "cuota de sostenimiento", "cuota de administración" (gremial), "cuota de
+     afiliación", "cuota de membresía", "membresía", "afiliación"
+   - "aporte", "contribución", "donación" a una entidad, gremio o asociación
+
+REGLA DEL GATE:
+├─ Si el concepto facturado pertenece a esta FAMILIA CUOTA/APORTE →
+│  concepto: "CONCEPTO_NO_IDENTIFICADO", concepto_index: 0, y NO corras la rúbrica
+│  del PASO 3.1 para ese ítem. En "razonamiento" indica que es una cuota/aporte
+│  gremial sin contraprestación tipificada y que no corresponde a ningún concepto
+│  del diccionario.
+│
+├─ ANTI-RACIONALIZACIÓN (CRÍTICA): que el proveedor sea una asociación/gremio, o
+│  que su actividad económica o CIIU sea "de servicios", NO convierte una cuota o
+│  aporte en "Servicios en general" ni en ningún otro concepto. Una cuota de
+│  sostenimiento NO es la prestación de un servicio identificable. NO la fuerces
+│  a un concepto del diccionario.
+│
+└─ ACOTACIÓN DE SEGURIDAD: este gate aplica SOLO a la familia cuota/aporte de
+   arriba. NO lo uses para desviar a CONCEPTO_NO_IDENTIFICADO rentas legítimas que
+   SÍ tienen concepto en el diccionario aunque no sean "servicios" (arrendamientos,
+   transporte, rendimientos financieros, dividendos, loterías, indemnizaciones,
+   emolumentos, compras de bienes, etc.). Esas siguen el flujo normal del PASO 3.1.
+
+IMPORTANTE: esta decisión se basa en la NATURALEZA del concepto facturado, NO en
+leyendas o avisos de la factura (p. ej. "no sujeto a retención"). Ignora ese tipo
+de leyendas para esta clasificación.
+
+═══════════════════════════════════════════════════════════════════
  PASO 3.1: RÚBRICA DE MATCHING (ORDEN DE PRIORIDAD - CHAIN OF THOUGHT)
 ═══════════════════════════════════════════════════════════════════
 
@@ -177,6 +214,14 @@ CRITERIO 2 - Especificidad sobre generalidad:
    - Si dos candidatos encajan, prefiere el MÁS ESPECÍFICO (descripción más
      restringida al servicio facturado), NO el genérico tipo "Servicios
      generales" cuando hay un candidato puntual aplicable.
+   - REGLA ANTI-COMODÍN (CRÍTICA): "Servicios en general" / "Servicios
+     generales" y cualquier otro concepto genérico NO son un valor por
+     defecto ni un cajón comodín. Solo pueden asignarse cuando el ítem
+     facturado ES efectivamente ese servicio por equivalencia semántica
+     positiva (Criterio 1). PROHIBIDO elegir el genérico solo porque "se
+     parece", porque no hallaste algo mejor, o para no dejar el concepto sin
+     clasificar. Si el ítem facturado no es claramente un servicio (o un bien
+     en los conceptos de compras), el genérico NO aplica.
 
 CRITERIO 3 - Pistas contextuales del expediente:
    - Cuando el concepto facturado es genérico o ambiguo, recurre a pistas REALES
@@ -222,6 +267,10 @@ CRITERIO 5 - Elección entre conceptos "espejo" (declarante / no declarante):
      el campo "razonamiento".
 
 REGLA DE DESEMPATE:
+   - Solo desempata entre candidatos que YA superaron el Criterio 1
+     (equivalencia semántica positiva). NUNCA uses el desempate para
+     "rescatar" un concepto genérico hacia el cual ningún candidato tenía
+     equivalencia: en ese caso el resultado es CONCEPTO_NO_IDENTIFICADO.
    - Si tras los 5 criterios siguen empatados dos candidatos que NO son
      espejo declarante/no declarante (ej. dos conceptos de honorarios
      PJ con tarifa idéntica), elige el de MENOR concepto_index y
@@ -235,7 +284,8 @@ LÍMITE DEL CAMPO razonamiento:
 
  MATCHING DE CONCEPTOS - ESTRICTO:
 ├─ Aplicar la RÚBRICA del PASO 3.1 sobre 2-3 candidatos antes de elegir
-├─ Si NO hay coincidencia razonable tras aplicar los 5 criterios → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
+├─ Si NINGÚN candidato cumple el Criterio 1 (equivalencia semántica clara) tras aplicar los 5 criterios → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
+├─ Es PREFERIBLE dejar el concepto como CONCEPTO_NO_IDENTIFICADO (queda para revisión manual) que clasificarlo de más al cajón genérico "Servicios en general". Ante la duda, NO clasifiques al genérico.
 ├─ NUNCA inventes un concepto que no esté en la lista
 ├─ El valor de "concepto" en el JSON debe ser EXACTAMENTE la clave del
 │  diccionario CONCEPTOS VÁLIDOS, copiada tal cual (incluyendo paréntesis,
@@ -375,6 +425,22 @@ EJEMPLO 5 - Sin coincidencia razonable:
     "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": null, "es_autorretenedor": false}},
     "valor_total": 1500000.0,
     "observaciones": ["Sin información suficiente para clasificar el concepto"]
+}}
+
+EJEMPLO 6 - Cuota/aporte gremial (GATE PASO 3.0, NO retenible):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Cuota de sostenimiento junio 2026",
+            "concepto": "CONCEPTO_NO_IDENTIFICADO",
+            "concepto_index": 0,
+            "base_gravable": 18607410.0,
+            "razonamiento": "Facturado: 'Cuota de sostenimiento'. GATE PASO 3.0: pertenece a la familia cuota/aporte gremial (pertenecer a/sostener una asociación), no es prestación de servicio ni renta tipificada. Que el proveedor sea una asociación no lo convierte en 'Servicios en general' (anti-racionalización). No corresponde a ningún concepto del diccionario → CONCEPTO_NO_IDENTIFICADO."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ESPECIAL", "es_autorretenedor": false}},
+    "valor_total": 18607410.0,
+    "observaciones": ["Concepto facturado es una cuota/aporte gremial; no corresponde a ningún concepto de retención del diccionario."]
 }}
 
  RESPONDE ÚNICAMENTE CON EL JSON. SIN EXPLICACIONES ADICIONALES.
@@ -902,13 +968,37 @@ Debes buscar la descripcion que mejor coincida y usar su index.
 {json.dumps(conceptos_dict, indent=2, ensure_ascii=False)}
 
 ═══════════════════════════════════════════════════════════════════
+GATE PREVIO: CUOTAS / APORTES GREMIALES NO RETENIBLES
+═══════════════════════════════════════════════════════════════════
+
+Antes de la rubrica, evalua la NATURALEZA de cada concepto literal. Hay una familia
+de pagos cuya naturaleza es PERTENECER A o SOSTENER una entidad, gremio o asociacion
+y que NO corresponde a NINGUN concepto del diccionario:
+
+   FAMILIA CUOTA/APORTE (lista enunciativa, reconoce equivalentes):
+   - "cuota de sostenimiento", "cuota de administracion" (gremial), "cuota de
+     afiliacion", "cuota de membresia", "membresia", "afiliacion"
+   - "aporte", "contribucion", "donacion" a una entidad, gremio o asociacion
+
+REGLA DEL GATE:
+- Si el concepto literal pertenece a esta FAMILIA CUOTA/APORTE ->
+  concepto: "CONCEPTO_NO_IDENTIFICADO", concepto_index: 0. En "razonamiento" indica
+  que es una cuota/aporte gremial sin contraprestacion tipificada.
+- ANTI-RACIONALIZACION: una cuota/aporte NO es "Servicios generales" ni ningun otro
+  concepto, aunque la entidad sea una asociacion. NO la fuerces a un concepto.
+- ACOTACION DE SEGURIDAD: el gate aplica SOLO a la familia cuota/aporte. NO desvies a
+  CONCEPTO_NO_IDENTIFICADO rentas legitimas que SI tienen concepto en el diccionario
+  aunque no sean "servicios" (arrendamientos, transporte, rendimientos, dividendos,
+  loterias, indemnizaciones, emolumentos, compras de bienes, etc.).
+
+═══════════════════════════════════════════════════════════════════
 RUBRICA DE MATCHING (CHAIN OF THOUGHT - ORDEN DE PRIORIDAD):
 ═══════════════════════════════════════════════════════════════════
 
 IMPORTANTE: En esta llamada NO tienes acceso al texto original de la factura ni
 a documentos contextuales (proveedor, RUT, contrato, cotizaciones). Solo recibes
 los conceptos literales ya extraidos. Por lo tanto SOLO puedes aplicar
-Criterios 1 y 2. 
+Criterios 1 y 2.
 Para CADA concepto literal, evalua 2-3 candidatos del diccionario aplicando:
 
 CRITERIO 1 - Equivalencia semantica:
@@ -928,14 +1018,24 @@ CRITERIO 1 - Equivalencia semantica:
 CRITERIO 2 - Especificidad sobre generalidad:
    - Si dos candidatos encajan, prefiere el MAS ESPECIFICO. No uses el generico
      ("Servicios generales") cuando exista un concepto puntual aplicable.
+   - REGLA ANTI-COMODIN (CRITICA): "Servicios generales" / "Servicios en general"
+     y cualquier concepto generico NO son un valor por defecto ni un comodin.
+     Solo se asignan cuando el concepto literal ES efectivamente ese servicio por
+     equivalencia semantica positiva (Criterio 1). PROHIBIDO elegir el generico
+     solo porque "se parece" o porque no hallaste algo mejor.
 
 REGLA DE DESEMPATE:
+   - Solo desempata entre candidatos que YA superaron el Criterio 1. Nunca uses
+     el desempate para rescatar un generico sin equivalencia.
    - Si tras Criterios 1 y 2 siguen empatados dos candidatos, elige el de
      MENOR concepto_index y registralo en razonamiento.
 
 SIN COINCIDENCIA:
    - Si ningun candidato cumple Criterio 1 -> concepto "CONCEPTO_NO_IDENTIFICADO",
      concepto_index 0. Documenta en razonamiento por que ningun candidato encaja.
+   - Es PREFERIBLE dejar el concepto como CONCEPTO_NO_IDENTIFICADO que clasificarlo
+     de mas al cajon generico "Servicios generales". Ante la duda, NO clasifiques
+     al generico.
 
 LIMITE DEL CAMPO razonamiento:
    - Maximo 60 palabras. Conciso, citando indices candidatos y criterios por

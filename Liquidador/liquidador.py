@@ -121,7 +121,9 @@ class LiquidadorRetencion:
         ]
         
         # Agregar advertencias por conceptos no identificados
-        if conceptos_no_identificados:
+        # Solo cuando hay conceptos mixtos (algunos identificados y otros no).
+        # Si TODOS son no identificados, basta el mensaje "No se identificaron conceptos válidos".
+        if conceptos_no_identificados and conceptos_identificados:
             mensajes_error.append("El concepto facturado no se identifica en los soportes adjuntos. Validar soportes.")
             logger.warning(f"Conceptos no identificados: {len(conceptos_no_identificados)}")
         
@@ -132,12 +134,15 @@ class LiquidadorRetencion:
             logger.error("No hay conceptos identificados válidos")
 
         if not puede_liquidar:
+            # Único caso que llega aquí: no hay ningún concepto identificado.
+            # Gemini confirmó que lo facturado no se relaciona con el diccionario,
+            # por lo que el impuesto no aplica.
             return self._crear_resultado_no_liquidable(
                 mensajes_error,
-                estado="preliquidacion_sin_finalizar",
+                estado="no_aplica_impuesto",
                 valor_factura_sin_iva=analisis.valor_total or 0
             )
-        
+
         #  VALIDACIÓN SEPARADA: ARTÍCULO 383 PARA PERSONAS NATURALES
         # Verificar si se analizó Art 383 y si aplica
         if analisis.articulo_383 :

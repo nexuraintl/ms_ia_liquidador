@@ -179,4 +179,4 @@ def registrar_exception_handler(app) -> None:
         RequestValidationError,
         validation_exception_handler
     )
-    logger.info("✓ Exception handler de validación registrado correctamente")
+    logger.info("Exception handler de validación registrado correctamente")

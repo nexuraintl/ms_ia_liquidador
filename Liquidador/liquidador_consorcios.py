@@ -403,7 +403,7 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
             if not conceptos or valor_total <= 0:
                 return Decimal('0')
 
-            logger.info(f"📊 Calculando retención general teórica para {len(conceptos)} concepto(s)")
+            logger.info(f"Calculando retención general teórica para {len(conceptos)} concepto(s)")
 
             retencion_total_general = Decimal('0')
 
@@ -416,11 +416,11 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
                 retencion_concepto = valor_total * tarifa_retencion
                 retencion_total_general += retencion_concepto
 
-                logger.info(f"📈 {nombre_concepto}: ${valor_total:,.2f} × {tarifa_retencion*100}% = ${retencion_concepto:,.2f}")
+                logger.info(f"{nombre_concepto}: ${valor_total:,.2f} × {tarifa_retencion*100}% = ${retencion_concepto:,.2f}")
 
             # Redondear resultado final a 2 decimales
             retencion_final = retencion_total_general.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            logger.info(f"💡 Retención general teórica: ${retencion_final:,.2f} (sujeta a validación por consorciado)")
+            logger.info(f"Retención general teórica: ${retencion_final:,.2f} (sujeta a validación por consorciado)")
 
             return retencion_final
 
@@ -1080,4 +1080,4 @@ class LiquidadorConsorciosFactory:
 if __name__ == '__main__':
     # Ejemplo de uso
     liquidador = LiquidadorConsorciosFactory.crear_liquidador()
-    logger.info("✅ LiquidadorConsorcios creado con arquitectura SOLID")
+    logger.info("LiquidadorConsorcios creado con arquitectura SOLID")

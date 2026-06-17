@@ -717,7 +717,7 @@ class LiquidadorRetencion:
             }
             
         except Exception as e:
-            logger.error(f"💥 Error en cálculo Art. 383 con validaciones manuales: {e}")
+            logger.error(f"Error en cálculo Art. 383 con validaciones manuales: {e}")
             return {
                 "puede_liquidar": False,
                 "mensajes_error": [f"Error en cálculo validado Art. 383: {str(e)}"]
@@ -788,7 +788,7 @@ class LiquidadorRetencion:
             List[str]: Lista de mensajes explicativos
         """
         mensajes_detalle = [
-            "📜 Cálculo bajo Artículo 383 del Estatuto Tributario (ANÁLISIS SEPARADO):",
+            "Cálculo bajo Artículo 383 del Estatuto Tributario (ANÁLISIS SEPARADO):",
             f"  • Ingreso bruto: ${ingreso_bruto:,.2f}",
             f"  • Aportes seguridad social (40%): ${aportes_seguridad_social:,.2f}",
             f"  • Deducciones aplicables: ${deducciones_limitadas:,.2f}"
@@ -805,7 +805,7 @@ class LiquidadorRetencion:
             f"  • Base gravable en UVT: {base_gravable_uvt:.2f} UVT",
             f"  • Tarifa aplicada: {tarifa_art383*100:.1f}%",
             f"  • Retención calculada: ${valor_retencion_art383:,.2f}",
-            "✅ Cálculo completado con análisis separado de Gemini"
+            "Cálculo completado con análisis separado de Gemini"
         ])
         
         return mensajes_detalle
@@ -887,7 +887,7 @@ class LiquidadorRetencion:
             "estado": None  # NUEVO: Se asignará según validaciones
         }
         
-        # 🔧 VALIDACIÓN MEJORADA: Manejar None correctamente
+        # VALIDACIÓN MEJORADA: Manejar None correctamente
         if not naturaleza or naturaleza is None:
             resultado["advertencias"].append("No se pudo identificar la naturaleza del tercero. Por favor adjunte el RUT actualizado.")
             logger.warning("Naturaleza del tercero no identificada o es None")
@@ -1109,7 +1109,7 @@ class LiquidadorRetencion:
         Returns:
             ResultadoLiquidacion: Resultado con valores en cero y explicación
         """
-        # 🔧 FIX: Generar concepto descriptivo en lugar de "N/A"
+        # FIX: Generar concepto descriptivo en lugar de "N/A"
         concepto_descriptivo = "No aplica retención"
 
         # NUEVO: Determinar estado si no se proporciona

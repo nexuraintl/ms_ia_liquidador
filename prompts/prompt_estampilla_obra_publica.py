@@ -163,7 +163,7 @@ Asignar cuando el objeto del contrato no se haya podido extraer de los documento
 7. Extraer el objeto del contrato de secciones que no mencionen TEXTUALMENTE "OBJETO DEL CONTRATO"
 
 
-✓ OBLIGATORIO:
+OBLIGATORIO:
 1. Copiar textualmente las descripciones encontradas
 2. Usar 0 cuando no encuentres un valor
 3. Usar "no_identificado" cuando no encuentres una descripción

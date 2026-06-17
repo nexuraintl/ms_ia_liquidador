@@ -274,7 +274,6 @@ PREGUNTAS_FUENTE_NACIONAL = [
 # ===============================
 
 CONFIG = {
-    "archivo_excel": "RETEFUENTE_CONCEPTOS.xlsx",
     "max_archivos": 6,
     "max_tamaño_mb": 50,
     "extensiones_soportadas": [".pdf", ".xlsx", ".xls", ".jpg", ".jpeg", ".png", ".docx", ".doc"],
@@ -1525,7 +1524,7 @@ def detectar_impuestos_aplicables(nit: str) -> Dict[str, Any]:
     """
     aplica_estampilla = nit_aplica_estampilla_universidad(nit)
     aplica_obra_publica = nit_aplica_contribucion_obra_publica(nit)
-    aplica_iva = nit_aplica_iva_reteiva(nit)  # ✅ NUEVA VALIDACIÓN
+    aplica_iva = nit_aplica_iva_reteiva(nit)  # NUEVA VALIDACIÓN
     
     impuestos_aplicables = []
     if aplica_estampilla:
@@ -1533,18 +1532,18 @@ def detectar_impuestos_aplicables(nit: str) -> Dict[str, Any]:
     if aplica_obra_publica:
         impuestos_aplicables.append("CONTRIBUCION_OBRA_PUBLICA")
     if aplica_iva:
-        impuestos_aplicables.append("IVA_RETEIVA")  # ✅ NUEVO IMPUESTO
+        impuestos_aplicables.append("IVA_RETEIVA")  # NUEVO IMPUESTO
     
     return {
         "nit": nit,
         "aplica_estampilla_universidad": aplica_estampilla,
         "aplica_contribucion_obra_publica": aplica_obra_publica,
-        "aplica_iva_reteiva": aplica_iva,  # ✅ NUEVO CAMPO
+        "aplica_iva_reteiva": aplica_iva,  # NUEVO CAMPO
         "impuestos_aplicables": impuestos_aplicables,
-        "procesamiento_paralelo": len(impuestos_aplicables) > 1,  # ✅ LÓGICA ACTUALIZADA
+        "procesamiento_paralelo": len(impuestos_aplicables) > 1,  # LÓGICA ACTUALIZADA
         "nombre_entidad_estampilla": NITS_ESTAMPILLA_UNIVERSIDAD.get(nit),
         "nombre_entidad_obra_publica": NITS_CONTRIBUCION_OBRA_PUBLICA.get(nit),
-        "nombre_entidad_iva": NITS_IVA_RETEIVA.get(nit, {}).get("nombre")  # ✅ NUEVO CAMPO
+        "nombre_entidad_iva": NITS_IVA_RETEIVA.get(nit, {}).get("nombre")  # NUEVO CAMPO
     }
 
 def obtener_configuracion_impuestos_integrada(database_manager=None) -> Dict[str, Any]:

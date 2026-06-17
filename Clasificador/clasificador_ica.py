@@ -456,7 +456,7 @@ class ClasificadorICA:
                 # CORRECCIÓN: Procesar archivos al formato esperado por Gemini
                 archivos_procesados = await self._procesar_archivos_para_gemini(archivos_directos)
                 contenido_gemini.extend(archivos_procesados)
-                logger.info(f"📎 ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
+                logger.info(f"ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
 
             # Prompt al final (sufijo variable)
             contenido_gemini.append(prompt)

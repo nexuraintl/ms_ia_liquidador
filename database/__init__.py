@@ -156,4 +156,4 @@ def crear_database_stack_completo(supabase_url: str = None, supabase_key: str = 
 
 import logging
 logger = logging.getLogger(__name__)
-logger.info(f"📦 Database module inicializado - Versión {__version__} - Arquitectura: {__architecture__}")
+logger.info(f"Database module inicializado - Versión {__version__} - Arquitectura: {__architecture__}")

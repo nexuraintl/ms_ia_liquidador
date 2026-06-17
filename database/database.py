@@ -3434,15 +3434,15 @@ class DatabaseManager:
         try:
             health_status = self.db_connection.health_check()
             if health_status:
-                logger.info("✅ DatabaseManager inicializado correctamente con conexión activa")
+                logger.info("DatabaseManager inicializado correctamente con conexión activa")
             else:
                 logger.warning(
-                    "⚠️ DatabaseManager inicializado pero health check falló. "
+                    "DatabaseManager inicializado pero health check falló. "
                     "Si hay fallback configurado, se activará automáticamente en las operaciones."
                 )
         except Exception as e:
             logger.warning(
-                f"⚠️ DatabaseManager inicializado pero health check generó excepción: {str(e)[:100]}. "
+                f"DatabaseManager inicializado pero health check generó excepción: {str(e)[:100]}. "
                 "Si hay fallback configurado, se activará automáticamente en las operaciones."
             )
     
@@ -3709,26 +3709,26 @@ def ejecutar_pruebas_completas(db_manager: DatabaseManager):
                 print(f"       NIT: {data['nit']}")
                 print(f"       Nombre: {data['nombre_fiduciario']}")
             else:
-                print(f"   ❌ Error: {resultado['message']}")
+                print(f"   Error: {resultado['message']}")
     else:
-        print(f"   ❌ No se pudieron listar códigos: {codigos_result['message']}")
+        print(f"   No se pudieron listar códigos: {codigos_result['message']}")
     
     # 4. Probar con código específico conocido
     print("\n Probando con código específico:")
     resultado_especifico = db_manager.obtener_negocio_por_codigo("44658")
     
     if resultado_especifico['success']:
-        print("   ✅ Código '44658' encontrado!")
+        print("   Código '44658' encontrado!")
         data = resultado_especifico['data']
-        print(f"      📊 Datos: {data}")
+        print(f"      Datos: {data}")
         
         # Para integración con preliquidador
-        print(f"\n🔧 DATOS PARA PRELIQUIDADOR:")
+        print(f"\nDATOS PARA PRELIQUIDADOR:")
         print(f"   NIT a procesar: {data['nit']}")
         print(f"   Entidad: {data['nombre_fiduciario']}")
         
     else:
-        print(f"   ❌ Código '44658': {resultado_especifico['message']}")
+        print(f"   Código '44658': {resultado_especifico['message']}")
 
 # ================================
 # FALLBACK DATABASE - NEXURA CON SUPABASE COMO RESPALDO
@@ -4039,7 +4039,7 @@ def main():
     """
     Función principal de prueba
     """
-    print("🚀 INICIANDO SISTEMA DE CONSULTA DE NEGOCIOS")
+    print("INICIANDO SISTEMA DE CONSULTA DE NEGOCIOS")
     print("=" * 60)
     
     try:

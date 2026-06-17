@@ -71,11 +71,11 @@ PASO 1: CLASIFICACIÓN DE DOCUMENTOS
 Debes clasificar EXACTAMENTE {total_archivos} documento(s) en UNA de estas categorías:
 
 1. **FACTURA** - Identificar si contiene:
-   ✓ Número de factura o documento equivalente
-   ✓ Fecha de emisión/venta
-   ✓ Valores monetarios (subtotal, total, impuestos)
-   ✓ Datos del vendedor/proveedor y comprador
-   ✓ Descripción de bienes o servicios vendidos
+   Número de factura o documento equivalente
+   Fecha de emisión/venta
+   Valores monetarios (subtotal, total, impuestos)
+   Datos del vendedor/proveedor y comprador
+   Descripción de bienes o servicios vendidos
    
    SE PUEDE CLASIFICAR COMO FACTURA TAMBIÉN:
    • "SOPORTE EN ADQUISICIONES EFECTUADAS A NO OBLIGADOS A FACTURAR"
@@ -84,15 +84,15 @@ Debes clasificar EXACTAMENTE {total_archivos} documento(s) en UNA de estas categ
    • Cualquier documento con estructura de venta/cobro
 
 2. **RUT** - Registro Único Tributario que contiene:
-   ✓ Número de identificación tributaria (NIT)
-   ✓ Razón social
-   ✓ Responsabilidades tributarias
-   ✓ Actividades económicas CIIU
+   Número de identificación tributaria (NIT)
+   Razón social
+   Responsabilidades tributarias
+   Actividades económicas CIIU
 
 4. **ANEXO_CONTRATO** - Documento que contiene ESPECÍFICAMENTE:
-   ✓ Objeto del contrato
-   ✓ Obligaciones contractuales
-   ✓ Términos y condiciones del contrato
+   Objeto del contrato
+   Obligaciones contractuales
+   Términos y condiciones del contrato
 
 5. **ANEXO** - Cualquier otro documento de soporte
 
@@ -341,10 +341,10 @@ PASO 1: TIPO DE DOCUMENTO (POR FUNCIÓN)
 Debes clasificar EXACTAMENTE {total_archivos} documento(s) en UNA de estas categorías:
 
 1. **FACTURA** - El documento que ES el cobro en sí mismo. Para serlo DEBE contener su detalle:
-   ✓ Número de factura o documento equivalente y fecha
-   ✓ Valores monetarios DETALLADOS: subtotal, IVA y/o total (OBLIGATORIO)
-   ✓ Datos de vendedor/proveedor y comprador
-   ✓ Descripción/ítems de los bienes o servicios (OBLIGATORIO)
+   Número de factura o documento equivalente y fecha
+   Valores monetarios DETALLADOS: subtotal, IVA y/o total (OBLIGATORIO)
+   Datos de vendedor/proveedor y comprador
+   Descripción/ítems de los bienes o servicios (OBLIGATORIO)
    Cuentan también como FACTURA (si muestran valores e ítems): "SOPORTE EN ADQUISICIONES
    EFECTUADAS A NO OBLIGADOS A FACTURAR", "CUENTA DE COBRO", "DOCUMENTO EQUIVALENTE", o cualquier
    estructura de venta/cobro con su detalle.

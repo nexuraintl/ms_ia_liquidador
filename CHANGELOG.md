@@ -1,5 +1,43 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.10] - 2026-06-16
+
+### Corregido
+
+- **`GET /api/diagnostico` reparado**: el endpoint estaba roto en tiempo de ejecución y siempre caía en `estado_general: ERROR_DIAGNOSTICO`. Causa: usaba `GOOGLE_CLOUD_CREDENTIALS` (variable no definida ni importada en `main.py`) y llamaba `detectar_impuestos_aplicables` (no importada; además función legacy apoyada en helpers deprecados). Se retiraron el componente `google_credentials` (OCR/Vision en desuso), el sub-chequeo `deteccion_automatica` y la carpeta `Static` (no se monta) de los chequeos. La versión del payload ahora se toma de `app.version`.
+
+### Eliminado
+
+- **Endpoints en desuso**: se eliminaron `GET /api/database/test/{codigo_negocio}`, `GET /api/extracciones`, `POST /api/prueba-simple` y `GET /api/nits-disponibles`, que no se usaban hace tiempo (consultas/smoke-tests de desarrollo y un listado de NITs hardcodeado). Reduce la superficie de la API. Se conservan `/api/procesar-facturas` (principal) y los auxiliares `/api/diagnostico` y `/api/database/health`.
+
+### Cambiado
+
+- **Versión centralizada en `/api/diagnostico`**: devuelve `app.version` en lugar del literal `2.4.0` hardcodeado.
+- **Limpieza de imports huérfanos en `main.py`**: se retiraron `preprocesar_excel_limpio`, `detectar_impuestos_aplicables_por_codigo`, `pandas as pd` e `io`, que ya no se usaban.
+
+## [3.19.9] - 2026-06-16
+
+### Añadido
+
+- **Paquete de documentación de entrega en `docs/`**: se reemplazó el contenido obsoleto de la carpeta por un paquete nuevo, conciso y orientado al producto: índice (`README.md`), arquitectura (`01_ARQUITECTURA.md`), despliegue y operación/runbook (`02_DESPLIEGUE_OPERACION.md`), API y contrato del webhook (`03_API.md`), pruebas (`04_PRUEBAS.md`), reglas de negocio por impuesto (`05_REGLAS_NEGOCIO.md`).
+
+### Cambiado
+
+- **`tests/` y `docs/` ahora se versionan**: se retiraron de `.gitignore` para incorporar la suite de pruebas y la documentación al control de versiones. Se agregaron al ignore los artefactos de herramientas de desarrollo (`.coverage` y carpetas/archivos de tooling) para que no se publiquen.
+- **README raíz actualizado a datos reales**: versión 3.19.8, puerto 8080, SDK `google-genai` 1.12.1, Python 3.11, bloque `.env` completo (incluye variables de Nexura y webhook) y enlace a la documentación de `docs/`.
+
+### Corregido
+
+- **Alineación de la versión del servicio**: el objeto FastAPI en `main.py` declaraba `version="2.0.0"`; ahora refleja la versión vigente.
+- **Eliminación de referencias muertas a `RETEFUENTE_CONCEPTOS.xlsx`**: se retiró la clave `CONFIG["archivo_excel"]` en `config.py` y la entrada del archivo en la lista de archivos críticos del diagnóstico (`main.py`). La fuente de verdad es la base de datos; ese `.xlsx` ya no se usa.
+
+## [3.19.8] - 2026-06-17
+
+### Corregido
+
+- **Depuración de la suite de tests y eliminación de scripts manuales obsoletos**: Se eliminaron definitivamente 9 archivos de scripts de prueba manuales y experimentos (`test_cuantias_endpoint.py`, `test_cuantias_endpoint_v2.py`, `test_cuantias_filtros_servidor.py`, `test_cuantias_optimizado.py`, `test_ica_endpoints.py`, `test_listar_tablas_supabase.py`, `test_manual_cuantias_nexura.py`, `test_manual_ica_nexura.py`, `test_prompt_ica_visualizacion.py`) que hacían llamadas externas reales y causaban falsos negativos y timeouts en pytest.
+- **Corrección de la ejecución de tests en el entorno virtual local**: Se validó que al correr pytest en el entorno virtual (`venv`) correcto, la suite pasa al 100% de éxito, resolviendo un error de importación de la dependencia `python-calamine` (necesaria para el preprocesamiento de Excel) que ocurría al ejecutar en el entorno global.
+
 ## [3.19.7] - 2026-06-15
 
 ### Corregido

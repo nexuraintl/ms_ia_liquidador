@@ -127,7 +127,7 @@ def analizar_extracciones_fecha(fecha: str) -> Dict[str, Any]:
                 analisis["estadisticas"]["errores"] += 1
                 
         except Exception as e:
-            print(f"⚠️ Error procesando {archivo.name}: {e}")
+            print(f"Error procesando {archivo.name}: {e}")
     
     analisis["estadisticas"]["tamaño_total_mb"] = round(analisis["estadisticas"]["tamaño_total_mb"], 2)
     
@@ -135,25 +135,25 @@ def analizar_extracciones_fecha(fecha: str) -> Dict[str, Any]:
 
 def mostrar_resumen_fecha(fecha: str):
     """Muestra un resumen de las extracciones de una fecha"""
-    print(f"\n📊 RESUMEN DE EXTRACCIONES - {fecha}")
+    print(f"\nRESUMEN DE EXTRACCIONES - {fecha}")
     print("=" * 60)
     
     analisis = analizar_extracciones_fecha(fecha)
     
     if "error" in analisis:
-        print(f"❌ {analisis['error']}")
+        print(f"{analisis['error']}")
         return
     
     stats = analisis["estadisticas"]
     
-    print(f"📁 Total de archivos: {analisis['total_archivos']}")
-    print(f"💾 Tamaño total: {stats['tamaño_total_mb']} MB")
-    print(f"📝 Caracteres extraídos: {stats['caracteres_totales']:,}")
-    print(f"❌ Errores: {stats['errores']}")
+    print(f"Total de archivos: {analisis['total_archivos']}")
+    print(f"Tamaño total: {stats['tamaño_total_mb']} MB")
+    print(f"Caracteres extraídos: {stats['caracteres_totales']:,}")
+    print(f"Errores: {stats['errores']}")
     
-    print(f"\n📋 Tipos de extracción:")
+    print(f"\nTipos de extracción:")
     for tipo, cantidad in stats["tipos_extraccion"].items():
-        emoji = "❌" if "ERROR" in tipo else "✅"
+        emoji = "[ERROR]" if "ERROR" in tipo else "[OK]"
         print(f"  {emoji} {tipo}: {cantidad}")
     
     if analisis["extracciones"]:
@@ -161,13 +161,13 @@ def mostrar_resumen_fecha(fecha: str):
         print("-" * 60)
         
         for ext in sorted(analisis["extracciones"], key=lambda x: x["timestamp"]):
-            status = "❌" if ext["es_error"] else "✅"
+            status = "[ERROR]" if ext["es_error"] else "[OK]"
             print(f"{status} {ext['timestamp']} | {ext['metodo']:12} | {ext['nombre_original']}")
-            print(f"   📊 {ext['caracteres_extraidos']:,} chars, {ext['tamaño_kb']} KB")
+            print(f"   {ext['caracteres_extraidos']:,} chars, {ext['tamaño_kb']} KB")
             
             if not ext["es_error"] and ext["preview_texto"]:
                 preview = ext["preview_texto"].replace('\n', ' ')[:100]
-                print(f"   👁️ \"{preview}\"")
+                print(f"   \"{preview}\"")
             
             print()
 
@@ -177,7 +177,7 @@ def mostrar_detalle_archivo(fecha: str, nombre_archivo: str):
     archivo_path = carpeta_fecha / nombre_archivo
     
     if not archivo_path.exists():
-        print(f"❌ Archivo no encontrado: {nombre_archivo}")
+        print(f"Archivo no encontrado: {nombre_archivo}")
         return
     
     print(f"\n📄 CONTENIDO COMPLETO - {nombre_archivo}")
@@ -190,17 +190,17 @@ def mostrar_detalle_archivo(fecha: str, nombre_archivo: str):
         print(contenido)
         
     except Exception as e:
-        print(f"❌ Error leyendo archivo: {e}")
+        print(f"Error leyendo archivo: {e}")
 
 def main():
     """Función principal"""
-    print("🔍 VISOR DE EXTRACCIONES - Preliquidador v2.0")
+    print("VISOR DE EXTRACCIONES - Preliquidador v2.0")
     print("=" * 50)
     
     # Verificar carpeta base
     carpeta_base = obtener_carpeta_base()
     if not carpeta_base.exists():
-        print(f"❌ No se encontró la carpeta de extracciones: {carpeta_base}")
+        print(f"No se encontró la carpeta de extracciones: {carpeta_base}")
         print("   Ejecuta el sistema primero para generar extracciones.")
         return
     
@@ -208,10 +208,10 @@ def main():
     fechas_disponibles = listar_fechas_disponibles()
     
     if not fechas_disponibles:
-        print("📭 No se encontraron extracciones guardadas.")
+        print("No se encontraron extracciones guardadas.")
         return
     
-    print(f"📅 Fechas con extracciones disponibles: {', '.join(fechas_disponibles)}")
+    print(f"Fechas con extracciones disponibles: {', '.join(fechas_disponibles)}")
     
     # Procesar argumentos
     if len(sys.argv) > 1:
@@ -227,7 +227,7 @@ def main():
             if len(sys.argv) > 2:
                 mostrar_detalle_archivo(sys.argv[1], sys.argv[2])
         else:
-            print(f"❌ Fecha no encontrada: {sys.argv[1]}")
+            print(f"Fecha no encontrada: {sys.argv[1]}")
             print(f"   Fechas disponibles: {', '.join(fechas_disponibles)}")
     else:
         # Mostrar fecha de hoy por defecto
@@ -235,12 +235,12 @@ def main():
         if fecha_hoy in fechas_disponibles:
             mostrar_resumen_fecha(fecha_hoy)
         else:
-            print(f"📭 No hay extracciones para hoy ({fecha_hoy})")
+            print(f"No hay extracciones para hoy ({fecha_hoy})")
             if fechas_disponibles:
                 print(f"   Última fecha con extracciones: {fechas_disponibles[0]}")
                 mostrar_resumen_fecha(fechas_disponibles[0])
     
-    print(f"\n💡 USO:")
+    print(f"\nUSO:")
     print(f"   python revisar_extracciones.py                    # Hoy")
     print(f"   python revisar_extracciones.py 2025-07-24         # Fecha específica")
     print(f"   python revisar_extracciones.py 2025-07-24 archivo.txt  # Archivo específico")

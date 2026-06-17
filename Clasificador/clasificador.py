@@ -1087,11 +1087,11 @@ class ProcesadorGemini:
          FUNCIÓN HÍBRIDA PARA ANÁLISIS DE FACTURA: Prompt + Archivos directos para análisis de retefuente.
          
          FUNCIONALIDAD:
-         ✅ Análisis especializado de facturas con multimodalidad
-         ✅ Combina prompt de análisis + archivos PDFs/imágenes
-         ✅ Optimizado para análisis de retefuente, consorcios y extranjera
-         ✅ Reutilizable para todos los tipos de análisis de facturas
-         ✅ Timeout extendido para análisis complejo
+         Análisis especializado de facturas con multimodalidad
+         Combina prompt de análisis + archivos PDFs/imágenes
+         Optimizado para análisis de retefuente, consorcios y extranjera
+         Reutilizable para todos los tipos de análisis de facturas
+         Timeout extendido para análisis complejo
          
          Args:
              prompt: Prompt especializado para análisis (PROMPT_ANALISIS_FACTURA, etc.)
@@ -1499,7 +1499,7 @@ class ProcesadorGemini:
         # Stream independiente para este worker 
         stream = BytesIO(archivo_bytes)
         
-        # ✅ SOLUCIÓN: UploadFile sin content_type (compatible con todas las versiones)
+        # SOLUCIÓN: UploadFile sin content_type (compatible con todas las versiones)
         try:
             # Intentar con content_type (versiones más nuevas)
             archivo_clonado = UploadFile(
@@ -1533,7 +1533,7 @@ class ProcesadorGemini:
         #  SINGLE RETRY como solicitado 
         for intento in range(1, 3):  # Solo 2 intentos
             try:
-                # 🔧 RESETEAR POSICIÓN DE FORMA MÁS ROBUSTA
+                # RESETEAR POSICIÓN DE FORMA MÁS ROBUSTA
                 if hasattr(archivo, 'seek'):
                     try:
                         await archivo.seek(0)
@@ -1574,7 +1574,7 @@ class ProcesadorGemini:
                     else:
                         raise ValueError(f"Archivo {nombre_archivo} demasiado pequeño: {len(archivo_bytes)} bytes")
                 
-                # ✅ VALIDACIÓN ADICIONAL PARA PDFs
+                # VALIDACIÓN ADICIONAL PARA PDFs
                 if archivo_bytes.startswith(b'%PDF'):
                     logger.info(f" PDF detectado con magic bytes: {nombre_archivo}")
                 elif nombre_archivo.lower().endswith('.pdf'):
@@ -1864,7 +1864,7 @@ class ProcesadorGemini:
             logger.info(" Facturación extranjera detectada: Proveedor fuera de Colombia")
             return True
         else:
-            logger.info("🇨🇴 Facturación nacional: Proveedor en Colombia")
+            logger.info("Facturación nacional: Proveedor en Colombia")
             return False
 
     def _limpiar_respuesta_json(self, respuesta: str) -> str:
@@ -2022,7 +2022,7 @@ class ProcesadorGemini:
 
             # 3. Verificar si el JSON es válido ahora
             json.loads(json_reparado)
-            logger.info("✅ JSON reparado exitosamente")
+            logger.info("JSON reparado exitosamente")
             return json_reparado
 
         except json.JSONDecodeError as e:
@@ -2041,7 +2041,7 @@ class ProcesadorGemini:
             contenido: Contenido a guardar
         """
         try:
-            # ✅ CORREGIDO: Usar rutas absolutas para evitar errores de subpath
+            # CORREGIDO: Usar rutas absolutas para evitar errores de subpath
             directorio_base = Path.cwd()  # Directorio actual del proyecto
             fecha_hoy = datetime.now().strftime("%Y-%m-%d")
             

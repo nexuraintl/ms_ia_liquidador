@@ -116,28 +116,28 @@ class ResultadoImpuestosIntegrado(BaseModel):
 
 class LiquidadorEstampilla:
     """
-    🏛️ LIQUIDADOR INTEGRADO DE IMPUESTOS ESPECIALES - OPTIMIZADO 2025
+    LIQUIDADOR INTEGRADO DE IMPUESTOS ESPECIALES - OPTIMIZADO 2025
     
     DESDE 2025: Ambos impuestos aplican para los MISMOS NITs administrativos.
     El sistema ahora utiliza análisis integrado optimizado.
     
-    ✅ ESTAMPILLA PRO UNIVERSIDAD NACIONAL:
+    ESTAMPILLA PRO UNIVERSIDAD NACIONAL:
         - NITs unificados (ahora incluye todos los NITs de obra pública)
         - Objetos: obra + interventoría + servicios conexos
         - Cálculo: Tarifas por rangos UVT (0.5%, 1.0%, 2.0%)
         
-    ✅ CONTRIBUCIÓN A OBRA PÚBLICA 5%:
+    CONTRIBUCIÓN A OBRA PÚBLICA 5%:
         - Mismo NITs que estampilla (configuración unificada)
         - Objetos: SOLO contrato de obra (no interventoría)
         - Cálculo: Tarifa fija del 5% sobre factura sin IVA
         
-    ✅ OPTIMIZACIONES IMPLEMENTADAS:
+    OPTIMIZACIONES IMPLEMENTADAS:
         - Prompt integrado en prompt_clasificador.py (mejor organización)
         - Detección automática de qué impuestos aplican según objeto
         - Procesamiento paralelo cuando ambos aplican (solo obra)
         - Manejo unificado de consorcios para ambos impuestos
         
-    ⚠️ FUNCIONES ELIMINADAS (ya no necesarias):
+    FUNCIONES ELIMINADAS (ya no necesarias):
         - obtener_prompt_gemini() → Reemplazado por prompt integrado
         - obtener_prompt_gemini_integrado() → Movido a prompt_clasificador.py
     """
@@ -252,9 +252,9 @@ class LiquidadorEstampilla:
         Extrae el valor total del contrato del texto
         
         FUNCIONALIDAD:
-        ✅ Busca patrones como "valor del contrato: $1,000,000"
-        ✅ Maneja porcentajes como "20% del valor del contrato"
-        ✅ Considera adiciones al contrato
+        Busca patrones como "valor del contrato: $1,000,000"
+        Maneja porcentajes como "20% del valor del contrato"
+        Considera adiciones al contrato
         
         Args:
             texto_documentos: Texto extraído de los documentos
@@ -383,7 +383,7 @@ class LiquidadorEstampilla:
                 "tarifa_aplicada": 0
             }
 
-        # ✅ CÁLCULO CORRECTO: Aplicar tarifa sobre valor de FACTURA sin IVA
+        # CÁLCULO CORRECTO: Aplicar tarifa sobre valor de FACTURA sin IVA
         valor_estampilla = valor_factura_sin_iva * info_tarifa["tarifa"]
         
         # Determinar rango en texto
@@ -456,7 +456,7 @@ class LiquidadorEstampilla:
             nombre = consorciado.get("nombre", "Sin nombre")
             participacion = consorciado.get("participacion_porcentaje", 0) / 100
             
-            # ✅ CÁLCULO CORRECTO PARA CONSORCIOS:
+            # CÁLCULO CORRECTO PARA CONSORCIOS:
             # Estampilla = Valor factura sin IVA x Tarifa x % participación
             valor_estampilla_consorciado = valor_factura_sin_iva * info_tarifa["tarifa"] * participacion
             
@@ -492,14 +492,14 @@ class LiquidadorEstampilla:
         SRP: Solo liquidación de estampilla universidad
 
         CUMPLE EXACTAMENTE LOS REQUISITOS:
-        ✅ Valida código de negocio
-        ✅ Valida objeto del contrato (obra, interventoría, servicios conexos)
-        ✅ Si NO se identifica objeto → "Preliquidación sin finalizar"
-        ✅ Valida valor del contrato (para determinar tarifa UVT)
-        ✅ Si NO se identifica valor → "Preliquidación sin finalizar"
-        ✅ Fórmula: Estampilla = Valor factura (sin IVA) x Porcentaje tarifa
-        ✅ Estados: "Preliquidado" / "No aplica impuesto" / "Preliquidación sin finalizar"
-        ✅ Manejo de consorcios con porcentaje de participación
+        Valida código de negocio
+        Valida objeto del contrato (obra, interventoría, servicios conexos)
+        Si NO se identifica objeto → "Preliquidación sin finalizar"
+        Valida valor del contrato (para determinar tarifa UVT)
+        Si NO se identifica valor → "Preliquidación sin finalizar"
+        Fórmula: Estampilla = Valor factura (sin IVA) x Porcentaje tarifa
+        Estados: "Preliquidado" / "No aplica impuesto" / "Preliquidación sin finalizar"
+        Manejo de consorcios con porcentaje de participación
 
         Args:
             analisis_contrato: Resultado del análisis de Gemini
@@ -541,7 +541,7 @@ class LiquidadorEstampilla:
                 resultado.estado = "preliquidacion_sin_finalizar"
                 return resultado
             
-            # 3. ✅ VALIDAR OBJETO DEL CONTRATO - REQUISITO CRÍTICO
+            # 3. VALIDAR OBJETO DEL CONTRATO - REQUISITO CRÍTICO
             if analisis_contrato.objeto_identificado:
                 resultado.objeto_contrato_valido = analisis_contrato.objeto_identificado.aplica_estampilla
                 
@@ -550,23 +550,23 @@ class LiquidadorEstampilla:
                     resultado.estado = "no_aplica_impuesto"
                     return resultado
             else:
-                # ✅ CUMPLE REQUISITO: Si NO se identifica objeto → "Preliquidación sin finalizar"
+                # CUMPLE REQUISITO: Si NO se identifica objeto → "Preliquidación sin finalizar"
                 resultado.mensajes_error.append("Cuando no se identifica el objeto del contrato, asignar estado: Preliquidación sin finalizar")
                 resultado.estado = "preliquidacion_sin_finalizar"
                 return resultado
             
-            # 4. ✅ VALIDAR VALOR DEL CONTRATO - REQUISITO CRÍTICO
+            # 4. VALIDAR VALOR DEL CONTRATO - REQUISITO CRÍTICO
             if analisis_contrato.valor_total_contrato:
                 resultado.valor_contrato_identificado = True
                 resultado.valor_contrato_pesos = analisis_contrato.valor_total_contrato
                 resultado.valor_contrato_uvt = analisis_contrato.valor_total_contrato / self.uvt_2025
             else:
-                # ✅ CUMPLE REQUISITO: Si NO se identifica valor → "Preliquidación sin finalizar"
+                # CUMPLE REQUISITO: Si NO se identifica valor → "Preliquidación sin finalizar"
                 resultado.mensajes_error.append("Si no se identifica el valor del contrato, asignar estado: Preliquidación sin finalizar")
                 resultado.estado = "preliquidacion_sin_finalizar"
                 return resultado
             
-            # 5. ✅ CALCULAR ESTAMPILLA CON FÓRMULA CORRECTA
+            # 5. CALCULAR ESTAMPILLA CON FÓRMULA CORRECTA
             if analisis_contrato.tercero and analisis_contrato.tercero.es_consorcio:
                 # MANEJO DE CONSORCIOS
                 logger.info(" Calculando estampilla para consorcio")
@@ -583,9 +583,9 @@ class LiquidadorEstampilla:
                     valor_factura_sin_iva=valor_factura_sin_iva
                 )
             
-            # 6. ✅ ACTUALIZAR RESULTADO CON ESTADOS CORRECTOS
+            # 6. ACTUALIZAR RESULTADO CON ESTADOS CORRECTOS
             resultado.aplica = True
-            resultado.estado = "preliquidado"  # ✅ CUMPLE REQUISITO: Si aplica → "Preliquidado"
+            resultado.estado = "preliquidado"  # CUMPLE REQUISITO: Si aplica → "Preliquidado"
             resultado.valor_estampilla = calculo["valor_estampilla"]
             resultado.tarifa_aplicada = calculo["tarifa_aplicada"]
             resultado.rango_uvt = calculo["rango_uvt"]
@@ -604,7 +604,7 @@ class LiquidadorEstampilla:
     def obtener_prompt_integrado_desde_clasificador(self, factura_texto: str, rut_texto: str, anexos_texto: str, 
                                                      cotizaciones_texto: str, anexo_contrato: str, nit_administrativo: str, nombres_archivos_directos: List[str]=None) -> str:
         """
-        🚀 NUEVA FUNCIÓN - Obtiene el prompt integrado optimizado desde prompt_clasificador.py
+        NUEVA FUNCIÓN - Obtiene el prompt integrado optimizado desde prompt_clasificador.py
         
         Esta función reemplaza los prompts individuales y utiliza el análisis integrado
         de obra pública + estampilla universidad.
@@ -650,13 +650,13 @@ class LiquidadorEstampilla:
         SRP: Solo liquidación de contribución a obra pública
 
         CUMPLE EXACTAMENTE LOS REQUISITOS:
-        ✅ Valida código de negocio
-        ✅ Solo contrato de obra (construcción, mantenimiento, instalación)
-        ✅ Si NO se identifica objeto → "Preliquidación sin finalizar"
-        ✅ Si NO se identifica valor → "Preliquidación sin finalizar"
-        ✅ Fórmula: Contribución = Valor factura (sin IVA) x 5%
-        ✅ Consorcios: Contribución = Valor factura (sin IVA) x 5% x % participación
-        ✅ Estados: "Preliquidado" / "No aplica  impuesto" / "Preliquidación sin finalizar"
+        Valida código de negocio
+        Solo contrato de obra (construcción, mantenimiento, instalación)
+        Si NO se identifica objeto → "Preliquidación sin finalizar"
+        Si NO se identifica valor → "Preliquidación sin finalizar"
+        Fórmula: Contribución = Valor factura (sin IVA) x 5%
+        Consorcios: Contribución = Valor factura (sin IVA) x 5% x % participación
+        Estados: "Preliquidado" / "No aplica  impuesto" / "Preliquidación sin finalizar"
 
         Args:
             valor_factura_sin_iva: Valor de la factura sin IVA
@@ -691,7 +691,7 @@ class LiquidadorEstampilla:
                 logger.warning(f"Código de negocio no válido: {codigo_negocio}")
                 return resultado
             
-            # 2. ✅ VALIDAR TERCERO (solo si se proporciona nombre)
+            # 2. VALIDAR TERCERO (solo si se proporciona nombre)
             if nombre_tercero:
                 if es_tercero_recursos_publicos(nombre_tercero):
                     resultado.tercero_valido = True
@@ -704,7 +704,7 @@ class LiquidadorEstampilla:
             else:
                 resultado.tercero_valido = True  # Si no se proporciona, asumimos válido
             
-            # 3. ✅ VALIDAR OBJETO DEL CONTRATO - REQUISITO CRÍTICO (SOLO OBRA)
+            # 3. VALIDAR OBJETO DEL CONTRATO - REQUISITO CRÍTICO (SOLO OBRA)
             if objeto_contrato:
                 es_obra = self._es_contrato_obra(objeto_contrato)
                 if es_obra:
@@ -716,30 +716,30 @@ class LiquidadorEstampilla:
                     resultado.estado = "preliquidacion_sin_finalizar"
                     return resultado
             else:
-                # ✅ CUMPLE REQUISITO: Si NO se identifica objeto → "Preliquidación sin finalizar"
+                # CUMPLE REQUISITO: Si NO se identifica objeto → "Preliquidación sin finalizar"
                 resultado.mensajes_error.append("Cuando no se identifica el objeto del contrato, asignar estado: Preliquidación sin finalizar")
                 resultado.estado = "preliquidacion_sin_finalizar"
                 return resultado
             
-            # 4. ✅ VALIDAR VALOR DE FACTURA - REQUISITO CRÍTICO
+            # 4. VALIDAR VALOR DE FACTURA - REQUISITO CRÍTICO
             if valor_factura_sin_iva > 0:
                 resultado.valor_factura_identificado = True
                 resultado.valor_factura_sin_iva = valor_factura_sin_iva
             else:
-                # ✅ CUMPLE REQUISITO: Si NO se identifica valor → "Preliquidación sin finalizar"
+                # CUMPLE REQUISITO: Si NO se identifica valor → "Preliquidación sin finalizar"
                 resultado.mensajes_error.append("Si no se identifica el valor de la factura, asignar estado: Preliquidación sin finalizar")
                 resultado.estado = "preliquidacion_sin_finalizar"
                 return resultado
             
-            # 5. ✅ CÁLCULO CON FÓRMULA CORRECTA
+            # 5. CÁLCULO CON FÓRMULA CORRECTA
             if es_consorcio and consorciados_info:
                 resultado = self._calcular_obra_publica_consorcio(resultado, valor_factura_sin_iva, consorciados_info)
             else:
                 resultado = self._calcular_obra_publica_individual(resultado, valor_factura_sin_iva)
             
-            # 6. ✅ ESTADO FINAL CORRECTO
+            # 6. ESTADO FINAL CORRECTO
             if resultado.aplica and resultado.valor_contribucion > 0:
-                resultado.estado = "preliquidado"  # ✅ CUMPLE REQUISITO: Si aplica → "Preliquidado"
+                resultado.estado = "preliquidado"  # CUMPLE REQUISITO: Si aplica → "Preliquidado"
                 logger.info(f" Contribución obra pública calculada: ${resultado.valor_contribucion:,.2f}")
                 logger.info(f" Fórmula: Valor factura sin IVA x 5% = ${valor_factura_sin_iva:,.2f} x 5% = ${resultado.valor_contribucion:,.2f}")
             else:
@@ -1302,7 +1302,7 @@ def crear_liquidador_estampilla() -> LiquidadorEstampilla:
     logger.info(" Creando liquidador integrado - Modo estampilla + obra pública")
     return LiquidadorEstampilla()
 
-# ✅ ALIAS INTEGRADO: Liquidador de Impuestos Especiales
+# ALIAS INTEGRADO: Liquidador de Impuestos Especiales
 LiquidadorImpuestosEspeciales = LiquidadorEstampilla
 
 def crear_liquidador_impuestos_especiales() -> LiquidadorEstampilla:
@@ -1340,7 +1340,7 @@ def validar_configuracion_estampilla() -> Dict[str, Any]:
             validacion["errores"].append("No hay terceros configurados")
             validacion["valida"] = False
         
-        # ✅ Validación de unificación exitosa
+        # Validación de unificación exitosa
         from config import NITS_CONTRIBUCION_OBRA_PUBLICA
         if config["nits_validos"] == NITS_CONTRIBUCION_OBRA_PUBLICA:
             validacion["unificacion_exitosa"] = True
@@ -1389,7 +1389,7 @@ def validar_configuracion_impuestos_integrada() -> Dict[str, Any]:
             "objetos_contrato": len(config_obra["objetos_contrato"])
         }
         
-        # ✅ Validación crítica: NITs unificados
+        # Validación crítica: NITs unificados
         if config_estampilla["nits_validos"] == config_obra["nits_validos"]:
             validacion["nits_unificados_exitoso"] = True
             logger.info(" NITs unificados correctamente entre ambos impuestos")
@@ -1419,9 +1419,9 @@ def validar_configuracion_impuestos_integrada() -> Dict[str, Any]:
         estado = "OK" if validacion["valida"] else "ERROR"
         logger.info(f" Validación configuración INTEGRADA OPTIMIZADA: {estado}")
         if validacion["valida"]:
-            logger.info(f"   ✓ {validacion['estampilla_universidad']['nits_configurados']} NITs unificados")
-            logger.info(f"   ✓ {validacion['terceros_compartidos']} terceros compartidos")
-            logger.info(f"   ✓ Prompt integrado funcionando")
+            logger.info(f"   {validacion['estampilla_universidad']['nits_configurados']} NITs unificados")
+            logger.info(f"   {validacion['terceros_compartidos']} terceros compartidos")
+            logger.info(f"   Prompt integrado funcionando")
         
         return validacion
         

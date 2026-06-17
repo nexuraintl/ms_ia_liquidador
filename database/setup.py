@@ -179,11 +179,11 @@ def crear_database_por_tipo(tipo_db: str, auth_provider: Optional[IAuthProvider]
         #         primary_db=nexura_db,
         #         fallback_db=supabase_db
         #     )
-        #     logger.info("✅ Sistema de fallback Nexura -> Supabase configurado correctamente")
+        #     logger.info("Sistema de fallback Nexura -> Supabase configurado correctamente")
         #     return fallback_db
         # else:
         #     logger.warning(
-        #         "⚠️ Variables SUPABASE_URL y/o SUPABASE_KEY no configuradas. "
+        #         "Variables SUPABASE_URL y/o SUPABASE_KEY no configuradas. "
         #         "Nexura funcionará SIN fallback (puede fallar si Nexura está caída)"
         #     )
         # ========================================

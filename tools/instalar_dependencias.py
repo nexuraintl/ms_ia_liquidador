@@ -15,7 +15,7 @@ from pathlib import Path
 
 def ejecutar_comando(comando):
     """Ejecuta un comando y muestra el resultado"""
-    print(f"🔄 Ejecutando: {comando}")
+    print(f"Ejecutando: {comando}")
     try:
         resultado = subprocess.run(
             comando, 
@@ -24,10 +24,10 @@ def ejecutar_comando(comando):
             capture_output=True, 
             text=True
         )
-        print(f"✅ Comando exitoso")
+        print(f"Comando exitoso")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         print(f"   Salida: {e.stdout}")
         print(f"   Error: {e.stderr}")
         return False
@@ -39,24 +39,24 @@ def verificar_dependencia(nombre_modulo, nombre_mostrar=None):
     
     try:
         __import__(nombre_modulo)
-        print(f"✅ {nombre_mostrar} ya está instalado")
+        print(f"{nombre_mostrar} ya está instalado")
         return True
     except ImportError:
-        print(f"❌ {nombre_mostrar} no está instalado")
+        print(f"{nombre_mostrar} no está instalado")
         return False
 
 def main():
     """Función principal de instalación"""
-    print("🚀 INSTALADOR DE DEPENDENCIAS - PRELIQUIDADOR v2.0")
+    print("INSTALADOR DE DEPENDENCIAS - PRELIQUIDADOR v2.0")
     print("=" * 50)
     
     # Verificar si estamos en el directorio correcto
     if not Path("requirements.txt").exists():
-        print("❌ No se encontró requirements.txt")
+        print("No se encontró requirements.txt")
         print("   Ejecuta este script desde la carpeta del proyecto")
         return
     
-    print("📦 Verificando dependencias actuales...")
+    print("Verificando dependencias actuales...")
     
     # Verificar dependencias principales
     dependencias_principales = [
@@ -70,7 +70,7 @@ def main():
     for modulo, nombre in dependencias_principales:
         verificar_dependencia(modulo, nombre)
     
-    print("\n🆕 Verificando nuevas dependencias v2.0...")
+    print("\nVerificando nuevas dependencias v2.0...")
     
     # Verificar nuevas dependencias
     nuevas_dependencias = [
@@ -84,17 +84,17 @@ def main():
             dependencias_faltantes.append(nombre)
     
     if dependencias_faltantes:
-        print(f"\n📥 Instalando dependencias faltantes: {', '.join(dependencias_faltantes)}")
+        print(f"\nInstalando dependencias faltantes: {', '.join(dependencias_faltantes)}")
         
         # Instalar desde requirements.txt
-        print("\n🔄 Instalando todas las dependencias desde requirements.txt...")
+        print("\nInstalando todas las dependencias desde requirements.txt...")
         if ejecutar_comando(f"{sys.executable} -m pip install -r requirements.txt"):
-            print("\n✅ Instalación completada exitosamente")
+            print("\nInstalación completada exitosamente")
         else:
-            print("\n❌ Error en la instalación")
+            print("\nError en la instalación")
             return
     else:
-        print("\n✅ Todas las dependencias están instaladas")
+        print("\nTodas las dependencias están instaladas")
     
     print("\n🧪 Verificando instalación...")
     
@@ -102,20 +102,20 @@ def main():
     try:
         print("   Probando pdf2image...")
         import pdf2image
-        print("   ✅ pdf2image funcional")
+        print("   pdf2image funcional")
     except Exception as e:
-        print(f"   ❌ Error con pdf2image: {e}")
+        print(f"   Error con pdf2image: {e}")
     
     try:
         print("   Probando PyMuPDF...")
         import fitz
-        print("   ✅ PyMuPDF funcional")
+        print("   PyMuPDF funcional")
     except Exception as e:
-        print(f"   ❌ Error con PyMuPDF: {e}")
+        print(f"   Error con PyMuPDF: {e}")
     
-    print("\n📝 NOTAS IMPORTANTES:")
+    print("\nNOTAS IMPORTANTES:")
     print("=" * 30)
-    print("1. 🔧 Si pdf2image falla en Linux/Mac, instala poppler-utils:")
+    print("1. Si pdf2image falla en Linux/Mac, instala poppler-utils:")
     print("   - Ubuntu/Debian: sudo apt-get install poppler-utils")
     print("   - macOS: brew install poppler")
     print("   - Windows: Incluido automáticamente")
@@ -124,13 +124,13 @@ def main():
     print("   - Variable GOOGLE_APPLICATION_CREDENTIALS en .env")
     print("   - Archivo JSON de credenciales válido")
     print("")
-    print("3. 🔄 Reinicia el servidor después de la instalación:")
+    print("3. Reinicia el servidor después de la instalación:")
     print("   - Ctrl+C para detener")
     print("   - python main.py para reiniciar")
     print("")
     print("4. 🧪 Prueba con un PDF que tenga poco texto para verificar OCR")
     
-    print("\n🎉 ¡INSTALACIÓN COMPLETADA!")
+    print("\n¡INSTALACIÓN COMPLETADA!")
     print("   El sistema ahora puede convertir PDF → Imagen → OCR")
 
 if __name__ == "__main__":

@@ -53,15 +53,21 @@ logs/
 config.local.py
 local_settings.py
 
-INSTRUCCIONES_CLAUDE_v2.md
+# SALIDAS GENERADAS POR TESTS (no versionar)
+tests/outputs/
 
-docs/
-
+# HERRAMIENTAS DE DESARROLLO (no versionar)
+tools/benchmark_prompt_caching.py
+.claude/
+.gemini/
+.opencode/
+.agent/
+AGENTS.md
+GEMINI.md
 CLAUDE.md
-
-tests/
-
+INSTRUCCIONES_CLAUDE_v2.md
 openspec/
+.coverage
 
 8710f8efdc27d463afcb10e88d10d9fc.xml
 9e9f6eb6167b551a7344b2c6a3bd4875.xml

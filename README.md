@@ -2,11 +2,13 @@
 
 **Sistema automatizado de liquidación tributaria con Inteligencia Artificial y Arquitectura Profesional.**
 
+> Versión: **3.19.8** · Documentación completa en [`docs/`](docs/README.md)
+
 API REST desarrollada con **FastAPI** que utiliza **Google Gemini AI** para procesar facturas y documentos de soporte, calculando automáticamente múltiples impuestos colombianos (Retención en la Fuente, IVA, ICA, Estampillas, etc.). El proyecto está construido rigurosamente bajo los principios **SOLID** y **Clean Architecture**.
 
 ## 📑 Características Principales
 
-- **Inteligencia Artificial (Híbrida)**: Integración con Google Gemini AI (SDK `google-genai` v0.2.0+) para la extracción y clasificación precisa de información. Utiliza multimodalidad mediante Google Files API para procesar archivos pesados (PDFs, Imágenes) de manera eficiente.
+- **Inteligencia Artificial (Híbrida)**: Integración con Google Gemini AI (SDK `google-genai` v1.12.1) para la extracción y clasificación precisa de información. Utiliza multimodalidad mediante Google Files API para procesar archivos pesados (PDFs, Imágenes) de manera eficiente.
 - **Cálculo Determinista**: Algoritmos deterministas en Python para validaciones normativas y cálculos tributarios exactos basados en la información extraída.
 - **Arquitectura Robusta**:
   - Implementación estricta de principios **SOLID**.
@@ -27,9 +29,9 @@ El sistema liquida y valida normativamente los siguientes impuestos:
 
 ## 🛠️ Stack Tecnológico
 
-- **Backend**: Python 3.9+, FastAPI, Pydantic.
+- **Backend**: Python 3.11, FastAPI, Pydantic.
 - **Inteligencia Artificial**: Google Gemini AI (`google-genai`).
-- **Base de Datos / Fuentes de Verdad**: Estrategia híbrida con Nexura API (Primaria) y Supabase (Respaldo).
+- **Fuente de Verdad de Datos**: API de Nexura (única fuente activa). El código conserva un respaldo en Supabase usado durante el desarrollo, hoy desactivado.
 - **Procesamiento Asíncrono**: `asyncio`, tareas en background y Webhooks.
 
 ## 📁 Estructura del Proyecto
@@ -40,17 +42,17 @@ La arquitectura se divide estratégicamente en responsabilidades únicas:
 - `Background/`: Procesamiento asíncrono y Webhooks de resultados.
 - `Clasificador/`: Integración con Gemini AI y módulos clasificadores especializados por impuesto.
 - `Liquidador/`: Lógica de negocio tributaria, calculadoras deterministas y validadores normativos.
-- `database/`: Capa de acceso a datos dinámica (Nexura API / Supabase).
+- `database/`: Capa de acceso a datos vía API de Nexura.
 - `modelos/`: Definiciones Pydantic para validación de datos (I/O).
 - `Conversor/`: Servicios financieros externos (ej. conversor TRM COP/USD).
 
 ## ⚙️ Requisitos Previos
 
-- Python 3.9 o superior.
+- Python 3.11.
+- `poppler-utils` (dependencia de las librerías de manejo de PDF; incluida en la imagen Docker).
 - Claves y Credenciales:
   - Google Gemini API Key.
-  - Supabase URL y Key.
-  - Credenciales de Nexura API.
+  - Credenciales de la API de Nexura.
 
 ## 🚀 Instalación y Configuración
 
@@ -75,30 +77,44 @@ La arquitectura se divide estratégicamente en responsabilidades únicas:
    ```
 
 4. **Configurar variables de entorno:**
-   Crea un archivo `.env` en la raíz del proyecto basándote en la configuración de `config.py`.
+   Crea un archivo `.env` en la raíz del proyecto. El detalle completo de cada
+   variable está en [`docs/02_DESPLIEGUE_OPERACION.md`](docs/02_DESPLIEGUE_OPERACION.md).
    ```env
+   # Obligatorias
    GEMINI_API_KEY=tu_api_key_de_gemini
-   SUPABASE_URL=tu_supabase_url
-   SUPABASE_KEY=tu_supabase_key
-   NEXURA_API_URL=tu_nexura_url
-   NEXURA_JWT_TOKEN=tu_token_jwt
+   NEXURA_API_BASE_URL=tu_nexura_url
+   NEXURA_LOGIN_USER=tu_usuario_nexura
+   NEXURA_LOGIN_PASSWORD=tu_password_nexura
+
+   # Opcionales (con valor por defecto)
+   NEXURA_API_TIMEOUT=30
+   WEBHOOK_URL=url_destino_del_resultado
+   WEBHOOK_AUTH_TYPE=bearer
+   WEBHOOK_AUTH_TOKEN=token_del_webhook
    ```
+   > La fuente de datos es la API de Nexura. `SUPABASE_URL`/`SUPABASE_KEY` solo se
+   > necesitan si se reactiva el respaldo en Supabase (hoy desactivado).
 
 ## 💻 Uso y Ejecución
 
 Para iniciar el servidor local de desarrollo, ejecuta:
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 Una vez que el servidor esté corriendo, puedes acceder a la documentación interactiva de la API en:
-- **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Swagger UI**: [http://localhost:8080/docs](http://localhost:8080/docs)
+- **ReDoc**: [http://localhost:8080/redoc](http://localhost:8080/redoc)
 
 ## 🧪 Pruebas
 
-El sistema cuenta con una suite de pruebas para validar las reglas de negocio. Para ejecutarlas:
+El sistema cuenta con una suite de pruebas para validar las reglas de negocio.
+Ejecútalas con el entorno virtual del proyecto (con el Python global falla la
+dependencia `python-calamine`):
 ```bash
-pytest
+.\venv\Scripts\pytest tests/    # Windows
+./venv/bin/pytest tests/        # Linux/Mac
 ```
+Estado actual: 760 aprobados, 18 omitidos (integraciones externas), 0 fallos.
+Detalle en [`docs/04_PRUEBAS.md`](docs/04_PRUEBAS.md).

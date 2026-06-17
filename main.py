@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 from app.validacion_archivos import ValidadorArchivos
 from Clasificador import ProcesadorGemini
 from Liquidador import LiquidadorRetencion
-from Extraccion import ProcesadorArchivos, preprocesar_excel_limpio
+from Extraccion import ProcesadorArchivos
 from app.extraccion_hibrida import ExtractorHibrido
 
 # Importar módulos de base de datos (SOLID: Clean Architecture Module)
@@ -75,7 +75,6 @@ from config import (
     nit_aplica_ICA,  #  NUEVA IMPORTACIÓN ICA
     nit_aplica_tasa_prodeporte,  #  NUEVA IMPORTACIÓN TASA PRODEPORTE
     nit_aplica_timbre,  #  NUEVA IMPORTACIÓN TIMBRE
-    detectar_impuestos_aplicables_por_codigo,  #  DETECCIÓN AUTOMÁTICA POR CÓDIGO
     guardar_archivo_json,  # FUNCIÓN DE UTILIDAD PARA GUARDAR JSON
 
 )
@@ -85,9 +84,6 @@ from config import (
 # Importar modulo de procesamiento asincrono (Background)
 from Background import WebhookPublisher, BackgroundProcessor
 
-# Dependencias para preprocesamiento Excel
-import pandas as pd
-import io
 
 # Importar utilidades - Respuestas mock para validaciones (SRP)
 from utils.error_handlers import registrar_exception_handler
@@ -210,7 +206,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Preliquidador de Retefuente - Colombia",
     description="Sistema automatizado para calcular retención en la fuente con arquitectura modular",
-    version="2.0.0",
+    version="3.19.8",
     lifespan=lifespan
 )
 
@@ -354,82 +350,6 @@ async def procesar_facturas_integrado(
 # ===============================
 
 
-@app.get("/api/nits-disponibles")
-async def obtener_nits_disponibles_endpoint():
-    """Obtener lista de NITs administrativos disponibles"""
-    try:
-        nits_data = obtener_nits_disponibles()
-        
-        # Formatear para el frontend
-        nits_formateados = []
-        for nit, datos in nits_data.items():
-            nits_formateados.append({
-                "nit": nit,
-                "nombre": datos["nombre"],
-                "impuestos_aplicables": datos["impuestos_aplicables"],
-                "total_impuestos": len(datos["impuestos_aplicables"]),
-                "aplica_retencion_fuente": "RETENCION_FUENTE" in datos["impuestos_aplicables"],
-                "aplica_estampilla_universidad": "ESTAMPILLA_UNIVERSIDAD" in datos["impuestos_aplicables"]
-            })
-        
-        return {
-            "success": True,
-            "nits": nits_formateados,
-            "total_nits": len(nits_formateados),
-            "version": "2.4.0",
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error obteniendo NITs disponibles: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "Error obteniendo NITs",
-                "mensaje": str(e),
-                "version": "2.4.0"
-            }
-        )
-
-@app.get("/api/extracciones")
-async def obtener_estadisticas_extracciones():
-    """Obtener estadísticas de textos extraídos guardados"""
-    try:
-        extractor = ProcesadorArchivos()
-        estadisticas = extractor.obtener_estadisticas_guardado()
-        
-        return {
-            "success": True,
-            "version": "2.4.0",
-            "modulo": "Extraccion",
-            "estadisticas": estadisticas,
-            "timestamp": datetime.now().isoformat()
-        }
-        
-    except Exception as e:
-        logger.error(f"Error obteniendo estadísticas de extracciones: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "Error obteniendo estadísticas",
-                "mensaje": str(e),
-                "modulo": "Extraccion"
-            }
-        )
-
-@app.post("/api/prueba-simple")
-async def prueba_simple(nit_administrativo: Optional[str] = Form(None)):
-    """Endpoint de prueba simple SIN archivos"""
-    logger.info(f" PRUEBA SIMPLE: Recibido NIT: {nit_administrativo}")
-    return {
-        "success": True,
-        "mensaje": "POST sin archivos funciona - Sistema integrado",
-        "nit_recibido": nit_administrativo,
-        "version": "2.4.0",
-        "sistema": "integrado_retefuente_estampilla",
-        "timestamp": datetime.now().isoformat()
-    }
-
 @app.get("/api/database/health")
 async def database_health_check():
     """
@@ -480,51 +400,12 @@ async def database_health_check():
             }
         )
 
-@app.get("/api/database/test/{codigo_negocio}")
-async def test_database_query(codigo_negocio: int):
-    """
-    Probar consulta de negocio por código usando BusinessService.
-
-    PRINCIPIO SRP: Endpoint específico para testing de consultas de negocio
-    """
-    if not business_service:
-        return JSONResponse(
-            status_code=503,
-            content={
-                "error": "BusinessService no está disponible",
-                "details": "Error en inicialización del sistema de base de datos",
-                "service": "BusinessDataService"
-            }
-        )
-
-    try:
-        # Usar el servicio para la consulta (SRP + DIP)
-        resultado = business_service.obtener_datos_negocio(codigo_negocio)
-
-        return {
-            "resultado": resultado,
-            "service": "BusinessDataService",
-            "architecture": "SOLID + Clean Architecture",
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": f"Error consultando negocio: {str(e)}",
-                "codigo_consultado": codigo_negocio,
-                "service": "BusinessDataService",
-                "timestamp": datetime.now().isoformat()
-            }
-        )
-
 @app.get("/api/diagnostico")
 async def diagnostico_completo():
     """Endpoint de diagnóstico completo para verificar todos los componentes del sistema"""
     diagnostico = {
         "timestamp": datetime.now().isoformat(),
-        "version": "2.4.0",
-        "sistema": "integrado_retefuente_estampilla",
+        "version": app.version,
         "estado_general": "VERIFICANDO",
         "componentes": {}
     }
@@ -536,12 +417,6 @@ async def diagnostico_completo():
                 "configurado": bool(GEMINI_API_KEY),
                 "status": "OK" if GEMINI_API_KEY else "ERROR",
                 "mensaje": "Configurado" if GEMINI_API_KEY else "FALTA GEMINI_API_KEY en .env"
-            },
-            "google_credentials": {
-                "configurado": bool(GOOGLE_CLOUD_CREDENTIALS),
-                "archivo_existe": bool(GOOGLE_CLOUD_CREDENTIALS and os.path.exists(GOOGLE_CLOUD_CREDENTIALS)),
-                "status": "OK" if (GOOGLE_CLOUD_CREDENTIALS and os.path.exists(GOOGLE_CLOUD_CREDENTIALS)) else "WARNING",
-                "mensaje": "Configurado correctamente" if (GOOGLE_CLOUD_CREDENTIALS and os.path.exists(GOOGLE_CLOUD_CREDENTIALS)) else "Vision no disponible (opcional)"
             }
         }
         
@@ -629,21 +504,6 @@ async def diagnostico_completo():
                     "aplica_retencion": aplica_rf,
                     "mensaje": f"NIT {primer_nit} {'SÍ' if aplica_rf else 'NO'} aplica retención fuente"
                 }
-                
-         
-                #  VERIFICAR DETECCIÓN AUTOMÁTICA INTEGRADA
-                try:
-                    deteccion_auto = detectar_impuestos_aplicables(primer_nit)
-                    config_status["deteccion_automatica"] = {
-                        "status": "OK",
-                        "impuestos_detectados": deteccion_auto['impuestos_aplicables'],
-                        "mensaje": f"Detección automática funcionando: {len(deteccion_auto['impuestos_aplicables'])} impuestos detectados"
-                    }
-                except Exception as e:
-                    config_status["deteccion_automatica"] = {
-                        "status": "ERROR",
-                        "mensaje": f"Error en detección automática: {str(e)}"
-                    }
             else:
                 config_status["validar_nit"] = {
                     "status": "WARNING",
@@ -665,7 +525,7 @@ async def diagnostico_completo():
             "archivos_criticos": {}
         }
         
-        carpetas_requeridas = ["Clasificador", "Liquidador", "Extraccion", "Static", "Results"]
+        carpetas_requeridas = ["Clasificador", "Liquidador", "Extraccion", "Results"]
         for carpeta in carpetas_requeridas:
             existe = os.path.exists(carpeta)
             archivos_py = []
@@ -683,7 +543,7 @@ async def diagnostico_completo():
             }
             
         # Verificar archivos críticos
-        archivos_criticos = [".env", "config.py", "RETEFUENTE_CONCEPTOS.xlsx"]
+        archivos_criticos = [".env", "config.py"]
         for archivo in archivos_criticos:
             existe = os.path.exists(archivo)
             archivos_status["archivos_criticos"][archivo] = {
@@ -746,7 +606,6 @@ if __name__ == "__main__":
     logger.info(" Iniciando Preliquidador de Retefuente v2.0 - Sistema Integrado")
     logger.info(" Funcionalidades: Retención en la fuente + Estampilla universidad + Obra pública 5%")
     logger.info(f" Gemini configurado: {bool(GEMINI_API_KEY)}")
-    #logger.info(f" Vision configurado: {bool(GOOGLE_CLOUD_CREDENTIALS)}")
     
     # Verificar estructura de carpetas
     carpetas_requeridas = ["Clasificador", "Liquidador", "Extraccion",  "Results"]

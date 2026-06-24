@@ -109,6 +109,76 @@ class DatabaseInterface(ABC):
         """
         pass
 
+    @abstractmethod
+    def obtener_configuracion_iva_db(self) -> Dict[str, Any]:
+        """
+        Obtiene la configuracion de IVA desde la base de datos.
+
+        SRP: Solo consulta datos de configuracion IVA (Data Access Layer)
+        DIP: Abstraccion que permite multiples implementaciones
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': {
+                    'bienes_no_causan_iva': Dict[str, str],
+                    'bienes_exentos_iva': Dict[str, str],
+                    'servicios_excluidos_iva': Dict[str, str]
+                } | None,
+                'message': str,
+                'raw_data': dict  # opcional para debugging
+            }
+        """
+        pass
+
+    @abstractmethod
+    def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
+        """
+        Obtiene rangos UVT y tarifas para Estampilla Pro Universidad Nacional.
+
+        SRP: Solo consulta datos de rangos (Data Access Layer)
+        DIP: Abstraccion que permite multiples implementaciones
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': [
+                    {
+                        'desde_uvt': float,      # 26.0
+                        'hasta_uvt': float,      # 52652.0 (o float('inf') para infinito)
+                        'tarifa': float,         # 0.005 (0.5% convertido de "0.5000")
+                        'id': int                # identificador unico
+                    }
+                ] | None,
+                'message': str,
+                'raw_data': list  # opcional para debugging
+            }
+        """
+        pass
+
+    @abstractmethod
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio que aplican Estampilla Pro Universidad
+        Nacional y Contribucion a Obra Publica.
+
+        SRP: Solo consulta el endpoint de codigos de negocio (Data Access Layer)
+        DIP: Abstraccion que permite multiples implementaciones
+
+        Endpoint: GET /preliquidador/codigoNegociosFiduciaria/
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': { "69164": "PATRIMONIO ...", ... } | None,  # codigo(str) -> nombre
+                'message': str
+            }
+        """
+        pass
+
 
 # ================================
 #  IMPLEMENTACIÓN SUPABASE
@@ -787,6 +857,70 @@ class SupabaseDatabase(DatabaseInterface):
             )
         }
 
+    def obtener_configuracion_iva_db(self) -> Dict[str, Any]:
+        """
+        Implementacion Supabase para configuracion IVA.
+
+        NOTA: Tabla no existe en Supabase, retorna error descriptivo.
+        OCP: Preparada para extension futura si se crea tabla.
+
+        Returns:
+            Dict con success=False indicando que no esta implementado
+        """
+        logger.warning(
+            "SupabaseDatabase: Tabla configuracion IVA no implementada. "
+            "Use NexuraAPIDatabase para obtener configuracion IVA."
+        )
+
+        return {
+            'success': False,
+            'data': None,
+            'message': (
+                'Error consultando a la base de datos, Timeouts y retrys excedidos.'
+            )
+        }
+
+    def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
+        """
+        Implementacion Supabase para rangos estampilla universidad.
+
+        NOTA: Tabla no existe en Supabase, retorna error descriptivo.
+        OCP: Preparada para extension futura si se crea tabla.
+
+        Returns:
+            Dict con success=False indicando que no esta implementado
+        """
+        logger.warning(
+            "SupabaseDatabase: Tabla rangos estampilla no implementada. "
+            "Use NexuraAPIDatabase."
+        )
+
+        return {
+            'success': False,
+            'data': None,
+            'message': (
+                'Error consultando a la base de datos, Timeouts y retrys excedidos.'
+            )
+        }
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Implementacion Supabase para codigos de negocio fiduciaria.
+
+        NOTA: No soportado en Supabase, retorna error descriptivo.
+        OCP: Preparada para extension futura si se crea la fuente.
+        """
+        logger.warning(
+            "SupabaseDatabase: codigos de negocio fiduciaria no implementado. "
+            "Use NexuraAPIDatabase."
+        )
+
+        return {
+            'success': False,
+            'data': None,
+            'message': 'Codigos de negocio fiduciaria no soportado en Supabase'
+        }
+
     def health_check(self) -> bool:
         """
         Verifica si la conexión a Supabase funciona
@@ -832,10 +966,18 @@ class NexuraAPIDatabase(DatabaseInterface):
         self.auth_provider = auth_provider
         self.timeout = timeout
 
+        # Feature flag experimental: consultar la tabla normalizada /retefuenteNew/
+        # en lugar de /retefuente/. Solo afecta a obtener_conceptos_retefuente()
+        # y obtener_concepto_por_index(); el resto del sistema es agnostico.
+        self._use_retefuente_new = os.getenv("USE_RETEFUENTE_NEW", "false").lower() == "true"
+
         # Configuracion robusta de session HTTP (SRP: metodo dedicado)
         self.session = self._configurar_session_robusta()
 
-        logger.info(f"NexuraAPIDatabase inicializado: {self.base_url}")
+        logger.info(
+            f"NexuraAPIDatabase inicializado: {self.base_url} "
+            f"(USE_RETEFUENTE_NEW={self._use_retefuente_new})"
+        )
 
         # Validar autenticacion
         if not self.auth_provider.is_authenticated():
@@ -1085,6 +1227,69 @@ class NexuraAPIDatabase(DatabaseInterface):
         }
 
         return concepto_mapeado
+
+    def _mapear_conceptos_retefuente_new(self, data_nexura: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Mapea conceptos del endpoint experimental /retefuenteNew/ al formato interno.
+
+        El endpoint nuevo trae conceptos mas normalizados con campos:
+        id, numero_item, categoria, concepto, base_uvt, base, porcentaje.
+        Solo necesitamos 'concepto' (como descripcion) y 'id' (como index)
+        para mantener compatibilidad con el resto del sistema.
+        """
+        if not data_nexura:
+            return []
+
+        conceptos_mapeados = []
+        for concepto_raw in data_nexura:
+            conceptos_mapeados.append({
+                'descripcion_concepto': concepto_raw.get('concepto'),
+                'index': concepto_raw.get('id')
+            })
+        return conceptos_mapeados
+
+    def _mapear_concepto_individual_new(self, data_nexura: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """
+        Mapea un concepto individual del endpoint experimental /retefuenteNew/.
+
+        Diferencias con el endpoint legacy:
+        - 'concepto' en vez de 'descripcion_concepto'.
+        - 'base' puede venir como string con separador de miles ("1.414.098") o como "1".
+        - 'porcentaje' viene como numero (no como string con coma).
+        - No existe 'codigo_concepto' -> se setea como cadena vacia.
+        """
+        if not data_nexura or len(data_nexura) == 0:
+            return None
+
+        concepto_raw = data_nexura[0]
+
+        base_raw = concepto_raw.get('base', 0)
+        porcentaje_raw = concepto_raw.get('porcentaje', 0)
+
+        try:
+            if isinstance(base_raw, str):
+                base = float(base_raw.replace('.', '').replace(',', '.'))
+            elif base_raw is not None:
+                base = float(base_raw)
+            else:
+                base = 0.0
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Error convirtiendo base de retefuenteNew '{base_raw}': {e}")
+            base = 0.0
+
+        try:
+            porcentaje = float(porcentaje_raw) if porcentaje_raw is not None else 0.0
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Error convirtiendo porcentaje de retefuenteNew '{porcentaje_raw}': {e}")
+            porcentaje = 0.0
+
+        return {
+            'descripcion_concepto': concepto_raw.get('concepto', ''),
+            'base': base,
+            'porcentaje': porcentaje,
+            'index': concepto_raw.get('id'),
+            'codigo_concepto': ''
+        }
 
     def obtener_por_codigo(self, codigo: str) -> Dict[str, Any]:
         """
@@ -1485,10 +1690,17 @@ class NexuraAPIDatabase(DatabaseInterface):
             }
         """
         try:
+            if self._use_retefuente_new:
+                endpoint = '/preliquidador/retefuenteNew/'
+                params = {}
+            else:
+                endpoint = '/preliquidador/retefuente/'
+                params = {'estructuraContable': estructura_contable}
+
             response = self._hacer_request(
-                endpoint='/preliquidador/retefuente/',
+                endpoint=endpoint,
                 method='GET',
-                params={'estructuraContable': estructura_contable}
+                params=params
             )
 
             error_info = response.get('error', {})
@@ -1498,7 +1710,10 @@ class NexuraAPIDatabase(DatabaseInterface):
                 data_array = response.get('data', [])
 
                 if data_array and len(data_array) > 0:
-                    conceptos_mapeados = self._mapear_conceptos_retefuente(data_array)
+                    if self._use_retefuente_new:
+                        conceptos_mapeados = self._mapear_conceptos_retefuente_new(data_array)
+                    else:
+                        conceptos_mapeados = self._mapear_conceptos_retefuente(data_array)
 
                     return {
                         'success': True,
@@ -1612,13 +1827,17 @@ class NexuraAPIDatabase(DatabaseInterface):
             }
         """
         try:
+            if self._use_retefuente_new:
+                endpoint = '/preliquidador/retefuenteNew/'
+                params = {'id': index}
+            else:
+                endpoint = '/preliquidador/retefuente/'
+                params = {'id': index, 'estructuraContable': estructura_contable}
+
             response = self._hacer_request(
-                endpoint='/preliquidador/retefuente/',
+                endpoint=endpoint,
                 method='GET',
-                params={
-                    'id': index,
-                    'estructuraContable': estructura_contable
-                }
+                params=params
             )
 
             error_info = response.get('error', {})
@@ -1628,7 +1847,10 @@ class NexuraAPIDatabase(DatabaseInterface):
                 data_array = response.get('data', [])
 
                 if data_array and len(data_array) > 0:
-                    concepto_mapeado = self._mapear_concepto_individual(data_array)
+                    if self._use_retefuente_new:
+                        concepto_mapeado = self._mapear_concepto_individual_new(data_array)
+                    else:
+                        concepto_mapeado = self._mapear_concepto_individual(data_array)
 
                     if concepto_mapeado:
                         concepto_mapeado['estructura_contable'] = estructura_contable
@@ -2632,6 +2854,518 @@ class NexuraAPIDatabase(DatabaseInterface):
             logger.error(f"Error parseando '{porcentaje_str}': {e}", exc_info=True)
             return None
 
+    def obtener_configuracion_iva_db(self) -> Dict[str, Any]:
+        """
+        Obtiene la configuracion de IVA desde Nexura API.
+
+        SRP: Solo consulta endpoint de configuracion IVA (Data Access Layer)
+
+        Endpoint: GET /preliquidador/impuestoValorAgregado/
+        Sin parametros requeridos
+
+        Mapeo de campos esperados:
+        - bienes_no_causan_iva: Dict[str, str]
+        - bienes_exentos_iva: Dict[str, str]
+        - servicios_excluidos_iva: Dict[str, str]
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': {
+                    'bienes_no_causan_iva': Dict[str, str],
+                    'bienes_exentos_iva': Dict[str, str],
+                    'servicios_excluidos_iva': Dict[str, str]
+                } | None,
+                'message': str,
+                'raw_data': dict  # opcional para debugging
+            }
+        """
+        logger.info("Consultando configuracion IVA desde Nexura API: /preliquidador/impuestoValorAgregado/")
+
+        try:
+            # 1. REQUEST A NEXURA API
+            response = self._hacer_request(
+                endpoint='/preliquidador/impuestoValorAgregado/',
+                method='GET'
+            )
+
+            logger.debug(f"Respuesta API configuracion IVA recibida: status code verificado")
+
+            # 2. VERIFICAR ERROR CODE
+            error_info = response.get('error', {})
+            error_code = error_info.get('code', -1)
+
+            # 3. CASO EXITOSO (error.code = 0)
+            if error_code == 0:
+                data_obj = response.get('data', {})
+
+                # La API retorna un objeto (no array) con los campos directamente
+                if data_obj and isinstance(data_obj, dict):
+                    # 4. MAPEO DE CAMPOS
+                    # La API retorna arrays con los nombres en MAYUSCULAS
+                    bienes_no_causan_array = data_obj.get('BIENES_NO_CAUSAN_IVA', [])
+                    bienes_exentos_array = data_obj.get('BIENES_EXENTOS_IVA', [])
+                    servicios_excluidos_array = data_obj.get('SERVICIOS_EXCLUIDOS_IVA', [])
+
+                    # Verificar que al menos uno de los campos tiene datos
+                    if not bienes_no_causan_array and not bienes_exentos_array and not servicios_excluidos_array:
+                        logger.warning("API retorno configuracion IVA pero todos los campos estan vacios")
+                        return {
+                            'success': False,
+                            'data': None,
+                            'message': 'Configuracion IVA encontrada pero todos los campos estan vacios',
+                            'raw_data': data_obj
+                        }
+
+                    # 5. CONVERTIR ARRAYS A DICCIONARIOS CON INDICES NUMERICOS
+                    # Esto mantiene compatibilidad con el resto del sistema que espera diccionarios
+                    bienes_no_causan = {str(i+1): item for i, item in enumerate(bienes_no_causan_array)}
+                    bienes_exentos = {str(i+1): item for i, item in enumerate(bienes_exentos_array)}
+                    servicios_excluidos = {str(i+1): item for i, item in enumerate(servicios_excluidos_array)}
+
+                    # 6. RETORNAR DATOS MAPEADOS
+                    datos_iva = {
+                        'bienes_no_causan_iva': bienes_no_causan,
+                        'bienes_exentos_iva': bienes_exentos,
+                        'servicios_excluidos_iva': servicios_excluidos
+                    }
+
+                    logger.info(
+                        f"Configuracion IVA obtenida exitosamente: "
+                        f"{len(bienes_no_causan)} bienes no causan, "
+                        f"{len(bienes_exentos)} bienes exentos, "
+                        f"{len(servicios_excluidos)} servicios excluidos"
+                    )
+
+                    return {
+                        'success': True,
+                        'data': datos_iva,
+                        'message': 'Configuracion IVA obtenida exitosamente desde Nexura API',
+                        'raw_data': data_obj
+                    }
+                else:
+                    logger.warning("API retorno respuesta exitosa pero sin datos de configuracion IVA")
+                    return {
+                        'success': False,
+                        'data': None,
+                        'message': 'No se encontro configuracion IVA en la base de datos'
+                    }
+
+            # 6. CASO 404 (NO ENCONTRADO)
+            elif error_code == 404:
+                logger.info("Configuracion IVA no encontrada en la base de datos (404)")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'No se encontro configuracion IVA en la base de datos',
+                    'skip_fallback': True
+                }
+
+            # 7. OTROS ERRORES DE API
+            else:
+                error_message = error_info.get('message', 'Error desconocido')
+                logger.error(
+                    f"Error de API al consultar configuracion IVA: "
+                    f"Code={error_code}, Message={error_message}"
+                )
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': f"Error de API al consultar configuracion IVA: {error_message}"
+                }
+
+        # 8. MANEJO DE EXCEPCIONES
+        except requests.exceptions.Timeout:
+            logger.error("Timeout al consultar configuracion IVA")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'Timeout',
+                'message': 'Timeout al consultar configuracion IVA. Intente nuevamente.'
+            }
+
+        except requests.exceptions.HTTPError as e:
+            if '404' in str(e):
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'No se encontro configuracion IVA en la base de datos',
+                    'skip_fallback': True
+                }
+            else:
+                logger.error(f"Error HTTP al consultar configuracion IVA: {e}")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': f"Error HTTP al consultar configuracion IVA: {str(e)}"
+                }
+
+        except Exception as e:
+            logger.error(f"Error inesperado al consultar configuracion IVA: {e}", exc_info=True)
+            return {
+                'success': False,
+                'data': None,
+                'error': str(e),
+                'message': f"Error inesperado al consultar configuracion IVA: {str(e)}"
+            }
+
+    def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
+        """
+        Obtiene rangos UVT y tarifas para Estampilla Pro Universidad Nacional.
+
+        SRP: Solo consulta endpoint de rangos estampilla (Data Access Layer)
+
+        Endpoint: GET /preliquidador/estampillaProUniversidad/
+        Sin parametros requeridos
+
+        PARSING CRITICO:
+        - "0.5000" (string) → 0.005 (float) [dividir por 100]
+        - "26" (string) → 26.0 (float)
+        - "" (string vacio en hasta_uvt) → float('inf')
+        - "> 52.626" → 52.626 (extraer numero)
+        - "<= 52.652" → 52.652 (extraer numero)
+
+        CONSOLIDACION DE RANGOS:
+        - Registros con id 1 y 2 son el mismo rango (diferentes notaciones)
+        - Consolidar registros duplicados por rango real
+
+        Returns:
+            Dict con estructura estandar:
+            {
+                'success': bool,
+                'data': [
+                    {
+                        'desde_uvt': float,      # 26.0
+                        'hasta_uvt': float,      # 52652.0 (o float('inf') para infinito)
+                        'tarifa': float,         # 0.005 (0.5% convertido de "0.5000")
+                        'id': int                # identificador unico
+                    }
+                ] | None,
+                'message': str,
+                'raw_data': list  # opcional para debugging
+            }
+        """
+        logger.info("Consultando rangos estampilla universidad desde Nexura API: /preliquidador/estampillaProUniversidad/")
+
+        try:
+            # PASO 1: REQUEST A NEXURA API
+            response = self._hacer_request(
+                endpoint='/preliquidador/estampillaProUniversidad/',
+                method='GET'
+            )
+
+            logger.debug("Respuesta API rangos estampilla recibida: status code verificado")
+
+            # PASO 2: VERIFICAR ERROR CODE
+            error_info = response.get('error', {})
+            error_code = error_info.get('code', -1)
+
+            # PASO 3: CASO EXITOSO (error.code = 0)
+            if error_code == 0:
+                data_array = response.get('data', [])
+
+                if not data_array:
+                    logger.warning("API retorno respuesta exitosa pero sin rangos de estampilla")
+                    return {
+                        'success': False,
+                        'data': None,
+                        'message': 'Configuracion de rangos estampilla no encontrada en BD',
+                        'skip_fallback': True
+                    }
+
+                # PASO 4: PARSING Y CONSOLIDACION DE RANGOS
+                rangos_parseados = []
+
+                for registro in data_array:
+                    try:
+                        desde_uvt = self._parsear_uvt(registro.get('desde_uvt', '0'))
+                        hasta_uvt = self._parsear_uvt(registro.get('hasta_uvt', ''))
+                        tarifa_str = registro.get('tarifa', '0')
+
+                        # Convertir tarifa: "0.5000" → 0.5 → 0.005 (dividir por 100)
+                        tarifa_porcentaje = float(tarifa_str)
+                        tarifa_decimal = tarifa_porcentaje / 100.0
+
+                        # Validar estado activo
+                        estado = registro.get('estado', 0)
+                        if estado != 1:
+                            logger.debug(f"Rango inactivo ignorado: id={registro.get('id')}")
+                            continue
+
+                        rango = {
+                            'id': registro.get('id'),
+                            'desde_uvt': desde_uvt,
+                            'hasta_uvt': hasta_uvt,
+                            'tarifa': tarifa_decimal
+                        }
+
+                        rangos_parseados.append(rango)
+
+                        logger.debug(
+                            f"Rango parseado: id={rango['id']}, "
+                            f"desde_uvt={desde_uvt}, hasta_uvt={hasta_uvt}, "
+                            f"tarifa={tarifa_decimal} ({tarifa_porcentaje}%)"
+                        )
+
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Error parseando registro {registro.get('id')}: {e}")
+                        continue
+
+                # PASO 5: CONSOLIDAR RANGOS DUPLICADOS
+                rangos_consolidados = self._consolidar_rangos_estampilla(rangos_parseados)
+
+                if not rangos_consolidados:
+                    logger.error("No se pudieron parsear rangos validos de estampilla")
+                    return {
+                        'success': False,
+                        'data': None,
+                        'message': 'No se pudieron parsear rangos validos de estampilla',
+                        'skip_fallback': True,
+                        'raw_data': data_array
+                    }
+
+                logger.info(
+                    f"Rangos estampilla obtenidos exitosamente: "
+                    f"{len(rangos_consolidados)} rangos parseados de {len(data_array)} registros"
+                )
+
+                return {
+                    'success': True,
+                    'data': rangos_consolidados,
+                    'message': 'Rangos estampilla obtenidos exitosamente desde Nexura API',
+                    'raw_data': data_array
+                }
+
+            # CASO 404
+            elif error_code == 404:
+                logger.info("Configuracion de rangos estampilla no encontrada (404)")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'Configuracion de rangos estampilla no encontrada',
+                    'skip_fallback': True
+                }
+
+            # OTROS ERRORES
+            else:
+                error_message = error_info.get('message', 'Error desconocido')
+                logger.error(
+                    f"Error de API al consultar rangos estampilla: "
+                    f"Code={error_code}, Message={error_message}"
+                )
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': f"Error de API al consultar rangos estampilla: {error_message}"
+                }
+
+        # MANEJO DE EXCEPCIONES
+        except requests.exceptions.Timeout:
+            logger.error("Timeout al consultar rangos estampilla")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'Timeout',
+                'message': "Timeout al consultar rangos estampilla. Intente nuevamente."
+            }
+
+        except requests.exceptions.HTTPError as e:
+            if '404' in str(e):
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'Configuracion de rangos estampilla no encontrada',
+                    'skip_fallback': True
+                }
+            else:
+                logger.error(f"Error HTTP al consultar rangos estampilla: {e}")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': f"Error HTTP al consultar rangos estampilla: {str(e)}"
+                }
+
+        except Exception as e:
+            logger.error(f"Error inesperado al consultar rangos estampilla: {e}", exc_info=True)
+            return {
+                'success': False,
+                'data': None,
+                'error': str(e),
+                'message': f"Error inesperado: {str(e)}"
+            }
+
+    def _parsear_uvt(self, uvt_str: str) -> float:
+        """
+        Parsea valores UVT desde string con posibles operadores y separadores de miles.
+
+        IMPORTANTE: Los puntos son separadores de miles, NO decimales.
+        Ejemplo: "52.626" = 52,626 UVT (cincuenta y dos mil seiscientos veintiseis)
+
+        Casos soportados:
+        - "26" → 26.0
+        - "52.626" → 52626.0 (punto como separador de miles)
+        - "> 52.626" → 52626.0
+        - "<= 52.652" → 52652.0
+        - "157.904" → 157904.0
+        - "" (vacio) → float('inf')
+
+        Args:
+            uvt_str: String con valor UVT (puede tener puntos como separadores de miles)
+
+        Returns:
+            float: Valor UVT parseado como numero entero
+        """
+        if not uvt_str or uvt_str.strip() == '':
+            return float('inf')
+
+        try:
+            import re
+            # Extraer solo numeros y puntos
+            numeros = re.findall(r'[\d\.]+', uvt_str)
+
+            if not numeros:
+                logger.warning(f"No se encontraron numeros en UVT: '{uvt_str}'")
+                return 0.0
+
+            # Tomar primer numero encontrado y eliminar puntos (separadores de miles)
+            numero_str = numeros[0].replace('.', '')  # "52.626" → "52626"
+            valor = float(numero_str)
+
+            logger.debug(f"UVT parseado: '{uvt_str}' → {valor}")
+            return valor
+
+        except (ValueError, IndexError) as e:
+            logger.error(f"Error parseando UVT '{uvt_str}': {e}")
+            return 0.0
+
+    def _consolidar_rangos_estampilla(self, rangos: List[Dict]) -> List[Dict]:
+        """
+        Consolida rangos duplicados con diferentes notaciones.
+
+        IMPORTANTE: Los valores UVT ya vienen parseados sin puntos (separadores de miles)
+
+        Ejemplo:
+        - id=1: desde_uvt=26, hasta_uvt=52626, tarifa=0.005
+        - id=2: desde_uvt=52626, hasta_uvt=52652, tarifa=0.005
+
+        Se consolida como:
+        - desde_uvt=26, hasta_uvt=52652, tarifa=0.005
+
+        Args:
+            rangos: Lista de rangos parseados
+
+        Returns:
+            Lista de rangos consolidados sin duplicados
+        """
+        if not rangos:
+            return []
+
+        # Ordenar por desde_uvt
+        rangos_ordenados = sorted(rangos, key=lambda r: r['desde_uvt'])
+
+        consolidados = []
+        rango_actual = None
+
+        for rango in rangos_ordenados:
+            if rango_actual is None:
+                # Primer rango
+                rango_actual = rango.copy()
+            else:
+                # Verificar si es continuacion del rango actual
+                # (misma tarifa y rango contiguo)
+                if (abs(rango_actual['tarifa'] - rango['tarifa']) < 0.0001 and
+                    abs(rango_actual['hasta_uvt'] - rango['desde_uvt']) < 1.0):
+                    # Extender rango actual
+                    rango_actual['hasta_uvt'] = rango['hasta_uvt']
+                    logger.debug(
+                        f"Consolidando rangos: extendiendo hasta_uvt a {rango['hasta_uvt']}"
+                    )
+                else:
+                    # Nuevo rango diferente
+                    consolidados.append(rango_actual)
+                    rango_actual = rango.copy()
+
+        # Agregar ultimo rango
+        if rango_actual:
+            consolidados.append(rango_actual)
+
+        logger.debug(f"Rangos consolidados: {len(rangos)} → {len(consolidados)}")
+        return consolidados
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio que aplican Estampilla Pro Universidad
+        Nacional y Contribucion a Obra Publica desde Nexura API.
+
+        SRP: Solo consulta el endpoint de codigos de negocio (Data Access Layer)
+
+        Endpoint: GET /preliquidador/codigoNegociosFiduciaria/
+        Sin parametros requeridos.
+
+        Respuesta esperada de la API:
+            { "error": {"code": 0, ...},
+              "data": { "69164": "PATRIMONIO ...", ... } }   # codigo(str) -> nombre
+
+        Returns:
+            Dict con estructura estandar {success, data, message} donde data es el
+            objeto crudo { codigo(str): nombre(str) }.
+        """
+        logger.info("Consultando codigos de negocio desde Nexura API: /preliquidador/codigoNegociosFiduciaria/")
+
+        try:
+            response = self._hacer_request(
+                endpoint='/preliquidador/codigoNegociosFiduciaria/',
+                method='GET'
+            )
+
+            error_info = response.get('error', {})
+            error_code = error_info.get('code', -1)
+
+            if error_code == 0:
+                data_obj = response.get('data', {})
+
+                if data_obj and isinstance(data_obj, dict):
+                    logger.info(f"Codigos de negocio obtenidos exitosamente: {len(data_obj)} codigos")
+                    return {
+                        'success': True,
+                        'data': data_obj,
+                        'message': f'{len(data_obj)} codigos de negocio obtenidos desde Nexura API'
+                    }
+
+                logger.warning("API retorno respuesta exitosa pero sin codigos de negocio")
+                return {
+                    'success': False,
+                    'data': None,
+                    'message': 'No se encontraron codigos de negocio en la base de datos'
+                }
+
+            error_message = error_info.get('message', 'Error desconocido')
+            logger.error(f"Error de API al consultar codigos de negocio: Code={error_code}, Message={error_message}")
+            return {
+                'success': False,
+                'data': None,
+                'message': f"Error de API al consultar codigos de negocio: {error_message}"
+            }
+
+        except requests.exceptions.Timeout:
+            logger.error("Timeout al consultar codigos de negocio")
+            return {
+                'success': False,
+                'data': None,
+                'error': 'Timeout',
+                'message': 'Timeout al consultar codigos de negocio. Intente nuevamente.'
+            }
+
+        except Exception as e:
+            logger.error(f"Error inesperado al consultar codigos de negocio: {e}", exc_info=True)
+            return {
+                'success': False,
+                'data': None,
+                'error': str(e),
+                'message': f"Error inesperado al consultar codigos de negocio: {str(e)}"
+            }
+
     def health_check(self) -> bool:
         """
         Verifica si la conexion a Nexura API funciona
@@ -2700,15 +3434,15 @@ class DatabaseManager:
         try:
             health_status = self.db_connection.health_check()
             if health_status:
-                logger.info("✅ DatabaseManager inicializado correctamente con conexión activa")
+                logger.info("DatabaseManager inicializado correctamente con conexión activa")
             else:
                 logger.warning(
-                    "⚠️ DatabaseManager inicializado pero health check falló. "
+                    "DatabaseManager inicializado pero health check falló. "
                     "Si hay fallback configurado, se activará automáticamente en las operaciones."
                 )
         except Exception as e:
             logger.warning(
-                f"⚠️ DatabaseManager inicializado pero health check generó excepción: {str(e)[:100]}. "
+                f"DatabaseManager inicializado pero health check generó excepción: {str(e)[:100]}. "
                 "Si hay fallback configurado, se activará automáticamente en las operaciones."
             )
     
@@ -2899,6 +3633,42 @@ class DatabaseManager:
         """
         return self.db_connection.obtener_datos_rubro_tasa_prodeporte(codigo_rubro)
 
+    def obtener_configuracion_iva_db(self) -> Dict[str, Any]:
+        """
+        Obtiene la configuracion de IVA desde la base de datos.
+
+        SRP: Delega a la implementacion configurada (Strategy Pattern)
+
+        Returns:
+            Dict con resultado de la consulta incluyendo:
+            - success: bool
+            - message: str
+            - data: Dict con bienes_no_causan_iva, bienes_exentos_iva, servicios_excluidos_iva
+        """
+        return self.db_connection.obtener_configuracion_iva_db()
+
+    def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
+        """
+        Obtiene rangos UVT y tarifas para Estampilla Pro Universidad Nacional.
+
+        SRP: Delega a la implementacion configurada (Strategy Pattern)
+
+        Returns:
+            Dict con resultado de la consulta incluyendo:
+            - success: bool
+            - message: str
+            - data: List de rangos con desde_uvt, hasta_uvt, tarifa
+        """
+        return self.db_connection.obtener_rangos_estampilla_universidad()
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """
+        Obtiene los codigos de negocio (estampilla / obra publica).
+
+        SRP: Delega a la implementacion configurada (Strategy Pattern)
+        """
+        return self.db_connection.obtener_codigos_negocios_fiduciaria()
+
 
 def ejecutar_pruebas_completas(db_manager: DatabaseManager):
     """
@@ -2939,26 +3709,26 @@ def ejecutar_pruebas_completas(db_manager: DatabaseManager):
                 print(f"       NIT: {data['nit']}")
                 print(f"       Nombre: {data['nombre_fiduciario']}")
             else:
-                print(f"   ❌ Error: {resultado['message']}")
+                print(f"   Error: {resultado['message']}")
     else:
-        print(f"   ❌ No se pudieron listar códigos: {codigos_result['message']}")
+        print(f"   No se pudieron listar códigos: {codigos_result['message']}")
     
     # 4. Probar con código específico conocido
     print("\n Probando con código específico:")
     resultado_especifico = db_manager.obtener_negocio_por_codigo("44658")
     
     if resultado_especifico['success']:
-        print("   ✅ Código '44658' encontrado!")
+        print("   Código '44658' encontrado!")
         data = resultado_especifico['data']
-        print(f"      📊 Datos: {data}")
+        print(f"      Datos: {data}")
         
         # Para integración con preliquidador
-        print(f"\n🔧 DATOS PARA PRELIQUIDADOR:")
+        print(f"\nDATOS PARA PRELIQUIDADOR:")
         print(f"   NIT a procesar: {data['nit']}")
         print(f"   Entidad: {data['nombre_fiduciario']}")
         
     else:
-        print(f"   ❌ Código '44658': {resultado_especifico['message']}")
+        print(f"   Código '44658': {resultado_especifico['message']}")
 
 # ================================
 # FALLBACK DATABASE - NEXURA CON SUPABASE COMO RESPALDO
@@ -3236,6 +4006,30 @@ class DatabaseWithFallback(DatabaseInterface):
             codigo_rubro
         )
 
+    def obtener_configuracion_iva_db(self) -> Dict[str, Any]:
+        """Obtiene configuracion IVA con fallback automatico"""
+        return self._ejecutar_con_fallback(
+            'obtener_configuracion_iva_db',
+            self.primary_db.obtener_configuracion_iva_db,
+            self.fallback_db.obtener_configuracion_iva_db
+        )
+
+    def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
+        """Obtiene rangos UVT y tarifas para Estampilla Universidad con fallback automatico"""
+        return self._ejecutar_con_fallback(
+            'obtener_rangos_estampilla_universidad',
+            self.primary_db.obtener_rangos_estampilla_universidad,
+            self.fallback_db.obtener_rangos_estampilla_universidad
+        )
+
+    def obtener_codigos_negocios_fiduciaria(self) -> Dict[str, Any]:
+        """Obtiene los codigos de negocio (estampilla / obra publica) con fallback automatico"""
+        return self._ejecutar_con_fallback(
+            'obtener_codigos_negocios_fiduciaria',
+            self.primary_db.obtener_codigos_negocios_fiduciaria,
+            self.fallback_db.obtener_codigos_negocios_fiduciaria
+        )
+
 
 # ================================
 # TESTING Y FUNCIONES DE PRUEBA
@@ -3245,7 +4039,7 @@ def main():
     """
     Función principal de prueba
     """
-    print("🚀 INICIANDO SISTEMA DE CONSULTA DE NEGOCIOS")
+    print("INICIANDO SISTEMA DE CONSULTA DE NEGOCIOS")
     print("=" * 60)
     
     try:

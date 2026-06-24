@@ -88,6 +88,11 @@ class GeminiFilesManager:
         Raises:
             ValueError: Si falla upload o timeout
         """
+        # Verificar cache antes de subir
+        if archivo.filename in self.uploaded_files:
+            logger.info(f"Archivo ya en Files API (cache hit): {archivo.filename}")
+            return self.uploaded_files[archivo.filename]
+
         try:
             # PASO 1: Guardar archivo temporalmente (Files API requiere path)
             temp_path = await self._save_temp_file(archivo)
@@ -96,8 +101,8 @@ class GeminiFilesManager:
                 # PASO 2: Upload usando nuevo SDK
                 logger.info(f"Subiendo archivo a Files API: {archivo.filename}")
 
-                uploaded_file = self.client.files.upload(
-                    path=str(temp_path),
+                uploaded_file = await self.client.aio.files.upload(
+                    file=str(temp_path),
                     config={
                         "display_name": archivo.filename
                     }
@@ -199,7 +204,7 @@ class GeminiFilesManager:
 
             # Obtener estado actualizado
             try:
-                file_obj = self.client.files.get(name=file_obj.name)
+                file_obj = await self.client.aio.files.get(name=file_obj.name)
             except Exception as e:
                 raise ValueError(f"Error consultando estado del archivo: {str(e)}")
 
@@ -236,7 +241,7 @@ class GeminiFilesManager:
             File object con metadata
         """
         try:
-            file_obj = self.client.files.get(name=file_name)
+            file_obj = await self.client.aio.files.get(name=file_name)
             logger.debug(f"Metadata obtenida: {file_name}")
             return file_obj
         except Exception as e:
@@ -254,7 +259,7 @@ class GeminiFilesManager:
             True si eliminado exitosamente, False si error
         """
         try:
-            self.client.files.delete(name=file_name)
+            await self.client.aio.files.delete(name=file_name)
 
             # Remover del cache interno
             for filename, file_result in list(self.uploaded_files.items()):
@@ -271,7 +276,7 @@ class GeminiFilesManager:
 
     async def cleanup_all(self, ignore_errors: bool = True):
         """
-        Elimina todos los archivos subidos a Files API.
+        Elimina todos los archivos subidos a Files API en paralelo.
 
         CRÍTICO: Usar en finally del endpoint para evitar acumulación.
 
@@ -280,18 +285,30 @@ class GeminiFilesManager:
         """
         logger.info(f"Iniciando cleanup de {len(self.uploaded_files)} archivos")
 
-        errores = []
-        exitosos = 0
+        archivos_a_eliminar = list(self.uploaded_files.items())
 
-        for filename, file_result in list(self.uploaded_files.items()):
-            try:
-                await self.delete_file(file_result.name)
-                exitosos += 1
-                logger.info(f"Archivo eliminado: {filename}")
-            except Exception as e:
-                errores.append(f"{filename}: {str(e)}")
-                if not ignore_errors:
-                    raise
+        if archivos_a_eliminar:
+            # Lanzar todos los deletes en paralelo en lugar de secuencial.
+            # return_exceptions=True evita que un fallo cancele los demas.
+            resultados = await asyncio.gather(
+                *[self.delete_file(file_result.name) for _, file_result in archivos_a_eliminar],
+                return_exceptions=True
+            )
+
+            exitosos = sum(1 for r in resultados if r is True)
+            errores = []
+            for (nombre, _), resultado in zip(archivos_a_eliminar, resultados):
+                if isinstance(resultado, Exception):
+                    errores.append(f"{nombre}: {str(resultado)}")
+                    if not ignore_errors:
+                        raise resultado
+                elif resultado is False:
+                    errores.append(f"{nombre}: fallo al eliminar")
+
+            logger.info(f"Cleanup completado: {exitosos} exitosos, {len(errores)} errores")
+
+            if errores and ignore_errors:
+                logger.warning(f"Errores durante cleanup (ignorados): {errores}")
 
         # Limpiar cache interno
         self.uploaded_files.clear()
@@ -299,11 +316,6 @@ class GeminiFilesManager:
         # Limpiar archivos temporales restantes
         for temp_file in list(self.temp_files):
             await self._cleanup_temp_file(temp_file)
-
-        logger.info(f"Cleanup completado: {exitosos} exitosos, {len(errores)} errores")
-
-        if errores and ignore_errors:
-            logger.warning(f"Errores durante cleanup (ignorados): {errores}")
 
     async def __aenter__(self):
         """Context manager entry"""

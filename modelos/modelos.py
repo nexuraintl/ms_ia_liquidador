@@ -35,6 +35,8 @@ class ConceptoIdentificado(BaseModel):
         concepto_facturado: Descripcion literal del concepto en la factura (opcional)
         base_gravable: Base sobre la que se calcula la retencion (opcional)
         concepto_index: Indice del concepto en la lista de conceptos (opcional)
+        razonamiento: Chain-of-thought del matching - candidatos evaluados,
+            pistas contextuales citadas y criterio decisivo (opcional)
 
     Example:
         >>> concepto = ConceptoIdentificado(
@@ -48,6 +50,7 @@ class ConceptoIdentificado(BaseModel):
     concepto_facturado: Optional[str] = None
     base_gravable: Optional[float] = None
     concepto_index: Optional[int] = None
+    razonamiento: Optional[str] = None
 
 
 class DetalleConcepto(BaseModel):
@@ -285,12 +288,14 @@ class PlanillaSeguridadSocial(BaseModel):
         IBC_seguridad_social: Ingreso Base de Cotizacion
         planilla_seguridad_social: True si hay planilla PILA
         fecha_de_planilla_seguridad_social: Fecha de pago de la planilla
+        valor_pagado_seguridad_social: Valor total a pagar reportado en la planilla PILA
 
     Example:
         >>> planilla = PlanillaSeguridadSocial(
         ...     IBC_seguridad_social=8000000.0,
         ...     planilla_seguridad_social=True,
-        ...     fecha_de_planilla_seguridad_social="2024-10-15"
+        ...     fecha_de_planilla_seguridad_social="2024-10-15",
+        ...     valor_pagado_seguridad_social=950000.0
         ... )
 
     Note:
@@ -300,6 +305,7 @@ class PlanillaSeguridadSocial(BaseModel):
     IBC_seguridad_social: float = 0.0
     planilla_seguridad_social: bool = False
     fecha_de_planilla_seguridad_social: str = "0000-00-00"
+    valor_pagado_seguridad_social: float = 0.0
 
 
 class DeduccionesArticulo383(BaseModel):

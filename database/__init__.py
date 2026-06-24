@@ -74,6 +74,9 @@ from .setup import (
     # Inicialización de infraestructura
     inicializar_database_manager,
 
+    # Obtener UVT desde API externa
+    obtener_uvt_desde_api,
+
     # Verificación de conexión
     verificar_conexion_database
 )
@@ -105,6 +108,7 @@ __all__ = [
 
     # Infrastructure Setup
     "inicializar_database_manager",
+    "obtener_uvt_desde_api",
     "verificar_conexion_database",
 ]
 
@@ -152,4 +156,4 @@ def crear_database_stack_completo(supabase_url: str = None, supabase_key: str = 
 
 import logging
 logger = logging.getLogger(__name__)
-logger.info(f"📦 Database module inicializado - Versión {__version__} - Arquitectura: {__architecture__}")
+logger.info(f"Database module inicializado - Versión {__version__} - Arquitectura: {__architecture__}")

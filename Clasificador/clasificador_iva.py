@@ -36,11 +36,16 @@ if TYPE_CHECKING:
 
 
 class ClasificadorIva:
-    def __init__ (self, 
+    def __init__ (self,
                   procesador_gemini: 'ProcesadorGemini',
+                  database_manager = None
                   ):
         self.procesador_gemini = procesador_gemini
-        
+        self.database_manager = database_manager
+
+        if not database_manager:
+            logger.warning("ClasificadorIva inicializado SIN database_manager - La obtencion de config IVA fallara")
+
         logger.info("Clasificador Iva inicializado correctamente.")
     
     async def analizar_iva(self, documentos_clasificados: Dict[str, Dict], archivos_directos: List[UploadFile] = None, cache_archivos: Dict[str, bytes] = None) -> Dict[str, Any]:
@@ -111,7 +116,8 @@ class ClasificadorIva:
                 anexos_texto=anexos_texto,
                 cotizaciones_texto=cotizaciones_texto,
                 anexo_contrato=anexo_contrato,
-                nombres_archivos_directos=nombres_archivos_directos
+                nombres_archivos_directos=nombres_archivos_directos,
+                database_manager=self.database_manager
             )
             
             # Llamar a Gemini

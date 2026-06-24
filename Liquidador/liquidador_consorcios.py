@@ -397,30 +397,30 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
             Decimal: Valor de retención general teórica (sin validación de base mínima)
         """
         try:
-            valor_total = Decimal(str(datos_liquidacion.get('valor_total', 0)))
+            valor_total = Decimal(str(datos_liquidacion.get('valor_total') or 0))
             conceptos = datos_liquidacion.get('conceptos_identificados', [])
 
             if not conceptos or valor_total <= 0:
                 return Decimal('0')
 
-            logger.info(f"📊 Calculando retención general teórica para {len(conceptos)} concepto(s)")
+            logger.info(f"Calculando retención general teórica para {len(conceptos)} concepto(s)")
 
             retencion_total_general = Decimal('0')
 
             # Procesar TODOS los conceptos (sin validar base mínima a nivel general)
             for concepto in conceptos:
                 nombre_concepto = concepto.get('concepto', 'Concepto desconocido')
-                tarifa_retencion = Decimal(str(concepto.get('tarifa_retencion', 0))) / 100
+                tarifa_retencion = Decimal(str(concepto.get('tarifa_retencion') or 0)) / 100
 
                 # Calcular retención teórica para este concepto
                 retencion_concepto = valor_total * tarifa_retencion
                 retencion_total_general += retencion_concepto
 
-                logger.info(f"📈 {nombre_concepto}: ${valor_total:,.2f} × {tarifa_retencion*100}% = ${retencion_concepto:,.2f}")
+                logger.info(f"{nombre_concepto}: ${valor_total:,.2f} × {tarifa_retencion*100}% = ${retencion_concepto:,.2f}")
 
             # Redondear resultado final a 2 decimales
             retencion_final = retencion_total_general.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            logger.info(f"💡 Retención general teórica: ${retencion_final:,.2f} (sujeta a validación por consorciado)")
+            logger.info(f"Retención general teórica: ${retencion_final:,.2f} (sujeta a validación por consorciado)")
 
             return retencion_final
 
@@ -466,7 +466,7 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
             # Validar CADA concepto individualmente
             for concepto in conceptos_validados:
                 nombre_concepto = concepto.get('concepto', 'Concepto desconocido')
-                tarifa_retencion_pct = concepto.get('tarifa_retencion', 0)
+                tarifa_retencion_pct = concepto.get('tarifa_retencion') or 0
                 # DETECCIÓN AUTOMÁTICA DE FORMATO: decimal (0.11) vs porcentaje (11)
                 if tarifa_retencion_pct <= 1.0:
                     # Ya está en formato decimal (0.11 = 11%)
@@ -478,7 +478,7 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
                     tarifa_display = tarifa_retencion_pct
 
                 # BASE GRAVABLE DE LA FACTURA (extraída por Gemini por este concepto)
-                base_gravable_factura = Decimal(str(concepto.get('base_gravable', 0)))
+                base_gravable_factura = Decimal(str(concepto.get('base_gravable') or 0))
 
                 # CODIGO DEL CONCEPTO (obtenido de BD en validar_concepto)
                 codigo_concepto = concepto.get('codigo_concepto', None)
@@ -576,10 +576,11 @@ class CalculadorRetencionConsorcio(ICalculadorRetencion):
                 return Decimal('0')
 
             # Buscar base mínima (puede estar como 'base_pesos', 'base_minima', 'uvt_minima', etc.)
-            base_minima = datos_concepto.get('base_pesos',
-                         datos_concepto.get('base_minima',
-                         datos_concepto.get('uvt_minima',
-                         datos_concepto.get('base_gravable', 0))))
+            base_minima = (datos_concepto.get('base_pesos')
+                           or datos_concepto.get('base_minima')
+                           or datos_concepto.get('uvt_minima')
+                           or datos_concepto.get('base_gravable')
+                           or 0)
 
             base_decimal = Decimal(str(base_minima))
             logger.debug(f" Base mínima para '{nombre_concepto}': ${base_decimal:,.2f}")
@@ -664,20 +665,23 @@ class LiquidadorConsorcios:
             if not es_valida:
                 return self._crear_resultado_error(mensaje_error)
 
-            # PASO 2: Validar conceptos identificados
-            conceptos_validos, mensaje_concepto = self._validar_conceptos_consorcio(
+            # PASO 2: Validar conceptos identificados (regla flexible)
+            conceptos_validos, alertas_no_mapeados = self._validar_conceptos_consorcio(
                 analisis_gemini.get('conceptos_identificados', []),
                 diccionario_conceptos
             )
 
+            # Solo se detiene cuando NINGUN concepto facturado pudo mapearse
             if not conceptos_validos:
                 # Preservar valor_total de la factura incluso si hay errores
-                valor_total = Decimal(str(analisis_gemini.get('valor_total', 0)))
+                valor_total = Decimal(str(analisis_gemini.get('valor_total') or 0))
+                mensaje_concepto = "No se pudieron relacionar los conceptos facturados con los conceptos almacenados en base de datos"
                 return self._crear_resultado_sin_finalizar(mensaje_concepto, valor_total)
 
             # PASO 3: Validar y liquidar consorciados individuales
             consorciados_liquidados = []
-            observaciones = []
+            # Sembrar alertas no bloqueantes de los conceptos que no mapearon
+            observaciones = list(alertas_no_mapeados)
             error_naturaleza_incompleta = False
             mensajes_error_naturaleza = []
 
@@ -700,7 +704,7 @@ class LiquidadorConsorcios:
 
             # Verificar si hubo error de naturaleza incompleta DESPUÉS de procesar todos
             if error_naturaleza_incompleta:
-                valor_total = Decimal(str(analisis_gemini.get('valor_total', 0)))
+                valor_total = Decimal(str(analisis_gemini.get('valor_total') or 0))
                 return ResultadoLiquidacionConsorcio(
                     es_consorcio=True,
                     nombre_consorcio=analisis_gemini.get('nombre_consorcio', ''),
@@ -715,7 +719,7 @@ class LiquidadorConsorcios:
 
             # PASO 4: Calcular totales
             retencion_total = sum(c.valor_retencion for c in consorciados_liquidados)
-            valor_total = Decimal(str(analisis_gemini.get('valor_total', 0)))
+            valor_total = Decimal(str(analisis_gemini.get('valor_total') or 0))
 
             # PASO 5: Generar resultado final
             return ResultadoLiquidacionConsorcio(
@@ -773,18 +777,24 @@ class LiquidadorConsorcios:
 
     def _validar_conceptos_consorcio(self,
                                    conceptos_identificados: List[Dict[str, Any]],
-                                   diccionario_conceptos: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], str]:
+                                   diccionario_conceptos: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[str]]:
         """
         Valida los conceptos identificados contra el diccionario.
+
+        Regla flexible: acumula los conceptos que SI mapean a base de datos y
+        registra los que NO mapean (CONCEPTO_NO_IDENTIFICADO / concepto_index 0)
+        como alertas, sin abortar la liquidacion. El corte bloqueante solo ocurre
+        aguas arriba cuando NINGUN concepto facturado pudo mapearse.
 
         Args:
             conceptos_identificados: Conceptos identificados por Gemini
             diccionario_conceptos: Diccionario de conceptos válidos
 
         Returns:
-            Tuple[List[Dict], str]: (conceptos_validos, mensaje_error)
+            Tuple[List[Dict], List[str]]: (conceptos_validos, alertas_no_mapeados)
         """
         conceptos_validos = []
+        alertas_no_mapeados = []
 
         for concepto_data in conceptos_identificados:
             concepto_nombre = concepto_data.get('concepto', '')
@@ -795,9 +805,22 @@ class LiquidadorConsorcios:
             )
 
             if not es_valido:
-                mensaje_error = "No se pudieron relacionar los conceptos facturados con los conceptos almacenados en base de datos"
-                logger.warning(f"Concepto no válido: {concepto_nombre}")
-                return [], mensaje_error
+                nombre_facturado = (
+                    concepto_data.get('nombre_concepto')
+                    or concepto_data.get('concepto_facturado')
+                    or concepto_nombre
+                    or "(sin nombre)"
+                )
+                razonamiento = concepto_data.get('razonamiento', '')
+                alerta = (
+                    f"Concepto facturado '{nombre_facturado}' no se pudo relacionar con un "
+                    f"concepto de retención en base de datos; no se aplicó retención sobre este ítem."
+                )
+                if razonamiento:
+                    alerta += f" Detalle: {razonamiento}"
+                alertas_no_mapeados.append(alerta)
+                logger.warning(f"Concepto no mapeado (se omite, no aborta): {nombre_facturado}")
+                continue
 
             # Combinar datos de Gemini con datos del diccionario/BD
             concepto_completo = {
@@ -806,7 +829,7 @@ class LiquidadorConsorcios:
             }
             conceptos_validos.append(concepto_completo)
 
-        return conceptos_validos, ""
+        return conceptos_validos, alertas_no_mapeados
 
     def _liquidar_consorciado_individual(self,
                                        consorciado: Dict[str, Any],
@@ -827,7 +850,27 @@ class LiquidadorConsorcios:
         """
         nombre = consorciado.get('nombre', '')
         nit = consorciado.get('nit', '')
-        porcentaje = float(consorciado.get('porcentaje_participacion', 0))
+
+        # Gemini puede devolver porcentaje_participacion: null cuando no logra
+        # identificarlo en el documento (ver prompts/prompt_retefuente.py:559).
+        # dict.get(key, default) NO usa el default si el valor existe pero es None,
+        # por lo que float(None) reventaba toda la liquidacion. Se reporta como
+        # informacion incompleta y se reutiliza el pipeline de _campo_faltante.
+        porcentaje_raw = consorciado.get('porcentaje_participacion')
+        if porcentaje_raw is None:
+            consorciado['_campo_faltante'] = 'porcentaje de participación'
+            return ConsorciadoLiquidado(
+                nombre=nombre,
+                nit=nit,
+                porcentaje_participacion=0.0,
+                aplica_retencion=False,
+                valor_retencion=Decimal('0'),
+                valor_base=Decimal('0'),
+                conceptos_liquidados=[],
+                razon_no_aplicacion="Información incompleta: falta el porcentaje de participación",
+                naturaleza_tributaria=consorciado.get('naturaleza_tributaria')
+            )
+        porcentaje = float(porcentaje_raw)
 
         # Validar naturaleza tributaria
         aplica_retencion, razon_no_aplicacion, campo_faltante = self.validador_naturaleza.validar_naturaleza_consorcio(consorciado)
@@ -851,7 +894,7 @@ class LiquidadorConsorcios:
             )
 
         # Calcular valor base individual
-        valor_total = Decimal(str(analisis_general.get('valor_total', 0)))
+        valor_total = Decimal(str(analisis_general.get('valor_total') or 0))
         valor_base_individual = valor_total * (Decimal(str(porcentaje)) / 100)
 
         # NUEVA LÓGICA v3.1.2: Calcular retención individual con validación de base gravable
@@ -1037,4 +1080,4 @@ class LiquidadorConsorciosFactory:
 if __name__ == '__main__':
     # Ejemplo de uso
     liquidador = LiquidadorConsorciosFactory.crear_liquidador()
-    logger.info("✅ LiquidadorConsorcios creado con arquitectura SOLID")
+    logger.info("LiquidadorConsorcios creado con arquitectura SOLID")

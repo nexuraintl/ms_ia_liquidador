@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 # Extensiones soportadas por el sistema
 EXTENSIONES_SOPORTADAS = {
     'pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp',  # Procesamiento directo
-    'xlsx', 'xls', 'docx', 'doc', 'msg', 'eml', 'xml'  # Preprocesamiento local
+    'xlsx', 'xls', 'docx', 'doc', 'msg', 'eml', 'xml',          # Preprocesamiento local
+    'zip'                                                          # Contenedores comprimidos
 }
 
 

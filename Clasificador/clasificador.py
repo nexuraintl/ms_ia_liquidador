@@ -14,6 +14,9 @@ import json
 import asyncio
 import logging
 import traceback
+import ssl
+import httpx
+import httpcore
 from datetime import datetime
 from typing import Dict, Any, Tuple
 from pathlib import Path
@@ -38,7 +41,7 @@ from io import BytesIO
 logger = logging.getLogger(__name__)
 
 # Importar prompts clasificador general
-from prompts.prompt_clasificador import PROMPT_CLASIFICACION
+from prompts.prompt_clasificador import PROMPT_CLASIFICACION, PROMPT_CLASIFICACION_LOTE, PROMPT_ANALISIS_GLOBAL
 
 # Importar prompts retefuente
 from prompts.prompt_retefuente import (
@@ -101,14 +104,18 @@ class ProcesadorGemini:
 
         # NUEVO SDK v2.0: Inicializar cliente
         self.client = genai.Client(api_key=self.api_key)
-        self.model_name = 'gemini-2.5-flash-preview-09-2025'
+        self.model_name = 'gemini-2.5-flash'
 
         # NUEVO: Inicializar Files Manager (SRP: gestión de archivos)
         self.files_manager = GeminiFilesManager(api_key=self.api_key)
 
+        # Acumulador de uso de tokens por factura (la instancia es por factura).
+        # Lo llena _log_uso_tokens; lo resume _log_resumen_uso_tokens.
+        self._uso_acumulado: list = []
+
         # Configuración de generación estándar
         self.generation_config = {
-            'temperature': 0.4,
+            'temperature': 0.3,
             'max_output_tokens': 65536,
             'candidate_count': 1
         }
@@ -170,11 +177,17 @@ class ProcesadorGemini:
             
             logger.info("ClasificadorEstampillasGenerales inicializado correctamente")
             
-            self.clasificador_iva = ClasificadorIva(procesador_gemini=self)
+            self.clasificador_iva = ClasificadorIva(
+                procesador_gemini=self,
+                database_manager=self.db_manager
+            )
             logger.info("Clasificador IVA inicializado correctamente")
-            
-            self.clasificador_obra_uni = ClasificadorObraUni(procesador_gemini=self)
-            
+
+            self.clasificador_obra_uni = ClasificadorObraUni(
+                procesador_gemini=self,
+                database_manager=self.db_manager
+            )
+
             logger.info("ClasificadorObraUni inicializado correctamente")
             
 
@@ -199,7 +212,7 @@ class ProcesadorGemini:
         ENFOQUE HÍBRIDO IMPLEMENTADO:
          PDFs e Imágenes → Enviados directamente a Gemini (multimodal)
          Excel/Email/Word → Procesados localmente y enviados como texto
-         Límite: Máximo 20 archivos directos
+         Sin límite de archivos: se clasifican en lotes de 10 (batching paralelo)
          Mantener prompts existentes con modificaciones mínimas
         
         Args:
@@ -211,8 +224,7 @@ class ProcesadorGemini:
             Tuple[Dict[str, str], bool, bool]: (clasificacion_documentos, es_consorcio, es_facturacion_extranjera)
             
         Raises:
-            ValueError: Si hay error en el procesamiento con Gemini
-            HTTPException: Si se excede límite de archivos directos
+            ValueError: Si hay error en el procesamiento con Gemini o no se reciben archivos
         """
         #  DETECCIÓN AUTOMÁTICA DE MODO MEJORADA
         if textos_archivos_o_directos is not None:
@@ -243,7 +255,7 @@ class ProcesadorGemini:
             # MODO HÍBRIDO EXPLÍCITO: usar parámetros específicos
             logger.info(" MODO HÍBRIDO EXPLÍCITO detectado")
             archivos_directos = archivos_directos or []
-            textos_preprocesados = textos_preprocesados or {}
+            textos_preprocesados = textos_preprocesados or {}        
         
         # Continuar con lógica híbrida usando variables normalizadas
         archivos_directos = archivos_directos or []
@@ -255,22 +267,6 @@ class ProcesadorGemini:
         logger.info(f"Textos preprocesados (Excel/Email/Word): {len(textos_preprocesados)}")
         logger.info(f" Total archivos a clasificar: {total_archivos}")
         
-        #  VALIDACIÓN: Límite de archivos directos (20)
-        if len(archivos_directos) > 20:
-            error_msg = f"Límite excedido: {len(archivos_directos)} archivos directos (máximo 20)"
-            logger.error(f" {error_msg}")
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": "Demasiados archivos directos",
-                    "detalle": error_msg,
-                    "limite_maximo": 20,
-                    "archivos_recibidos": len(archivos_directos),
-                    "sugerencia": "Reduzca el número de archivos directos"
-                }
-            )
-
         #  VALIDACIÓN: Al menos un archivo debe estar presente
         if total_archivos == 0:
             error_msg = "No se recibieron archivos para clasificar"
@@ -278,24 +274,35 @@ class ProcesadorGemini:
             raise ValueError(error_msg)
         
         try:
-            # PASO 1: Crear lista de nombres de archivos directos para el prompt (NUEVO v3.0: soporta Files API)
+            # PASO 1: Crear lista de nombres de archivos directos para el prompt (con prevención de colisiones)
             from utils.utils_archivos import obtener_nombre_archivo
-            nombres_archivos_directos = [obtener_nombre_archivo(archivo, i) for i, archivo in enumerate(archivos_directos)]
             
-            logger.info(f" Archivos directos para Gemini: {nombres_archivos_directos}")
+            nombres_archivos_directos = []
+            nombres_vistos = set(textos_preprocesados.keys())
+            for i, archivo in enumerate(archivos_directos):
+                nombre_base = obtener_nombre_archivo(archivo, i)
+                nombre_unico = nombre_base
+                counter = 1
+                while nombre_unico in nombres_vistos:
+                    parts = nombre_base.rsplit('.', 1)
+                    if len(parts) == 2:
+                        nombre_unico = f"{parts[0]}_{counter}.{parts[1]}"
+                    else:
+                        nombre_unico = f"{nombre_base}_{counter}"
+                    counter += 1
+                nombres_vistos.add(nombre_unico)
+                nombres_archivos_directos.append(nombre_unico)
+            
+            logger.info(f" Archivos directos para Gemini (unicos): {nombres_archivos_directos}")
             logger.info(f" Textos preprocesados: {list(textos_preprocesados.keys())}")
 
-            # PASO 2: Generar prompt híbrido usando función modificada (v3.0: con proveedor)
-            prompt = PROMPT_CLASIFICACION(textos_preprocesados, nombres_archivos_directos, proveedor)
-
-            # PASO 3: NUEVO v3.0 - Subir archivos a Files API (no bytes inline)
-            contents = [prompt]
-            uploaded_files_refs = []
-
+            # PASO 2: Subir archivos directos a Files API (upload único) y resolver sus refs
+            archivos_directos_resueltos = []
+            
             if archivos_directos:
                 logger.info(f"Subiendo {len(archivos_directos)} archivos a Files API...")
-
                 for i, archivo in enumerate(archivos_directos):
+                    nombre_archivo = nombres_archivos_directos[i]
                     try:
                         # Subir archivo a Files API usando GeminiFilesManager
                         file_result = await self.files_manager.upload_file(
@@ -303,16 +310,16 @@ class ProcesadorGemini:
                             wait_for_active=True,
                             timeout_seconds=300
                         )
-
-                        uploaded_files_refs.append(file_result)
-
-                        nombre_archivo = file_result.display_name
-                        logger.info(f"Archivo subido a Files API: {nombre_archivo} -> {file_result.name}")
-
+                        # Obtener objeto File usando la referencia con retry
+                        file_obj = await self._files_get_con_retry(name=file_result.name)
+                        archivos_directos_resueltos.append({
+                            "nombre": nombre_archivo,
+                            "gemini_part": file_obj
+                        })
+                        logger.info(f"Archivo subido y resuelto a Files API: {nombre_archivo} -> {file_result.name}")
                     except Exception as e:
                         logger.error(f"Error subiendo archivo {i+1} a Files API: {e}")
                         logger.warning(f"Fallback: intentando envío inline para archivo {i+1}")
-
                         # Fallback: si Files API falla, enviar como bytes inline
                         try:
                             if hasattr(archivo, 'seek'):
@@ -322,9 +329,7 @@ class ProcesadorGemini:
                             else:
                                 archivo_bytes = archivo if isinstance(archivo, bytes) else bytes(archivo)
 
-                            # Detectar MIME type por nombre de archivo
-                            nombre_archivo = getattr(archivo, 'filename', f'archivo_{i+1}')
-                            extension = nombre_archivo.split('.')[-1].lower()
+                            extension = nombre_archivo.split('.')[-1].lower() if '.' in nombre_archivo else ''
                             mime_type_map = {
                                 'pdf': 'application/pdf',
                                 'jpg': 'image/jpeg',
@@ -334,66 +339,166 @@ class ProcesadorGemini:
                                 'txt': 'text/plain'
                             }
                             mime_type = mime_type_map.get(extension, 'application/octet-stream')
-
-                            # Crear Part con tipos correctos
                             part_inline = types.Part.from_bytes(
                                 data=archivo_bytes,
                                 mime_type=mime_type
                             )
-
-                            contents.append(part_inline)
-                            logger.info(f"Archivo {i+1} ({mime_type}) enviado inline (fallback): {len(archivo_bytes):,} bytes")
+                            archivos_directos_resueltos.append({
+                                "nombre": nombre_archivo,
+                                "gemini_part": part_inline
+                            })
+                            logger.info(f"Archivo {i+1} ({mime_type}) preparado inline (fallback): {nombre_archivo}")
                         except Exception as fallback_error:
                             logger.error(f"Error en fallback inline: {fallback_error}")
                             continue
 
-                # Agregar referencias de Files API al contenido
-                for file_ref in uploaded_files_refs:
-                    # Obtener objeto File usando la referencia
-                    file_obj = self.client.files.get(name=file_ref.name)
-                    contents.append(file_obj)
-                    logger.info(f"Referencia Files API agregada: {file_ref.name}")
-            
-            # PASO 4: Llamar a Gemini con contenido híbrido
-            logger.info(f"Llamando a Gemini con {len(contents)} elementos: 1 prompt + {len(archivos_directos)} archivos")
-            
-            # Usar el modelo directamente en lugar de _llamar_gemini para archivos directos
-            respuesta = await self._llamar_gemini_hibrido(contents)
-            
-            logger.info(f" Respuesta híbrida de Gemini recibida: {respuesta[:500]}...")
-            
-            # PASO 5: Procesar respuesta (igual que antes)
-            # Limpiar respuesta si viene con texto extra
-            respuesta_limpia = self._limpiar_respuesta_json(respuesta)
-            
-            # Parsear JSON
-            resultado = json.loads(respuesta_limpia)
-            
-            # Extraer clasificación y detección de consorcio
-            factura_identificada = resultado.get("factura_identificada", False)
-            rut_identificado = resultado.get("rut_identificado", False)
-            clasificacion = resultado.get("clasificacion", resultado)  # Fallback para formato anterior
-            # NUEVO v3.1.2: Detectar consorcio directamente del resultado de Gemini
-            es_consorcio = resultado.get("es_consorcio", False)
+            # PASO 3: Construir lista de todos los documentos y partirlos en lotes de 10
+            todos_los_items = []
+            for item in archivos_directos_resueltos:
+                todos_los_items.append({
+                    "nombre": item["nombre"],
+                    "tipo": "directo",
+                    "gemini_part": item["gemini_part"]
+                })
+            for nombre_txt, texto_txt in textos_preprocesados.items():
+                todos_los_items.append({
+                    "nombre": nombre_txt,
+                    "tipo": "preprocesado",
+                    "texto": texto_txt
+                })
 
-            # Detectar tipo recurso extranjero usando validación manual (SRP)
-            es_recurso_extranjero = self._evaluar_tipo_recurso(resultado)
-            indicadores_extranjera = resultado.get("indicadores_extranjera", [])
+            tamanio_lote = 10
+            lotes = [todos_los_items[i:i + tamanio_lote] for i in range(0, len(todos_los_items), tamanio_lote)]
+            logger.info(f"Total lotes a procesar: {len(lotes)}")
+
+            # Helper para procesar cada lote de hasta 10 documentos
+            async def procesar_lote(lote, idx):
+                lote_textos_preprocesados = {}
+                lote_nombres_directos = []
+                lote_gemini_parts = []
+                for item in lote:
+                    if item["tipo"] == "directo":
+                        lote_nombres_directos.append(item["nombre"])
+                        lote_gemini_parts.append(item["gemini_part"])
+                    else:
+                        lote_textos_preprocesados[item["nombre"]] = item["texto"]
+                
+                prompt_lote = PROMPT_CLASIFICACION_LOTE(
+                    textos_preprocesados=lote_textos_preprocesados,
+                    nombres_archivos_directos=lote_nombres_directos,
+                    proveedor=proveedor
+                )
+                
+                contents = [prompt_lote] + lote_gemini_parts
+                
+                logger.info(f"Enviando lote {idx+1}/{len(lotes)} a Gemini (con {len(lote)} documentos)...")
+                respuesta = await self._llamar_gemini_hibrido(contents, nombres_archivos=lote_nombres_directos)
+
+                respuesta_limpia = self._limpiar_respuesta_json(respuesta)
+                try:
+                    resultado = json.loads(respuesta_limpia)
+                except json.JSONDecodeError as e:
+                    # La respuesta cruda (respuesta) solo existe en este scope; se loguea aqui
+                    # para diagnostico antes de propagar un error claro por lote.
+                    logger.error(
+                        f"Lote {idx+1}/{len(lotes)}: JSON invalido de Gemini ({e}). "
+                        f"Respuesta (500 chars): {respuesta[:500]}"
+                    )
+                    raise ValueError(
+                        f"Gemini devolvio JSON invalido para el lote {idx+1}/{len(lotes)} "
+                        f"({len(lote)} documento(s)): {e}"
+                    )
+                return resultado
+
+            # Ejecutar lotes en paralelo
+            resultados_lotes = await asyncio.gather(*[procesar_lote(l, i) for i, l in enumerate(lotes)])
+
+            # PASO 4: Unir (merge) resultados de lotes
+            clasificacion_consolidada = {}
+            factura_identificada = False
+            rut_identificado = False
+
+            for res in resultados_lotes:
+                lote_clasificacion = res.get("clasificacion", {})
+                for k, v in lote_clasificacion.items():
+                    if isinstance(v, dict):
+                        # Invariante: un documento DESCARTABLE nunca es relevante.
+                        # Gemini puede devolver la contradiccion {DESCARTABLE, relevante:true};
+                        # se corrige aqui, aguas arriba de todo consumidor de "relevante".
+                        if str(v.get("tipo", "")).upper() == "DESCARTABLE":
+                            v["relevante"] = False
+                        clasificacion_consolidada[k] = v
+                    else:
+                        clasificacion_consolidada[k] = {
+                            "tipo": v,
+                            "relevante": (v in ["FACTURA", "RUT", "CONTRATO"])
+                        }
+                if res.get("factura_identificada", False):
+                    factura_identificada = True
+                if res.get("rut_identificado", False):
+                    rut_identificado = True
+
+            # PASO 5: Ejecutar Análisis Global una sola vez sobre el conjunto relevante
+            archivos_directos_relevantes = []
+            for item in archivos_directos_resueltos:
+                nombre = item["nombre"]
+                if clasificacion_consolidada.get(nombre, {}).get("relevante", False):
+                    archivos_directos_relevantes.append(item["gemini_part"])
             
-            
-            # Determinar facturación extranjera basada en ubicación del proveedor
-            es_facturacion_extranjera = self._determinar_facturacion_extranjera(resultado)
-            
-            # PASO 6: Guardar respuesta con metadatos del procesamiento híbrido
+            textos_preprocesados_relevantes = {}
+            for name, txt in textos_preprocesados.items():
+                if clasificacion_consolidada.get(name, {}).get("relevante", False):
+                    textos_preprocesados_relevantes[name] = txt
+
+            nombres_archivos_relevantes_directos = [
+                item["nombre"] for item in archivos_directos_resueltos 
+                if clasificacion_consolidada.get(item["nombre"], {}).get("relevante", False)
+            ]
+
+            es_consorcio = False
+            es_recurso_extranjero = False
+            es_facturacion_extranjera = False
+            ubicacion_proveedor = ""
+            resultado_global = {}
+
+            if (archivos_directos_relevantes or textos_preprocesados_relevantes) and factura_identificada:
+                prompt_global = PROMPT_ANALISIS_GLOBAL(
+                    textos_preprocesados=textos_preprocesados_relevantes,
+                    nombres_archivos_directos=nombres_archivos_relevantes_directos,
+                    proveedor=proveedor
+                )
+                
+                contents_global = [prompt_global] + archivos_directos_relevantes
+                logger.info(f"Enviando {len(archivos_directos_relevantes) + 1} elementos a Gemini para Análisis Global...")
+                respuesta_global = await self._llamar_gemini_hibrido(contents_global, nombres_archivos=nombres_archivos_relevantes_directos)
+                
+                respuesta_global_limpia = self._limpiar_respuesta_json(respuesta_global)
+                resultado_global = json.loads(respuesta_global_limpia)
+
+                es_consorcio = resultado_global.get("es_consorcio", False)
+                es_recurso_extranjero = self._evaluar_tipo_recurso(resultado_global)
+                es_facturacion_extranjera = self._determinar_facturacion_extranjera(resultado_global)
+                ubicacion_proveedor = resultado_global.get("ubicacion_proveedor", "")
+            else:
+                logger.warning("No se ejecuta Análisis Global: sin documentos relevantes o sin factura identificada.")
+
+            # PASO 6: Guardar respuesta consolidada con metadatos
             clasificacion_data_hibrida = {
-                **resultado,
+                "clasificacion": clasificacion_consolidada,
+                "factura_identificada": factura_identificada,
+                "rut_identificado": rut_identificado,
+                "es_consorcio": es_consorcio,
+                "es_recurso_extranjero": es_recurso_extranjero,
+                "es_facturacion_extranjera": es_facturacion_extranjera,
+                "ubicacion_proveedor": ubicacion_proveedor,
+                "analisis_global_crudo": resultado_global,
                 "metadatos_hibridos": {
                     "procesamiento_hibrido": True,
                     "archivos_directos": nombres_archivos_directos,
                     "archivos_preprocesados": list(textos_preprocesados.keys()),
                     "total_archivos": total_archivos,
                     "timestamp": datetime.now().isoformat(),
-                    "version": "2.4.0_hibrido"
+                    "version": "3.0.0_filtrado_lotes"
                 }
             }
             
@@ -401,24 +506,26 @@ class ProcesadorGemini:
             
             # PASO 7: Logging de resultados
             logger.info(f"factura_identificada: {factura_identificada}, rut_identificado: {rut_identificado}")
-            logger.info(f" Clasificación híbrida exitosa: {len(clasificacion)} documentos clasificados")
+            logger.info(f" Clasificación híbrida exitosa: {len(clasificacion_consolidada)} documentos clasificados")
             logger.info(f" Consorcio detectado: {es_consorcio}")
             logger.info(f" Tipo recurso extranjero detectado: {es_recurso_extranjero}")
             logger.info(f" Facturación extranjera detectada: {es_facturacion_extranjera}")
-            if es_recurso_extranjero and indicadores_extranjera:
-                logger.info(f" Indicadores extranjera: {indicadores_extranjera}")
             
             # PASO 8: Logging detallado por archivo
-            for nombre_archivo, categoria in clasificacion.items():
+            for nombre_archivo, info in clasificacion_consolidada.items():
+                cat = info.get("tipo") if isinstance(info, dict) else info
+                relev = info.get("relevante") if isinstance(info, dict) else True
                 origen = "DIRECTO" if nombre_archivo in nombres_archivos_directos else "PREPROCESADO"
-                logger.info(f" {nombre_archivo} → {categoria} ({origen})")
+                logger.info(f" {nombre_archivo} → {cat} (relevante: {relev}) ({origen})")
             
-            return clasificacion, es_consorcio, es_recurso_extranjero, es_facturacion_extranjera
+            # Devolver clasificacion_consolidada para que app/clasificacion_documentos.py pueda propagar la relevancia
+            return clasificacion_consolidada, es_consorcio, es_recurso_extranjero, es_facturacion_extranjera
             
         except json.JSONDecodeError as e:
+            # El detalle de la respuesta cruda se loguea dentro de procesar_lote / análisis
+            # global, donde la variable de respuesta está en scope (tras el refactor a lotes).
             logger.error(f" Error parseando JSON híbrido de Gemini: {e}")
-            logger.error(f"Respuesta problemática: {respuesta}")
-            
+
             raise ValueError(f"Error en JSON clasificación híbrida: {str(e)}")
         
         except Exception as e:
@@ -429,30 +536,296 @@ class ProcesadorGemini:
             
             logger.error(f" Archivos directos fallidos: {archivos_fallidos_nombres}")
             logger.error(f" Textos preprocesados fallidos: {list(textos_preprocesados.keys())}")
-            raise ValueError(f"Error en clasificación híbrida: {str(e)}")
+            # str(e) puede ser vacio (p. ej. httpx.ConnectError) -> incluir el tipo
+            # para que el mensaje nunca quede como "Error en clasificación híbrida: "
+            detalle_error = str(e) or f"{type(e).__name__}: fallo de conexión con Google Gemini API"
+            raise ValueError(f"Error en clasificación híbrida: {detalle_error}")
 
         finally:
-            # PASO 9 (NUEVO v3.0): Cleanup automático de Files API
+            # PASO 9 (NUEVO v3.0): Cleanup omitido intencionalmente.
+            # Los archivos subidos aquí serán reutilizados por preparar_archivos_para_workers_paralelos()
+            # via cache en GeminiFilesManager. El cleanup final ocurre en _llamar_gemini_hibrido_factura().
+            pass
+
+    # Patrones de error (en str(e).lower()) considerados transitorios y reintentables.
+    # Incluye fallos SSL/EOF historicos y fallos de conexion/TLS hacia Gemini
+    # (httpx/httpcore ConnectError) que antes NO se reintentaban.
+    ERRORES_REINTENTABLES = (
+        "unexpected_eof",
+        "unexpected eof",
+        "ssl",
+        "ssleof",
+        "connection reset",
+        "connectionreset",
+        "broken pipe",
+        "brokenpipe",
+        "max retries exceeded",
+        "connection aborted",
+        "remotedisconnected",
+        "remote end closed connection",
+        "connecterror",
+        "connect error",
+        "connecttimeout",
+        "connect timeout",
+        "connection refused",
+        "temporary failure in name resolution",
+        "all connection attempts failed",
+    )
+
+    # Tipos de excepcion considerados transitorios a nivel de clase.
+    TIPOS_TRANSITORIOS = (
+        ssl.SSLError,
+        ConnectionError,
+        ConnectionResetError,
+        BrokenPipeError,
+        httpx.ConnectError,
+        httpx.ConnectTimeout,
+        httpx.ReadTimeout,
+        httpx.RemoteProtocolError,
+        httpx.TransportError,
+        httpcore.ConnectError,
+        httpcore.ConnectTimeout,
+    )
+
+    def _es_error_transitorio(self, e: Exception) -> bool:
+        """
+        Determina si una excepcion es un error de conexion/SSL transitorio
+        que vale la pena reintentar.
+
+        Combina deteccion por tipo (TIPOS_TRANSITORIOS) y por substring del
+        mensaje (ERRORES_REINTENTABLES). httpx.ConnectError tiene str() vacio,
+        por eso la deteccion por tipo es indispensable.
+        """
+        if isinstance(e, self.TIPOS_TRANSITORIOS):
+            return True
+        error_str = str(e).lower()
+        return any(patron in error_str for patron in self.ERRORES_REINTENTABLES)
+
+    async def _files_get_con_retry(self, name, max_reintentos: int = 3):
+        """
+        Obtiene un objeto File de la Files API con reintentos ante errores
+        de conexion transitorios (mismo criterio que _ejecutar_con_retry).
+
+        Antes esta llamada no tenia proteccion: un httpx.ConnectError aqui
+        abortaba toda la clasificacion con un mensaje vacio.
+
+        Args:
+            name: Nombre/referencia del archivo en Files API
+            max_reintentos: Numero maximo de intentos (default 3)
+
+        Returns:
+            Objeto File de Gemini Files API
+
+        Raises:
+            Exception: Si todos los reintentos fallan, relanza la ultima excepcion
+        """
+        ultima_excepcion = None
+
+        for intento in range(1, max_reintentos + 1):
             try:
-                if hasattr(self, 'files_manager') and self.files_manager:
-                    await self.files_manager.cleanup_all(ignore_errors=True)
-                    logger.info(" Cleanup de Files API completado")
-            except Exception as cleanup_error:
-                logger.warning(f" Error en cleanup de Files API: {cleanup_error}")
+                file_obj = await self.client.aio.files.get(name=name)
+                if intento > 1:
+                    logger.info(f"files.get exitoso en reintento {intento}/{max_reintentos}")
+                return file_obj
 
+            except Exception as e:
+                ultima_excepcion = e
 
-    async def _llamar_gemini_hibrido(self, contents: List) -> str:
+                if not self._es_error_transitorio(e):
+                    raise
+
+                if intento < max_reintentos:
+                    espera = 2 ** (intento - 1)
+                    logger.warning(
+                        f"Error transitorio en files.get intento {intento}/{max_reintentos}: "
+                        f"{type(e).__name__}: {e}. Reintentando en {espera}s..."
+                    )
+                    await asyncio.sleep(espera)
+
+                    try:
+                        self.client = genai.Client(api_key=self.api_key)
+                        logger.info("Cliente Gemini reinicializado con nueva conexion")
+                    except Exception as reinit_error:
+                        logger.warning(f"Error reinicializando cliente: {reinit_error}")
+                else:
+                    logger.error(
+                        f"Error de conexion persistente en files.get despues de "
+                        f"{max_reintentos} intentos: {type(e).__name__}: {e}"
+                    )
+
+        raise ultima_excepcion
+
+    def _log_uso_tokens(self, respuesta, contexto: str) -> None:
+        """
+        Loguea el uso de tokens de una respuesta de Gemini para medir el
+        impacto del implicit caching de Gemini 2.5.
+
+        Defensivo: usage_metadata y sus campos pueden no existir o ser None
+        segun la version del SDK / la respuesta. Nunca debe romper el flujo.
+
+        Args:
+            respuesta: GenerateContentResponse de Gemini
+            contexto: Etiqueta para identificar la llamada (ej. "clasificacion")
+        """
+        try:
+            um = getattr(respuesta, "usage_metadata", None)
+            if um is None:
+                return
+
+            prompt_tokens = getattr(um, "prompt_token_count", None) or 0
+            cacheados = getattr(um, "cached_content_token_count", None) or 0
+            salida = getattr(um, "candidates_token_count", None) or 0
+
+            pct = (cacheados / prompt_tokens * 100) if prompt_tokens else 0.0
+            logger.info(
+                f"Tokens Gemini [{contexto}]: prompt={prompt_tokens} "
+                f"cacheados={cacheados} ({pct:.0f}%) salida={salida}"
+            )
+
+            # Acumular por factura (la instancia de ProcesadorGemini es por
+            # factura, ver background_processor.py). Permite el resumen agregado.
+            self._uso_acumulado.append({
+                "contexto": contexto,
+                "prompt": prompt_tokens,
+                "cacheados": cacheados,
+                "salida": salida,
+            })
+        except Exception as e:
+            logger.debug(f"No se pudo loguear usage_metadata [{contexto}]: {e}")
+
+    def _log_resumen_uso_tokens(self) -> None:
+        """
+        Loguea el total agregado de tokens Gemini de TODAS las llamadas de esta
+        factura (incluye ICA). Defensivo: nunca rompe el flujo.
+        """
+        try:
+            registros = getattr(self, "_uso_acumulado", [])
+            if not registros:
+                return
+
+            n = len(registros)
+            prompt_total = sum(r["prompt"] for r in registros)
+            cacheados_total = sum(r["cacheados"] for r in registros)
+            salida_total = sum(r["salida"] for r in registros)
+            pct = (cacheados_total / prompt_total * 100) if prompt_total else 0.0
+
+            # Desglose por contexto: cacheados/prompt
+            por_ctx = {}
+            for r in registros:
+                acc = por_ctx.setdefault(r["contexto"], [0, 0, 0])
+                acc[0] += r["prompt"]
+                acc[1] += r["cacheados"]
+                acc[2] += 1
+            desglose = " ".join(
+                f"{ctx}(x{c}:{cac}/{pr})" for ctx, (pr, cac, c) in por_ctx.items()
+            )
+
+            logger.info(
+                f"RESUMEN Gemini factura: {n} llamadas | "
+                f"prompt_total={prompt_total} cacheados_total={cacheados_total} "
+                f"({pct:.0f}% ahorro) salida_total={salida_total} | {desglose}"
+            )
+        except Exception as e:
+            logger.debug(f"No se pudo loguear resumen de uso de tokens: {e}")
+
+    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3, contexto: str = "gemini"):
+        """
+        Ejecuta llamada a Gemini con cliente async nativo y reintentos para errores SSL transitorios.
+
+        Usa client.aio.models.generate_content (async nativo, httpx) en lugar de
+        run_in_executor + cliente sync (requests/urllib3). Esto elimina la competencia
+        por CPU entre hilos y el event loop que causaba UNEXPECTED_EOF en Cloud Run.
+
+        Args:
+            contenido: Lista de contenido para generate_content (prompt + archivos)
+            config: Configuracion de generacion (temperature, max_output_tokens, etc.)
+            timeout_segundos: Timeout maximo por intento individual
+            max_reintentos: Numero maximo de reintentos (default 3)
+
+        Returns:
+            Respuesta de Gemini (objeto GenerateContentResponse)
+
+        Raises:
+            Exception: Si todos los reintentos fallan, relanza la ultima excepcion
+        """
+        ultima_excepcion = None
+
+        for intento in range(1, max_reintentos + 1):
+            try:
+                respuesta = await asyncio.wait_for(
+                    self.client.aio.models.generate_content(
+                        model=self.model_name,
+                        contents=contenido,
+                        config=config
+                    ),
+                    timeout=timeout_segundos
+                )
+
+                if intento > 1:
+                    logger.info(f"Llamada a Gemini exitosa en reintento {intento}/{max_reintentos}")
+
+                # Hook de medicion: unico punto de retorno -> captura el 100%
+                # de llamadas (incl. ICA). NO altera la logica de
+                # retry/except/TLS de abajo.
+                self._log_uso_tokens(respuesta, contexto)
+
+                return respuesta
+
+            except asyncio.TimeoutError:
+                # Timeout NO se reintenta, se propaga inmediatamente
+                raise
+
+            except Exception as e:
+                ultima_excepcion = e
+
+                # Verificar si es un error SSL/conexion transitorio
+                es_transitorio = self._es_error_transitorio(e)
+
+                if not es_transitorio:
+                    # Error no transitorio, propagar inmediatamente
+                    raise
+
+                if intento < max_reintentos:
+                    espera = 2 ** (intento - 1)  # Backoff: 1s, 2s, 4s
+                    logger.warning(
+                        f"Error SSL transitorio en intento {intento}/{max_reintentos}: {e}. "
+                        f"Reintentando en {espera}s..."
+                    )
+                    await asyncio.sleep(espera)
+
+                    # Reinicializar cliente para forzar nueva conexion SSL
+                    try:
+                        self.client = genai.Client(api_key=self.api_key)
+                        logger.info("Cliente Gemini reinicializado con nueva conexion")
+                    except Exception as reinit_error:
+                        logger.warning(f"Error reinicializando cliente: {reinit_error}")
+                else:
+                    logger.error(
+                        f"Error SSL persistente despues de {max_reintentos} intentos: {e}"
+                    )
+
+        # Si llegamos aqui, todos los reintentos fallaron
+        raise ultima_excepcion
+
+    async def _llamar_gemini_hibrido(self, contents: List, nombres_archivos: List[str] = None) -> str:
         """
         Llamada especial a Gemini para contenido híbrido (prompt + archivos directos).
-        
+
         CORREGIDO: Ahora crea objetos con formato correcto para Gemini multimodal.
-        
+
         Args:
             contents: Lista con prompt + archivos UploadFile [prompt_str, archivo1_UploadFile, archivo2_UploadFile, ...]
-            
+            nombres_archivos: Nombres de los archivos directos en el MISMO orden que contents[1:].
+                Cuando se provee, cada archivo se antecede con un Part de texto delimitador
+                (===== DOCUMENTO ADJUNTO: <nombre> =====) que vincula explicitamente el nombre
+                con su contenido. Sin esto, Gemini recibe los PDFs como un stream concatenado
+                y adivina la correspondencia nombre<->contenido (p. ej. tratando 3 archivos
+                distintos como 3 paginas de la misma factura). El delimitador es determinista
+                y va al inicio, por lo que preserva el implicit caching de Gemini 2.5.
+
         Returns:
             str: Respuesta de Gemini
-            
+
         Raises:
             ValueError: Si hay error en la llamada a Gemini
         """
@@ -463,14 +836,22 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt + {len(contents) - 1} archivos directos")
             
             #  CREAR CONTENIDO MULTIMODAL CORRECTO
+            # Orden: documentos primero, prompt al final. El prefijo estable
+            # (documentos identicos entre los ~8 clasificadores) habilita el
+            # implicit caching de Gemini 2.5 y evita re-procesar el doc N veces.
             contenido_multimodal = []
-            
-            # Agregar prompt (primer elemento)
-            if contents:
-                prompt_texto = contents[0]
-                contenido_multimodal.append(prompt_texto)
-                logger.info(f" Prompt agregado: {len(prompt_texto):,} caracteres")
-            
+
+            # El prompt se anexa al FINAL (despues de los archivos)
+            prompt_texto = contents[0] if contents else None
+
+            # Etiqueta determinista que vincula cada nombre con su Part. Usa el indice
+            # del archivo original, por lo que la correspondencia se conserva aunque alguna
+            # rama haga continue por error.
+            def _etiqueta(idx):
+                if nombres_archivos and idx < len(nombres_archivos):
+                    return f"\n===== DOCUMENTO ADJUNTO: {nombres_archivos[idx]} =====\n"
+                return None
+
             #  PROCESAR ARCHIVOS DIRECTOS CORRECTAMENTE
             archivos_directos = contents[1:] if len(contents) > 1 else []
             for i, archivo_elemento in enumerate(archivos_directos):
@@ -484,6 +865,9 @@ class ProcesadorGemini:
                                 file_uri=archivo_elemento.uri
                             )
                         )
+                        etq = _etiqueta(i)
+                        if etq:
+                            contenido_multimodal.append(etq)
                         contenido_multimodal.append(file_part)
                         logger.info(f" Archivo Files API agregado: {archivo_elemento.name} ({archivo_elemento.mime_type})")
                         continue
@@ -554,27 +938,29 @@ class ProcesadorGemini:
                             mime_type="application/octet-stream"
                         )
 
+                    etq = _etiqueta(i)
+                    if etq:
+                        contenido_multimodal.append(etq)
                     contenido_multimodal.append(archivo_objeto)
 
                 except Exception as e:
                     logger.error(f" Error procesando archivo {i+1}: {e}")
                     continue
             
-            # NUEVO SDK v2.0: Llamar a Gemini con contenido multimodal
-            logger.info(f"Enviando a Gemini (nuevo SDK): {len(contenido_multimodal)} elementos")
+            # Anexar el prompt al FINAL (sufijo variable; el prefijo de
+            # documentos queda estable para el implicit caching de Gemini 2.5)
+            if prompt_texto is not None:
+                contenido_multimodal.append(prompt_texto)
+                logger.info(f" Prompt agregado al final: {len(prompt_texto):,} caracteres")
 
-            loop = asyncio.get_event_loop()
+            # Llamar a Gemini con retry automatico para errores SSL
+            logger.info(f"Enviando a Gemini (con retry SSL): {len(contenido_multimodal)} elementos")
 
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=contenido_multimodal,
-                        config=self.generation_config
-                    )
-                ),
-                timeout=timeout_segundos
+            respuesta = await self._ejecutar_con_retry(
+                contenido=contenido_multimodal,
+                config=self.generation_config,
+                timeout_segundos=timeout_segundos,
+                contexto="clasificacion"
             )
 
             if not respuesta:
@@ -701,11 +1087,11 @@ class ProcesadorGemini:
          FUNCIÓN HÍBRIDA PARA ANÁLISIS DE FACTURA: Prompt + Archivos directos para análisis de retefuente.
          
          FUNCIONALIDAD:
-         ✅ Análisis especializado de facturas con multimodalidad
-         ✅ Combina prompt de análisis + archivos PDFs/imágenes
-         ✅ Optimizado para análisis de retefuente, consorcios y extranjera
-         ✅ Reutilizable para todos los tipos de análisis de facturas
-         ✅ Timeout extendido para análisis complejo
+         Análisis especializado de facturas con multimodalidad
+         Combina prompt de análisis + archivos PDFs/imágenes
+         Optimizado para análisis de retefuente, consorcios y extranjera
+         Reutilizable para todos los tipos de análisis de facturas
+         Timeout extendido para análisis complejo
          
          Args:
              prompt: Prompt especializado para análisis (PROMPT_ANALISIS_FACTURA, etc.)
@@ -729,11 +1115,9 @@ class ProcesadorGemini:
             logger.info(f" Contenido: 1 prompt de análisis + {len(archivos_directos)} archivos directos")
 
             #  CREAR CONTENIDO MULTIMODAL CORRECTO PARA ANÁLISIS
+            # Orden: documentos primero, prompt al final, para habilitar el
+            # implicit caching de Gemini 2.5 (prefijo de documentos estable).
             contenido_multimodal = []
-
-            # Agregar prompt de análisis (primer elemento)
-            contenido_multimodal.append(prompt)
-            logger.info(f"Prompt de análisis agregado: {len(prompt):,} caracteres")
 
             # NUEVO v3.0: PROCESAR ARCHIVOS CON FILES API + VALIDACIÓN ROBUSTA
             uploaded_files_refs = []
@@ -833,7 +1217,7 @@ class ProcesadorGemini:
             # PASO 4: Agregar referencias de archivos SUBIDOS en este flujo
             # NOTA: Los archivos File de Google (desde cache) ya fueron agregados directamente en el loop
             for file_ref in uploaded_files_refs:
-                file_obj = self.client.files.get(name=file_ref.name)
+                file_obj = await self.client.aio.files.get(name=file_ref.name)
                 file_part = types.Part(
                     file_data=types.FileData(
                         mime_type=file_obj.mime_type,
@@ -844,7 +1228,9 @@ class ProcesadorGemini:
                 logger.info(f" Referencia Files API agregada (recién subido): {file_ref.name}")
             
             #  VALIDACIÓN FINAL: Verificar que tenemos contenido válido para enviar
-            archivos_validos = len(contenido_multimodal) - 1  # -1 porque el primer elemento es el prompt
+            # En este punto contenido_multimodal solo tiene Part de archivos
+            # (el prompt se anexa despues, al final).
+            archivos_validos = len(contenido_multimodal)
 
             if archivos_validos == 0 and len(archivos_directos) > 0:
                 # Solo lanzar error si se esperaban archivos pero ninguno fue validado
@@ -859,23 +1245,21 @@ class ProcesadorGemini:
                 archivos_omitidos = len(archivos_directos) - archivos_validos
                 logger.warning(f"Se omitieron {archivos_omitidos} archivos problemáticos de {len(archivos_directos)} archivos totales")
             
-            # ✅ LLAMAR A GEMINI CON CONTENIDO MULTIMODAL VALIDADO (NUEVO SDK v3.0)
-            logger.info(f" Enviando análisis a Gemini (nuevo SDK + Files API): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
+            # Anexar el prompt de analisis al FINAL (sufijo variable; el
+            # prefijo de documentos queda estable para el implicit caching)
+            contenido_multimodal.append(prompt)
+            logger.info(f"Prompt de análisis agregado al final: {len(prompt):,} caracteres")
 
-            loop = asyncio.get_event_loop()
+            # Llamar a Gemini con retry automatico para errores SSL
+            logger.info(f"Enviando analisis a Gemini (con retry SSL): {len(contenido_multimodal)} elementos ({archivos_validos} archivos validados)")
 
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=contenido_multimodal,
-                        config=self.generation_config
-                    )
-                ),
-                timeout=timeout_segundos
+            respuesta = await self._ejecutar_con_retry(
+                contenido=contenido_multimodal,
+                config=self.generation_config,
+                timeout_segundos=timeout_segundos,
+                contexto="analisis_factura"
             )
-            
+
             if not respuesta:
                 raise ValueError("IA devolvió respuesta None en análisis híbrido - posible problema de validación de archivos")
                 
@@ -982,7 +1366,7 @@ class ProcesadorGemini:
             cache_archivos: Dict[str, FileUploadResult] - Cache de referencias Files API
 
         Returns:
-            List[File]: Lista de objetos File de Files API para reutilizar
+            List[FileUploadResult]: Lista de referencias Files API para reutilizar
         """
         from .gemini_files_manager import FileUploadResult
 
@@ -991,10 +1375,10 @@ class ProcesadorGemini:
         for nombre_archivo, file_ref in cache_archivos.items():
             try:
                 # Si es FileUploadResult (nuevo cache Files API)
+                # Usamos el objeto directamente: ya tiene uri, mime_type y name.
+                # Evita una llamada files.get() por archivo por worker.
                 if isinstance(file_ref, FileUploadResult):
-                    # Obtener objeto File de Files API
-                    file_obj = self.client.files.get(name=file_ref.name)
-                    archivos_referencias.append(file_obj)
+                    archivos_referencias.append(file_ref)
                     logger.info(f" Referencia Files API reutilizada: {nombre_archivo} -> {file_ref.name}")
 
                 # Si es bytes (cache legacy - fallback)
@@ -1013,7 +1397,7 @@ class ProcesadorGemini:
 
         logger.info(f" {len(archivos_referencias)} referencias Files API listas para worker")
         return archivos_referencias
-    
+
     # ===============================
     #  FUNCIÓN COORDINADORA PARA CONCURRENCIA
     # ===============================
@@ -1115,7 +1499,7 @@ class ProcesadorGemini:
         # Stream independiente para este worker 
         stream = BytesIO(archivo_bytes)
         
-        # ✅ SOLUCIÓN: UploadFile sin content_type (compatible con todas las versiones)
+        # SOLUCIÓN: UploadFile sin content_type (compatible con todas las versiones)
         try:
             # Intentar con content_type (versiones más nuevas)
             archivo_clonado = UploadFile(
@@ -1149,7 +1533,7 @@ class ProcesadorGemini:
         #  SINGLE RETRY como solicitado 
         for intento in range(1, 3):  # Solo 2 intentos
             try:
-                # 🔧 RESETEAR POSICIÓN DE FORMA MÁS ROBUSTA
+                # RESETEAR POSICIÓN DE FORMA MÁS ROBUSTA
                 if hasattr(archivo, 'seek'):
                     try:
                         await archivo.seek(0)
@@ -1190,7 +1574,7 @@ class ProcesadorGemini:
                     else:
                         raise ValueError(f"Archivo {nombre_archivo} demasiado pequeño: {len(archivo_bytes)} bytes")
                 
-                # ✅ VALIDACIÓN ADICIONAL PARA PDFs
+                # VALIDACIÓN ADICIONAL PARA PDFs
                 if archivo_bytes.startswith(b'%PDF'):
                     logger.info(f" PDF detectado con magic bytes: {nombre_archivo}")
                 elif nombre_archivo.lower().endswith('.pdf'):
@@ -1233,27 +1617,10 @@ class ProcesadorGemini:
             num_paginas = len(pdf_reader.pages)
             
             if num_paginas == 0:
-                logger.error(f" PDF sin páginas: {nombre_archivo}")
+                logger.error(f"PDF sin paginas: {nombre_archivo}")
                 return False
-            
-            # ✅ VALIDACIÓN ADICIONAL: Verificar que al menos una página tenga contenido
-            try:
-                primera_pagina = pdf_reader.pages[0]
-                contenido = primera_pagina.extract_text()
-                
-                if not contenido.strip():
-                    logger.warning(f" PDF posiblemente escaneado (sin texto extraíble): {nombre_archivo}")
-                    # ✅ Aún así es válido para Gemini (puede leer imágenes en PDFs)
-                    logger.info(f" PDF escaneado aceptado para Gemini: {nombre_archivo}")
-                else:
-                    logger.info(f" PDF con texto extraíble validado: {nombre_archivo}")
-                    
-            except Exception as e:
-                logger.warning(f" No se pudo extraer texto de {nombre_archivo}: {e}")
-                # No es crítico, Gemini puede procesar PDFs sin texto extraíble
-            
-            # ✅ VALIDACIÓN FINAL EXITOSA
-            logger.info(f" PDF validado correctamente: {nombre_archivo} - {num_paginas} páginas")
+
+            logger.info(f"PDF validado correctamente: {nombre_archivo} - {num_paginas} paginas")
             return True
             
         except Exception as e:
@@ -1293,26 +1660,18 @@ class ProcesadorGemini:
             else:
                 timeout_segundos = 120.0   # 60s para análisis estándar
 
-            logger.info(f"Llamando a Gemini (nuevo SDK) con timeout de {timeout_segundos}s")
+            logger.info(f"Llamando a Gemini (con retry SSL) con timeout de {timeout_segundos}s")
 
-            # Crear tarea con timeout
-            loop = asyncio.get_event_loop()
-
-            # NUEVO SDK v2.0: usar client.models.generate_content
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.client.models.generate_content(
-                        model=self.model_name,
-                        contents=[prompt],
-                        config=config
-                    )
-                ),
-                timeout=timeout_segundos
+            # Llamar con retry automatico para errores SSL
+            respuesta = await self._ejecutar_con_retry(
+                contenido=[prompt],
+                config=config,
+                timeout_segundos=timeout_segundos,
+                contexto="consorcio" if usar_modelo_consorcio else "texto"
             )
 
             if not respuesta:
-                raise ValueError("IA devolvió respuesta None")
+                raise ValueError("IA devolvio respuesta None")
 
             if not hasattr(respuesta, 'text') or not respuesta.text:
                 raise ValueError("IA devolvió respuesta sin texto")
@@ -1505,7 +1864,7 @@ class ProcesadorGemini:
             logger.info(" Facturación extranjera detectada: Proveedor fuera de Colombia")
             return True
         else:
-            logger.info("🇨🇴 Facturación nacional: Proveedor en Colombia")
+            logger.info("Facturación nacional: Proveedor en Colombia")
             return False
 
     def _limpiar_respuesta_json(self, respuesta: str) -> str:
@@ -1663,7 +2022,7 @@ class ProcesadorGemini:
 
             # 3. Verificar si el JSON es válido ahora
             json.loads(json_reparado)
-            logger.info("✅ JSON reparado exitosamente")
+            logger.info("JSON reparado exitosamente")
             return json_reparado
 
         except json.JSONDecodeError as e:
@@ -1682,7 +2041,7 @@ class ProcesadorGemini:
             contenido: Contenido a guardar
         """
         try:
-            # ✅ CORREGIDO: Usar rutas absolutas para evitar errores de subpath
+            # CORREGIDO: Usar rutas absolutas para evitar errores de subpath
             directorio_base = Path.cwd()  # Directorio actual del proyecto
             fecha_hoy = datetime.now().strftime("%Y-%m-%d")
             

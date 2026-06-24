@@ -29,11 +29,13 @@ logger = logging.getLogger(__name__)
 
 class ClasificadorObraUni:
     
-    def __init__ (self, 
+    def __init__ (self,
                   procesador_gemini: 'ProcesadorGemini',
+                  database_manager=None
                   ):
         self.procesador_gemini = procesador_gemini
-        logger.info("ClasificadorObraUni inicializado correctamente.")
+        self.database_manager = database_manager
+        logger.info(f"ClasificadorObraUni inicializado - database_manager: {type(database_manager).__name__ if database_manager else 'None'}")
         
         
     async def analizar_estampilla(self, documentos_clasificados: Dict[str, Dict], archivos_directos: List[str] = None, cache_archivos: Dict[str, bytes] = None) -> Dict[str, Any]:
@@ -65,7 +67,7 @@ class ClasificadorObraUni:
         # Importar liquidador integrado
         try:
             from Liquidador.liquidador_estampilla import LiquidadorEstampilla
-            liquidador = LiquidadorEstampilla()
+            liquidador = LiquidadorEstampilla(database_manager=self.database_manager)
         except ImportError:
             logger.error("No se pudo importar LiquidadorEstampilla")
             raise ValueError("Error cargando liquidador de impuestos especiales")

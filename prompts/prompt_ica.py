@@ -15,7 +15,10 @@ Arquitectura: SOLID + Clean Architecture
 """
 
 import json
+import logging
 from typing import List, Dict, Any
+
+_logger = logging.getLogger(__name__)
 
 # Importar función para generar sección de archivos directos
 from prompts.prompt_clasificador import _generar_seccion_archivos_directos
@@ -69,6 +72,31 @@ REGLA FUNDAMENTAL:
 - Si no encuentras evidencia clara, marca codigo_ubicacion = 0
 
 ═══════════════════════════════════════════════════════════════════════
+PASO 0: VERIFICAR ADQUIRENTE/CLIENTE DE LA FACTURA (CRÍTICO)
+═══════════════════════════════════════════════════════════════════════
+
+Busca en los documentos adjuntos la FACTURA DE VENTA y verifica EXACTAMENTE a nombre de quién está facturado (busca campos como "Cliente", "Adquirente", "Señores", "Facturado a").
+
+REGLA ESTRICTA: SOLO DEBES CONTINUAR si el CLIENTE PRINCIPAL de la FACTURA es alguna de estas entidades o sus líneas de negocio:
+- FIDUCOLDEX (Fiduciaria Colombiana de Comercio Exterior S.A.)
+- ENCARGOS FIDUCIARIOS
+- FIDEICOMISOS SOCIEDAD FIDUCIARIA FIDUCOLDEX
+- PATRIMONIO AUTÓNOMO (Cualquier P.A., ej: P.A. FONTUR, P.A. INNPULSA, P.A. COLOMBIA PRODUCTIVA, etc.)
+- FONDOS DE INVERSIÓN - ABIERTA Y 60 MODERADO
+- FONDO AUREOS COLOMBIA – FONDO DE FONDO BANCOLDEX
+- CONSORCIOS (Cualquier consorcio)
+- Fondo de Inversión Colectiva Fiducoldex / FIC FIDUCOLDEX
+- Fondo de Capital Privado Áureos Colombia
+- FONDO MUJER LIBRE Y PRODUCTIVA / FONDO MUJER EMPRENDE
+
+IMPORTANTE: 
+1. Si el documento principal es una legalización de viáticos, un formato interno de Fiducoldex, un documento de cobro de un empleado, o NO es una factura expedida hacia nosotros, marca "aplica_ica": false.
+2. Si la factura está a nombre de una PERSONA NATURAL (un empleado) o un tercero distinto a la lista, marca "aplica_ica": false.
+3. No basta con que el nombre de Fiducoldex o de un Fondo aparezca en el encabezado o logo del documento; la entidad DEBE ser el ADQUIRENTE/CLIENTE de la factura.
+
+Si la factura NO está a nombre de nuestras entidades (según las reglas anteriores), debes indicar "aplica_ica": false, dejar las ubicaciones vacías y colocar EXACTAMENTE la siguiente frase en observaciones: "El documento analizado no es una factura a nombre de fiducoldex". Si SI es nuestro cliente, marca "aplica_ica": true.
+
+═══════════════════════════════════════════════════════════════════════
 PASO 1: UBICACIONES PARAMETRIZADAS EN BASE DE DATOS
 ═══════════════════════════════════════════════════════════════════════
 
@@ -91,6 +119,10 @@ PASO 3: INSTRUCCIONES DE IDENTIFICACIÓN
 BUSCAR EN LA FACTURA:
 1. Actividad facturada
 2. Ubicación textual de la actividad facturada.
+
+NOTA: La "ACTIVIDAD ECONOMICA" / codigo CIIU del ENCABEZADO de la factura es el dato
+de registro del EMISOR/proveedor (una pista), NO la actividad facturada. La actividad
+facturada se lee de las LINEAS / DESCRIPCION del concepto facturado, no del encabezado.
 
 
 UBICACIONES POR ACTIVIDAD FACTURADA:
@@ -183,6 +215,7 @@ PASO 5: FORMATO DE RESPUESTA JSON (OBLIGATORIO)
 Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
 
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "NOMBRE EXACTO como aparece en BD (SIN MAYUSCULAS SIN ACENTOS si no está en BD)",
@@ -202,6 +235,7 @@ Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
 
 EJEMPLO 1 - Una ubicación encontrada en BD:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "BOGOTA D.C.",
@@ -215,6 +249,7 @@ EJEMPLO 1 - Una ubicación encontrada en BD:
 
 EJEMPLO 2 - Múltiples ubicaciones con porcentajes:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "BOGOTA D.C.",
@@ -234,6 +269,7 @@ EJEMPLO 2 - Múltiples ubicaciones con porcentajes:
 
 EJEMPLO 3 - Ubicación NO encontrada en BD:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "zipaquira",
@@ -247,6 +283,7 @@ EJEMPLO 3 - Ubicación NO encontrada en BD:
 
 EJEMPLO 4 - NO se encontró ubicación:
 {{
+  "aplica_ica": true,
   "ubicaciones": [
     {{
       "nombre_ubicacion": "",
@@ -256,6 +293,13 @@ EJEMPLO 4 - NO se encontró ubicación:
     }}
   ],
   "observaciones": "No se encontró ubicación en los documentos proporcionados o no se encontrar documentos"
+}}
+
+EJEMPLO 5 - NO aplica ICA por Adquirente (Factura de Terceros):
+{{
+  "aplica_ica": false,
+  "ubicaciones": [],
+  "observaciones": "El documento analizado no es una factura a nombre de fiducoldex"
 }}
 
 IMPORTANTE:
@@ -354,7 +398,43 @@ PASO 3: DOCUMENTOS A ANALIZAR (ENFOQUE EN FACTURA y RUT)
 {docs_formateados}
 
 ═══════════════════════════════════════════════════════════════════════
-PASO 4: INSTRUCCIONES DE RELACION
+PASO 4: RUBRICA DE MATCHING (ORDEN DE PRIORIDAD)
+═══════════════════════════════════════════════════════════════════════
+
+Para cada conjunto de actividades facturadas, evalua los candidatos de la BD
+aplicando estos criterios EN ORDEN. No avances al siguiente criterio si el
+anterior ya discrimina entre candidatos.
+
+CRITERIO 1 - Equivalencia semantica de la descripcion:
+   - Compara el nucleo de la actividad facturada (sustantivo + objeto) con la
+     descripcion de BD. Coincidencia exacta o sinonimica gana.
+   - Ejemplo: "consultoria en sistemas" coincide con "consultoria en
+     informatica" (sinonimos del sector).
+
+CRITERIO 2 - Especificidad sobre generalidad:
+   - Si dos candidatos encajan, prefiere el MAS ESPECIFICO (descripcion mas
+     restringida al servicio facturado), NO el generico tipo "otros servicios"
+     o "actividades no clasificadas previamente".
+
+CRITERIO 3 - Coincidencia del tipo_actividad (servicio / comercio / industria):
+   - Servicios profesionales -> tipo SERVICIOS.
+   - Venta de bienes -> tipo COMERCIO.
+   - Manufactura / transformacion -> tipo INDUSTRIA.
+   - Si el tipo no encaja, descartar aunque la descripcion parezca cercana.
+
+CRITERIO 4 - Tarifa ICA:
+   - NUNCA es criterio de eleccion. Solo se reporta. Elegir por tarifa
+     (mas alta o mas baja) es incorrecto.
+
+REGLA DE DESEMPATE:
+   - Si tras los 4 criterios siguen empatados dos candidatos, elige el de
+     menor codigo_actividad y registralo en el campo razonamiento.
+
+LIMITE DEL CAMPO razonamiento:
+   - Maximo 60 palabras. Conciso, citando codigos y criterios por nombre.
+
+═══════════════════════════════════════════════════════════════════════
+PASO 5: INSTRUCCIONES DE RELACION
 ═══════════════════════════════════════════════════════════════════════
 
 PROCESO OBLIGATORIO:
@@ -363,25 +443,45 @@ PROCESO OBLIGATORIO:
    - TODAS las actividades facturadas (TEXTUALES, tal como aparecen en la factura)
    - El valor de la FACTURA SIN IVA (valor único para todas las actividades)
 
+   ACLARACION CRITICA (NO CONFUNDIR EMISOR CON LO FACTURADO):
+   - La "ACTIVIDAD ECONOMICA" / codigo CIIU y la "TARIFA ICA (x 1000)" impresos en
+     el ENCABEZADO o la plantilla de la factura son DATOS DE REGISTRO DEL EMISOR /
+     PROVEEDOR. Son una PISTA de contexto, NO la actividad facturada.
+   - La actividad facturada debe extraerse EXCLUSIVAMENTE de las LINEAS / DESCRIPCION
+     del concepto facturado (la tabla de productos o servicios), NO del encabezado,
+     NO del codigo CIIU del emisor y NO de la tarifa ICA impresa en la plantilla.
+   - Ejemplo de error a EVITAR: tomar "Actividad economica 9411" del encabezado y
+     reportarla como actividad facturada. Eso es el CIIU del emisor, no lo facturado.
+   - Si tras esto la actividad facturada no equivale a ninguna actividad de la BD por
+     ubicacion, deja actividades_relacionadas con codigo_actividad = 0 y
+     codigo_ubicacion = 0 (no fuerces un match con el CIIU del encabezado).
+
 2. RELACIONAR TODAS las actividades facturadas EN CONJUNTO con actividades de la BD:
    - Analizar TODAS las actividades facturadas como un grupo
    - Relacionarlas con actividades de la base de datos
-   - MAPEA EL CONJUNTO de actividades facturadas con LAS ACTIVIDAD MAS PRECISA DE LA BASE DE DATOS POR UBICACION
+   - Antes de elegir, evalua 2-3 candidatos de la BD por ubicacion contra la RUBRICA del PASO 4
+   - MAPEA EL CONJUNTO de actividades facturadas con LA ACTIVIDAD MAS PRECISA DE LA BASE DE DATOS POR UBICACION
+   - Documenta el analisis en el campo razonamiento de la respuesta JSON (maximo 60 palabras)
    - PUEDE HABER múltiples actividades relacionadas SOLO si son de DIFERENTES ubicaciones
    - Para la MISMA ubicación, SOLO PUEDE HABER UNA actividad relacionada
-   
+
 
 3. IMPORTANTE:
    - Si no encuentras actividades facturadas claras marca -> actividades facturadas : []
    - Si encuentras múltiples actividades relacionadas, DEBEN ser de DIFERENTES ubicaciones (codigo_ubicacion diferente)
    - NUNCA dos actividades relacionadas con el mismo codigo_ubicacion
    - Si NO encuentras ninguna relación, dejar actividades_relacionadas con: nombre_act_rel = "", codigo_actividad = 0, codigo_ubicacion = 0
-   
-4.EXTRAER DEL RUT (Formulario de Registro Unico Tributario):
+
+4. EXTRAER DEL RUT (Formulario de Registro Unico Tributario):
     -  Busca literalmente en el RUT "AUTORRETENEDOR DE ICA", Si encuentras en el RUT que el proovedor es AUTORRETENEDOR DE ICA , marca el parametro "autorretenedor_ica": true en el JSON de respuesta, de lo contrario marca "autorretenedor_ica": false
+    -  REGIMEN TRIBUTARIO (la evidencia textual del RUT SIEMPRE manda, en este orden de prioridad):
+       ├─ Si encuentras "REGIMEN SIMPLE", "REGIMEN SIMPLE DE TRIBUTACION", "SIMPLE" o el codigo "O-47" -> "regimen_tributario": "SIMPLE"
+       ├─ Si encuentras "REGIMEN ORDINARIO", "ORDINARIO" o el codigo DIAN "R-99-PN" -> "regimen_tributario": "ORDINARIO"
+       ├─ Si encuentras "REGIMEN ESPECIAL", "ESPECIAL" o "SIN ANIMO DE LUCRO" -> "regimen_tributario": "ESPECIAL"
+       └─ Si no encuentras ninguna evidencia textual del regimen -> "regimen_tributario": null
 
 ═══════════════════════════════════════════════════════════════════════
-PASO 5: FORMATO DE RESPUESTA JSON (OBLIGATORIO)
+PASO 6: FORMATO DE RESPUESTA JSON (OBLIGATORIO)
 ═══════════════════════════════════════════════════════════════════════
 
 Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
@@ -392,16 +492,19 @@ Debes responder UNICAMENTE con un JSON válido siguiendo esta estructura EXACTA:
     {{
       "nombre_act_rel": "DESCRIPCION TEXTUAL de BD para ubicación 1",
       "codigo_actividad": 10,
-      "codigo_ubicacion": 1
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: [...]. Candidatos en <UBICACION>: (a) cod X 'desc' tipo Y; (b) cod Z 'desc' tipo W. Elegido (a) por Criterio 1 (...). (b) descartado por Criterio 3 (...)."
     }},
     {{
       "nombre_act_rel": "DESCRIPCION TEXTUAL de BD para ubicación 2",
       "codigo_actividad": 15,
-      "codigo_ubicacion": 2
+      "codigo_ubicacion": 2,
+      "razonamiento": "Facturadas: [...]. Candidatos en <UBICACION2>: (a) cod X 'desc' tipo Y; (b) cod Z 'desc' tipo W. Elegido (a) por Criterio 2 (mas especifico)."
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": true | false
+  "autorretenedor_ica": true | false,
+  "regimen_tributario": "SIMPLE" | "ORDINARIO" | "ESPECIAL" | null
 }}
 
 EJEMPLO 1 - Una actividad, una ubicación no autorretenedor de ica :
@@ -411,11 +514,13 @@ EJEMPLO 1 - Una actividad, una ubicación no autorretenedor de ica :
     {{
       "nombre_act_rel": "Servicios de consultoría en informática",
       "codigo_actividad": 620100,
-      "codigo_ubicacion": 1
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Consultoría en sistemas']. Candidatos en BOGOTA: (a) 620100 'Consultoría en informática' SERVICIOS; (b) 999999 'Otros servicios' SERVICIOS. Elegido (a) por Criterio 1 (sinonimo directo) y Criterio 2 (mas especifico)."
     }}
   ],
   "valor_factura_sin_iva": 5000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": "ORDINARIO"
 }}
 
 EJEMPLO 2 - Múltiples actividades facturadas, múltiples ubicaciones, no autorretenedor de ica :
@@ -425,16 +530,19 @@ EJEMPLO 2 - Múltiples actividades facturadas, múltiples ubicaciones, no autorr
     {{
       "nombre_act_rel": "Servicios de ingeniería y arquitectura",
       "codigo_actividad": 711000,
-      "codigo_ubicacion": 1
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Ingeniería civil', 'Diseño arq.', 'Supervisión']. Candidatos BOGOTA: (a) 711000 'Ingeniería y arquitectura' SERVICIOS; (b) 999999 'Otros' SERVICIOS. Elegido (a) Criterio 1 y 2 (especifico al conjunto facturado)."
     }},
     {{
       "nombre_act_rel": "Servicios de ingeniería y arquitectura",
       "codigo_actividad": 711000,
-      "codigo_ubicacion": 5
+      "codigo_ubicacion": 5,
+      "razonamiento": "Facturadas: ['Ingeniería civil', 'Diseño arq.', 'Supervisión']. Candidatos MEDELLIN: (a) 711000 'Ingeniería y arquitectura' SERVICIOS; (b) 999999 'Otros' SERVICIOS. Elegido (a) mismos criterios que ubicación 1."
     }}
   ],
   "valor_factura_sin_iva": 10000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
 }}
 
 EJEMPLO 3 - Múltiples actividades, una ubicación, autorretenedor de ica :
@@ -444,39 +552,77 @@ EJEMPLO 3 - Múltiples actividades, una ubicación, autorretenedor de ica :
     {{
       "nombre_act_rel": "Servicios de consultoría empresarial",
       "codigo_actividad": 702000,
-      "codigo_ubicacion": 1
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Consultoría empresarial', 'Capacitación', 'Asesoría admin.']. Candidatos BOGOTA: (a) 702000 'Consultoría empresarial' SERVICIOS; (b) 855000 'Educación y formación' SERVICIOS. Elegido (a) Criterio 1 (mayor coincidencia con el conjunto facturado)."
     }}
   ],
   "valor_factura_sin_iva": 5000000.0,
-  "autorenedor_ica": true
+  "autorretenedor_ica": true,
+  "regimen_tributario": "ORDINARIO"
 }}
 
-EJEMPLO 4 - NO se pudo relacionar, no autorenedor de ica :
+EJEMPLO 4 - NO se pudo relacionar, no autorretenedor de ica :
 {{
   "actividades_facturadas": ["Servicios varios no especificados", "Otros servicios"],
   "actividades_relacionadas": [
     {{
       "nombre_act_rel": "",
       "codigo_actividad": 0,
-      "codigo_ubicacion": 0
+      "codigo_ubicacion": 0,
+      "razonamiento": "Facturadas: ['Servicios varios', 'Otros servicios']. Los candidatos disponibles son demasiado especificos para una descripcion tan generica. Ningun candidato cumple Criterio 1 (sin equivalencia semantica clara)."
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
 }}
 
-EJEMPLO 5 - NO se pudo identificar la actividad facturada, no autorenedor de ica :
+EJEMPLO 5 - NO se pudo identificar la actividad facturada, no autorretenedor de ica :
 {{
   "actividades_facturadas": [],
   "actividades_relacionadas": [
     {{
       "nombre_act_rel": "",
       "codigo_actividad": 0,
-      "codigo_ubicacion": 0
+      "codigo_ubicacion": 0,
+      "razonamiento": "No se identificaron actividades facturadas en el documento. Sin actividades facturadas no es posible evaluar candidatos de la BD."
     }}
   ],
   "valor_factura_sin_iva": 1000000.0,
-  "autorretenedor_ica": false
+  "autorretenedor_ica": false,
+  "regimen_tributario": null
+}}
+
+EJEMPLO 6 - Caso AMBIGUO con varios candidatos parecidos:
+{{
+  "actividades_facturadas": ["Mantenimiento preventivo de equipos de computo y soporte en sitio"],
+  "actividades_relacionadas": [
+    {{
+      "nombre_act_rel": "Mantenimiento y reparacion de computadores y equipo periferico",
+      "codigo_actividad": 951100,
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Mantenimiento equipos de computo']. Candidatos BOGOTA: (a) 951100 'Mantenimiento computadores' SERVICIOS; (b) 620900 'Otras TI' SERVICIOS; (c) 620100 'Consultoría informatica' SERVICIOS. Elegido (a) Criterio 1 (sinonimo exacto) y Criterio 2 (mas especifico que (b)). (c) descartado: consultoría != mantenimiento."
+    }}
+  ],
+  "valor_factura_sin_iva": 2500000.0,
+  "autorretenedor_ica": false,
+  "regimen_tributario": "ORDINARIO"
+}}
+
+EJEMPLO 7 - Proveedor del Regimen Simple de Tributacion (RUT indica "REGIMEN SIMPLE" / codigo O-47):
+{{
+  "actividades_facturadas": ["Servicios de aseo y cafetería"],
+  "actividades_relacionadas": [
+    {{
+      "nombre_act_rel": "Servicios de limpieza general",
+      "codigo_actividad": 812000,
+      "codigo_ubicacion": 1,
+      "razonamiento": "Facturadas: ['Aseo y cafetería']. Candidatos BOGOTA: (a) 812000 'Limpieza general' SERVICIOS; (b) 999999 'Otros' SERVICIOS. Elegido (a) por Criterio 1 (sinonimo directo)."
+    }}
+  ],
+  "valor_factura_sin_iva": 3000000.0,
+  "autorretenedor_ica": false,
+  "regimen_tributario": "SIMPLE"
 }}
 
 IMPORTANTE:
@@ -487,6 +633,9 @@ IMPORTANTE:
 - actividades_relacionadas es una LISTA UNICA (no anidada)
 - SOLO puede haber múltiples actividades relacionadas si tienen DIFERENTE codigo_ubicacion
 - valor_factura_sin_iva es el valor total de la factura SIN IVA
+- razonamiento debe estar presente en cada objeto de actividades_relacionadas
+- razonamiento debe ser conciso: MAXIMO 60 palabras
+- razonamiento debe citar 2-3 candidatos por codigo y justificar la eleccion con los criterios 1-4 de la RUBRICA
 """
 
 
@@ -532,13 +681,17 @@ def validar_estructura_ubicaciones(data: Dict[str, Any]) -> bool:
     Returns:
         bool: True si la estructura es válida
     """
+    if "aplica_ica" not in data or not isinstance(data["aplica_ica"], bool):
+        return False
+
     if "ubicaciones" not in data:
         return False
 
     if not isinstance(data["ubicaciones"], list):
         return False
 
-    if len(data["ubicaciones"]) == 0:
+    # Permitir ubicaciones vacías solo si aplica_ica es False
+    if len(data["ubicaciones"]) == 0 and data.get("aplica_ica", True):
         return False
 
     campos_requeridos = ["nombre_ubicacion", "codigo_ubicacion", "texto_identificador", "porcentaje_ejecucion"]
@@ -590,12 +743,28 @@ def validar_estructura_actividades(data: Dict[str, Any]) -> bool:
             return False
         if "codigo_ubicacion" not in rel:
             return False
+        # Validacion INFORMATIVA de razonamiento (no bloquea el flujo).
+        if "razonamiento" not in rel or not isinstance(rel.get("razonamiento"), str):
+            _logger.warning(
+                "Actividad relacionada sin campo 'razonamiento' valido "
+                "(codigo_actividad=%s, codigo_ubicacion=%s). El flujo continua.",
+                rel.get("codigo_actividad"), rel.get("codigo_ubicacion")
+            )
 
     # Validar valor_factura_sin_iva es numérico
     if not isinstance(data["valor_factura_sin_iva"], (int, float)):
         return False
       
-    if not isinstance(data["autorretenedor_ica"], bool):   
+    if not isinstance(data["autorretenedor_ica"], bool):
         return False
+
+    # Validacion INFORMATIVA de regimen_tributario (campo opcional, no bloquea el flujo).
+    # Si Gemini lo omite o lo envia con un tipo inesperado, se continua y el liquidador
+    # lo tratara como None (no aplica el corte por Regimen Simple).
+    if "regimen_tributario" in data and not isinstance(data["regimen_tributario"], (str, type(None))):
+        _logger.warning(
+            "Campo 'regimen_tributario' con tipo inesperado (%s). El flujo continua.",
+            type(data["regimen_tributario"]).__name__
+        )
 
     return True

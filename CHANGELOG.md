@@ -1,5 +1,811 @@
 # CHANGELOG - Preliquidador de Retención en la Fuente
 
+## [3.19.10] - 2026-06-16
+
+### Corregido
+
+- **`GET /api/diagnostico` reparado**: el endpoint estaba roto en tiempo de ejecución y siempre caía en `estado_general: ERROR_DIAGNOSTICO`. Causa: usaba `GOOGLE_CLOUD_CREDENTIALS` (variable no definida ni importada en `main.py`) y llamaba `detectar_impuestos_aplicables` (no importada; además función legacy apoyada en helpers deprecados). Se retiraron el componente `google_credentials` (OCR/Vision en desuso), el sub-chequeo `deteccion_automatica` y la carpeta `Static` (no se monta) de los chequeos. La versión del payload ahora se toma de `app.version`.
+
+### Eliminado
+
+- **Endpoints en desuso**: se eliminaron `GET /api/database/test/{codigo_negocio}`, `GET /api/extracciones`, `POST /api/prueba-simple` y `GET /api/nits-disponibles`, que no se usaban hace tiempo (consultas/smoke-tests de desarrollo y un listado de NITs hardcodeado). Reduce la superficie de la API. Se conservan `/api/procesar-facturas` (principal) y los auxiliares `/api/diagnostico` y `/api/database/health`.
+
+### Cambiado
+
+- **Versión centralizada en `/api/diagnostico`**: devuelve `app.version` en lugar del literal `2.4.0` hardcodeado.
+- **Limpieza de imports huérfanos en `main.py`**: se retiraron `preprocesar_excel_limpio`, `detectar_impuestos_aplicables_por_codigo`, `pandas as pd` e `io`, que ya no se usaban.
+
+## [3.19.9] - 2026-06-16
+
+### Añadido
+
+- **Paquete de documentación de entrega en `docs/`**: se reemplazó el contenido obsoleto de la carpeta por un paquete nuevo, conciso y orientado al producto: índice (`README.md`), arquitectura (`01_ARQUITECTURA.md`), despliegue y operación/runbook (`02_DESPLIEGUE_OPERACION.md`), API y contrato del webhook (`03_API.md`), pruebas (`04_PRUEBAS.md`), reglas de negocio por impuesto (`05_REGLAS_NEGOCIO.md`).
+
+### Cambiado
+
+- **`tests/` y `docs/` ahora se versionan**: se retiraron de `.gitignore` para incorporar la suite de pruebas y la documentación al control de versiones. Se agregaron al ignore los artefactos de herramientas de desarrollo (`.coverage` y carpetas/archivos de tooling) para que no se publiquen.
+- **README raíz actualizado a datos reales**: versión 3.19.8, puerto 8080, SDK `google-genai` 1.12.1, Python 3.11, bloque `.env` completo (incluye variables de Nexura y webhook) y enlace a la documentación de `docs/`.
+
+### Corregido
+
+- **Alineación de la versión del servicio**: el objeto FastAPI en `main.py` declaraba `version="2.0.0"`; ahora refleja la versión vigente.
+- **Eliminación de referencias muertas a `RETEFUENTE_CONCEPTOS.xlsx`**: se retiró la clave `CONFIG["archivo_excel"]` en `config.py` y la entrada del archivo en la lista de archivos críticos del diagnóstico (`main.py`). La fuente de verdad es la base de datos; ese `.xlsx` ya no se usa.
+
+## [3.19.8] - 2026-06-17
+
+### Corregido
+
+- **Depuración de la suite de tests y eliminación de scripts manuales obsoletos**: Se eliminaron definitivamente 9 archivos de scripts de prueba manuales y experimentos (`test_cuantias_endpoint.py`, `test_cuantias_endpoint_v2.py`, `test_cuantias_filtros_servidor.py`, `test_cuantias_optimizado.py`, `test_ica_endpoints.py`, `test_listar_tablas_supabase.py`, `test_manual_cuantias_nexura.py`, `test_manual_ica_nexura.py`, `test_prompt_ica_visualizacion.py`) que hacían llamadas externas reales y causaban falsos negativos y timeouts en pytest.
+- **Corrección de la ejecución de tests en el entorno virtual local**: Se validó que al correr pytest en el entorno virtual (`venv`) correcto, la suite pasa al 100% de éxito, resolviendo un error de importación de la dependencia `python-calamine` (necesaria para el preprocesamiento de Excel) que ocurría al ejecutar en el entorno global.
+
+## [3.19.7] - 2026-06-15
+
+### Corregido
+
+- **Retefuente: cuando NINGÚN concepto facturado mapea al diccionario, el estado queda `no_aplica_impuesto` y sin mensaje redundante**: si Gemini devuelve `CONCEPTO_NO_IDENTIFICADO` para todos los conceptos (no encuentra relación alguna entre lo facturado y el diccionario de retefuente), el resultado mostraba dos mensajes —"El concepto facturado no se identifica en los soportes adjuntos. Validar soportes." y "No se identificaron conceptos válidos para calcular retención"— y un estado `preliquidacion_sin_finalizar`. Ahora en `Liquidador/liquidador.py` (`calcular_retencion`): (1) el primer mensaje solo se agrega cuando hay conceptos mixtos (algunos identificados y otros no), y (2) cuando todos son no identificados se devuelve `estado="no_aplica_impuesto"` con un único mensaje. El caso mixto conserva su comportamiento (advertencia + cálculo sobre los identificados, `estado="preliquidado"`).
+
+## [3.19.6] - 2026-06-15
+
+### Corregido
+
+- **Retefuente: cuotas / aportes gremiales dejan de mapearse a "Servicios en general"**: una cuota de sostenimiento / aporte / membresía / afiliación a una asociación o gremio se encasillaba en el genérico "Servicios en general - Beneficiario persona jurídica" (4%) y se liquidaba retención indebida (caso real: factura AF3522 de Asociación de Fiduciarias a Fiducoldex). El modelo racionalizaba que "una cuota de sostenimiento es un servicio general de asociación", esquivando la regla anti-comodín. Ajuste solo a nivel de prompt en `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA` PASO 3.0 y `PROMPT_MATCHING_CONCEPTOS` de consorcios): se añade un GATE previo a la rúbrica de matching que identifica la familia cuota/aporte gremial (pertenecer a / sostener una entidad) y la marca como `CONCEPTO_NO_IDENTIFICADO` (`concepto_index` 0), más un ejemplo negativo (few-shot) y una regla anti-racionalización. El gate incluye una acotación de seguridad para NO desviar rentas legítimas no-servicio que sí tienen concepto en la BD (arrendamientos, transporte, rendimientos, dividendos, loterías, indemnizaciones, emolumentos, compras). Complementa la regla anti-comodín ya existente. No se leen leyendas de la factura (para evitar prompt injection).
+- **ICA: se aclara que la actividad económica (CIIU) del encabezado es dato del emisor (pista)**: la "ACTIVIDAD ECONOMICA" / CIIU y la tarifa ICA impresas en el encabezado de la factura son datos de registro del emisor, no la actividad facturada. Ajuste a nivel de prompt en `prompts/prompt_ica.py` (`crear_prompt_relacionar_actividades` y `crear_prompt_identificacion_ubicaciones`): la actividad facturada debe extraerse de las líneas/descripción del concepto, no del encabezado. NOTA: esto NO resuelve por sí solo el caso de cuotas de asociación cuando la BD de ICA contiene una actividad real "actividades de asociaciones empresariales" que coincide semánticamente con la línea facturada; ese match se abordará en una iteración dedicada a ICA.
+
+## [3.19.5] - 2026-06-15
+
+### Corregido
+
+- **Liquidación de consorcios ya no se aborta por un concepto no mapeado**: cuando Gemini no lograba relacionar un concepto facturado con la base de datos (`CONCEPTO_NO_IDENTIFICADO` / `concepto_index` 0), el liquidador de consorcios (`Liquidador/liquidador_consorcios.py`) era "todo o nada" y detenía toda la liquidación devolviendo `preliquidacion_sin_finalizar`, aunque otros conceptos sí mapearan (caso real: consorcio CPAS-3 con la línea `IVA` no mapeable). Ahora `_validar_conceptos_consorcio` acumula los conceptos válidos y registra los no mapeados como alertas en `observaciones` (incluyendo el razonamiento de Gemini); si al menos un concepto mapea, se liquida con esos y se devuelve el resultado (`estado="preliquidado"`, `procesamiento_exitoso=True`). La preliquidación queda sin finalizar solo cuando NINGÚN concepto facturado puede mapearse. El flujo no-consorcio (`Liquidador/liquidador.py`) ya tenía este comportamiento y no se modificó.
+
+## [3.19.4] - 2026-06-15
+
+### Corregido
+
+- **IVA sobre la utilidad (contratos AIU / obra civil) ya no se interpreta como concepto de retención**: en contratos de obra civil con estructura AIU (Administración, Imprevistos, Utilidad), el IVA se calcula como 19% de la Utilidad y el facturador electrónico lo emite como un ítem más dentro de la tabla de productos (no en la columna/total de IVA). Gemini lo extraía como un concepto facturado más, contaminando `conceptos_identificados` (caso real: consorcio CPAS-3, línea `IVAUTIL19` = $10.950.357). Ajuste solo a nivel de prompt en `prompts/prompt_retefuente.py`: tanto `PROMPT_EXTRACCION_CONSORCIO` (PASO C) como `PROMPT_ANALISIS_FACTURA` (PASO 3) ahora instruyen a excluir las líneas de impuestos (IVA, ReteIVA, INC) de los conceptos, dejando una nota en `observaciones` para trazabilidad. No se modificó código Python ni el cálculo de `valor_total` (que ya excluía el IVA).
+
+## [3.19.3] - 2026-06-09
+
+### Corregido
+
+- **Contenido de un PDF propagado a otros archivos distintos en la clasificación**: Gemini clasificaba 3 PDFs distintos como "primera/segunda/tercera página" de la misma factura. La causa era el ensamblado del contenido multimodal en `_llamar_gemini_hibrido` (`Clasificador/clasificador.py`): los PDFs se enviaban como un stream de Parts consecutivos `[<PDF1>, <PDF2>, <PDF3>, PROMPT]` y los nombres de archivo solo viajaban como una lista de texto dentro del prompt, sin vínculo explícito nombre↔contenido. Gemini debía adivinar la correspondencia y la alineaba posicionalmente, tratando 3 archivos distintos como páginas de uno solo. Ahora cada archivo se antecede con un Part de texto delimitador `===== DOCUMENTO ADJUNTO: <nombre> =====`, que vincula nombre y contenido de forma inequívoca. El delimitador es determinista y va al inicio, por lo que preserva el implicit caching de Gemini 2.5. Aplica a la clasificación por lotes y al análisis global (ambos pasan por `_llamar_gemini_hibrido`). Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla de identidad de los adjuntos: cada archivo es un documento independiente y completo, y no debe asumirse que varios archivos son páginas del mismo documento.
+
+## [3.19.2] - 2026-06-09
+
+### Cambiado
+
+- **`PROMPT_CLASIFICACION_LOTE` reescrito de marco "literal" a juicio fiscal calibrado**: el prompt arrancaba con "Eres un CLASIFICADOR LITERAL" y una regla anti-alucinación que prohibía "deducir, interpretar o suponer" y obligaba a usar "SOLO texto explícito". Pero la tarea de tipo/relevancia es de criterio (decidir si un Excel es un entregable o un dato tributario, o si un correo es la factura o solo la transporta, es interpretación). El marco rígido anulaba el razonamiento del modelo y, como es imposible enumerar todos los casos, cada caso nuevo se parchaba con otra regla, dejando aún falsos positivos. Ahora el encabezado posiciona a Gemini como ANALISTA FISCAL EXPERTO que razona sobre la FUNCIÓN de cada documento; la regla anti-alucinación se reorienta a "no inventes DATOS, pero SÍ usa tu juicio para inferir la función/relevancia". Las enumeraciones se conservan pero reetiquetadas como ANCLAS DE CALIBRACIÓN no exhaustivas, con permiso explícito de razonar por analogía. Se preservan intactos los guardrails duros: precedencia de FACTURA, coherencia `DESCARTABLE ⇒ relevante=false`, distribución territorial de ICA siempre relevante, entregables/datos operativos no relevantes (aunque tengan muchas cifras), notificaciones DIAN como DESCARTABLE, y PILA/Art. 383 siempre relevantes.
+- **Nuevo campo `motivo` en el JSON de clasificación por documento** (CoT ligero): cada documento responde primero un `motivo` breve (≤15 palabras con su función) antes de `tipo` y `relevante`, forzando el razonamiento antes de comprometer la etiqueta y dejando traza auditable. Es aditivo: `Clasificador/clasificador.py` solo lee `tipo`/`relevante` y preserva las claves extra; no cambia el contrato downstream.
+
+### Corregido
+
+- **Imágenes decorativas infladas a relevante=true**: firmas de correo, logos, iconos y banners embebidos (assets tipo `Outlook-*.png`, `image00X.png`) se marcaban como ANEXO/relevante=true y entraban como ruido a las llamadas de impuestos. El prompt ahora trata como DESCARTABLE cualquier imagen/pantallazo sin datos fiscales legibles, sin importar el nombre del archivo, y exige tratar de forma CONSISTENTE a los archivos de la misma naturaleza dentro del lote (antes archivos gemelos salían uno ANEXO y otro DESCARTABLE).
+- **Correos `.msg`/`.eml` clasificados como FACTURA**: se generalizó la regla DIAN a cualquier CORREO-TRANSPORTE: un correo cuyo cuerpo solo saluda, anuncia o adjunta la factura, sin contener él mismo subtotal/IVA/total e ítems, NO es FACTURA. El correo es ANEXO (si aporta contexto fiscal) o DESCARTABLE (si es solo envío); la FACTURA es el adjunto PDF/XML con valores e ítems.
+- **Regresión: entregables (bases de datos) racionalizados como relevantes**: al relajar el marco, Gemini empezó a conservar entregables del servicio facturado (p. ej. `C1 Bases Mujer_Soberana.xlsx`) justificándolos como relevantes por "contener NITs/cifras" o "distribución geográfica para ICA". Se afiló la frontera sin volver al marco rígido: (1) **PRUEBA DECISIVA** binaria en el PASO 2 — si el documento describe el COBRO/relación tributaria es relevante, si describe el RESULTADO ENTREGADO al cliente (registros, beneficiarios, padrones, bases de datos) es el PRODUCTO del trabajo → DESCARTABLE aunque tenga NITs, montos, ciudades o miles de filas; (2) **excepción de ICA acotada** — solo aplica a la distribución de la EJECUCIÓN del servicio/contrato del proveedor por municipio, NO a una columna geográfica de los registros dentro de un entregable; (3) se retiró el gancho suelto "NITs" de la lista de relevantes, atándolo al NIT/RUT del proveedor/comprador o del contrato; (4) pista de nombre ("Bases", "BD", "padrón", "listado", "data", "registros") como señal de entregable.
+
+## [3.19.1] - 2026-06-08
+
+### Corregido
+
+- **Inconsistencia DESCARTABLE + relevante=true**: la clasificación por lotes podía devolver documentos con `{"tipo": "DESCARTABLE", "relevante": true}` (Gemini contradecía su propia instrucción). Se fuerza el invariante en `Clasificador/clasificador.py`: al consolidar los lotes, un documento de tipo DESCARTABLE siempre queda `relevante=false`, aguas arriba de todo consumidor del flag. Se reforzó además `PROMPT_CLASIFICACION_LOTE` con una regla dura: si `tipo == DESCARTABLE` entonces `relevante` DEBE ser `false`. Evita que correos de notificación marcados DESCARTABLE entren como ruido (y gasten tokens) en las llamadas de impuestos.
+- **Datos territoriales de ICA ya no se descartan**: el criterio de relevancia de `PROMPT_CLASIFICACION_LOTE` no contemplaba la distribución territorial del servicio (ciudad/municipio de ejecución, porcentajes de ejecución por municipio), insumo directo de ICA para distribuir el impuesto. Un correo/anexo que solo aportara esa distribución podía caer como DESCARTABLE y, con el invariante anterior, perder su texto en la llamada de ICA (`app/clasificacion_documentos.py` vacía el texto de los no relevantes). Ahora el prompt conserva explícitamente estos documentos como tipo ANEXO + relevante=true (nunca DESCARTABLE).
+
+## [3.19.0] - 2026-06-07
+
+### Añadido
+
+- **Clasificación de documentos en dos fases**: Se dividió el proceso de clasificación en dos llamadas consecutivas a Gemini: una primera llamada por lotes de clasificación (`PROMPT_CLASIFICACION_LOTE` para determinar tipo y relevancia) y una posterior de análisis global (`PROMPT_ANALISIS_GLOBAL` sobre los relevantes para consorcios, recursos y facturación extranjera, y ubicación).
+- **Entrada ilimitada de archivos**: Se eliminó el tope duro de 20 archivos de entrada, procesando ahora cualquier volumen de documentos en lotes de hasta 10 mediante ejecución paralela (`asyncio.gather`).
+- **Filtro conservador de relevancia**: Identificación de documentos irrelevantes para descartar archivos que no aportan valor tributario, preservando siempre planillas PILA y certificados de deducción del Artículo 383.
+- **Recorte por prioridad fiscal**: Si el conjunto de documentos relevantes supera los 20 permitidos por el pipeline downstream, se recortan siguiendo la prioridad: `FACTURA > RUT > contrato > planillas/certificados (Art. 383) > resto`.
+- **Hard stop sin factura**: Interrupción inmediata del flujo con estado `preliquidacion_sin_finalizar` si tras clasificar todos los lotes no se identifica ninguna factura.
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — Se reestructuró `clasificar_documentos` para subir archivos una sola vez al Files API, realizar clasificación en lotes y ejecutar el análisis global consolidado.
+- `app/clasificacion_documentos.py` — Propagación del campo `relevante`, validación de hard stop por ausencia de factura y algoritmo de ordenamiento/recorte por prioridad fiscal de relevantes. El nuevo tipo `CONTRATO` se mapea al string canónico `ANEXO CONCEPTO DE CONTRATO` y el texto de documentos no relevantes se excluye de las llamadas downstream.
+
+### Corregido
+
+- **Crash al fallar el parseo de JSON de un lote de clasificación**: el manejador de error de `clasificar_documentos` referenciaba la variable `respuesta`, que tras el refactor a lotes ya no existe en ese scope, produciendo `NameError: name 'respuesta' is not defined` y enmascarando el error real. Ahora cada lote captura su `JSONDecodeError`, loguea la respuesta cruda en su scope y propaga un error claro indicando qué lote falló.
+- **Precedencia de FACTURA en documentos mixtos**: se restauró en `PROMPT_CLASIFICACION_LOTE` la regla de que un documento que contiene una factura real (con valores e ítems) embebida entre otra información (anexos, RUT, datos, ruido) se clasifica OBLIGATORIAMENTE como FACTURA, con precedencia sobre DESCARTABLE/ANEXO/CONTRATO/COTIZACION, haya uno o varios archivos. Se eliminó el recordatorio "solo un documento" que con el procesamiento por lotes podía forzar erróneamente a FACTURA el último archivo de un lote parcial. Si tras la clasificación no hay ninguna factura, el flujo se corta con normalidad (hard-stop), sin forzar.
+- **Entregables/datos operativos ya no se marcan como relevantes**: se reforzó el criterio de relevancia de `PROMPT_CLASIFICACION_LOTE` para descartar (`DESCARTABLE`, relevante=false) los entregables o pruebas de ejecución del servicio facturado (bases de datos, volcados, listados de registros, muestras) aunque contengan muchísimas cifras. Un Excel/anexo solo es relevante si aporta naturaleza tributaria (valores de factura, IVA, conceptos, NIT/RUT, contrato, planillas PILA, certificados). Evita que adjuntos como BD normalizadas contaminen el análisis downstream.
+- **Falso positivo de FACTURA en correos de notificación de la DIAN**: se endureció `PROMPT_CLASIFICACION_LOTE` para exigir que una FACTURA contenga valores monetarios detallados (subtotal/IVA/total) e ítems, y para clasificar como DESCARTABLE los correos que solo notifican/enlazan a una factura adjunta (p. ej. "Pulse el link para ver el documento", remitente `facturacionelectronica@dian.gov.co`, factura real dentro de un `.zip`). Antes estos correos se clasificaban como FACTURA por mencionar "Factura Electrónica número ...".
+- **Texto del contrato (OBJETO DEL CONTRATO) ahora llega a las llamadas downstream**: se corrigió una desincronización pre-existente por la cual el documento de contrato no era enrutado a su sección dedicada en `retefuente`, `iva`, `obra_uni`, `estampillas_generales` ni `consorcio` (esperaban el string `ANEXO CONCEPTO DE CONTRATO`, que la clasificación no emitía). Ahora la clasificación emite el string canónico y `clasificador_tp.py` también lo reconoce. Esto puede modificar resultados de impuestos al usar el objeto del contrato como pista (ej. matching de conceptos en retefuente, clasificación de tipo de contrato en obra pública).
+- `app/preparacion_tareas_analisis.py` — Se actualizó `preparar_cache` para filtrar los archivos compartidos con el downstream al subconjunto de relevantes.
+
+## [3.18.0] - 2026-06-06
+
+### Cambiado
+
+- Los códigos de negocio (patrimonios autónomos) que aplican **Estampilla Pro Universidad Nacional** y **Contribución a Obra Pública** dejan de estar hardcodeados en `config.py` y ahora se cargan desde la API Nexura (`GET /preliquidador/codigoNegociosFiduciaria/`). Se consultan **por solicitud** con **caché en memoria con TTL de 10 minutos**; sin **fallback** a valores hardcodeados: si la API falla y no hay caché válido, la preliquidación de esa factura se **aborta con error claro** (no se calculan estos impuestos con datos posiblemente obsoletos).
+  - `database/database.py` — nuevo método `obtener_codigos_negocios_fiduciaria()` en `DatabaseInterface` (ABC) e implementado en `NexuraAPIDatabase` (vía `_hacer_request`), `SupabaseDatabase` (no soportado) y `DatabaseWithFallback`/`DatabaseManager` (delegación).
+  - `database/database_service.py` — passthrough `obtener_codigos_negocios_fiduciaria()` en `IBusinessDataService`, `BusinessDataService` y `MockBusinessDataService` (mock con los 3 patrimonios por defecto).
+  - `config.py` — `CODIGOS_NEGOCIO_ESTAMPILLA`, `CODIGOS_NEGOCIO_OBRA_PUBLICA` y `TERCEROS_RECURSOS_PUBLICOS` arrancan vacíos y se pueblan vía nueva función `refrescar_codigos_negocio(business_service)` (caché TTL + mutación en sitio para preservar los `from config import` de otros módulos). `detectar_impuestos_aplicables_por_codigo()` la invoca al inicio. Se añade `limpiar_cache_codigos_negocio()`. El mensaje de validación de NIT `830054060` ahora lista los códigos vigentes dinámicamente. Se elimina el `assert` de `TERCEROS_RECURSOS_PUBLICOS` en `inicializar_configuracion()` (se puebla por solicitud).
+  - `Background/background_processor.py` — el manejo de error de `procesar_factura_background` clasifica el fallo de carga de códigos de negocio: la respuesta de contrato (`preliquidacion_sin_finalizar`) lleva `servicio_externo: "API Nexura / Base de datos"` (antes caía en el genérico "Google Gemini API") con mensaje de usuario específico y `retry_sugerido: True`.
+
+### Arquitectura
+
+- `Liquidador/liquidador_estampilla.py` y `prompts/prompt_estampilla_obra_publica.py` **no se modifican**: como `refrescar_codigos_negocio` muta los mismos objetos dict en sitio, ven los datos frescos automáticamente. El refresco corre en `detectar_impuestos_aplicables_por_codigo` (flujo de `validacion_negocios`), antes de la clasificación/liquidación de estampilla.
+- **Cloud Run (1 CPU / worker async único)**: el refresco queda serializado por el fetch bloqueante (`requests`), por lo que la mutación en sitio es segura sin lock. El caché es por-instancia (cada instancia consulta la API la primera vez y refresca cada 10 min).
+
+## [3.17.0] - 2026-06-01
+
+### Añadido
+
+- ICA — nueva validación: cuando el régimen tributario del proveedor es **SIMPLE** (Régimen Simple de Tributación), el estado del impuesto ICA queda en `no_aplica_impuesto` y se agrega una observación explicando que los contribuyentes del SIMPLE no son sujetos de retención de ICA. Replica el corte que ya existía en retención en la fuente (`Liquidador/liquidador.py`), siguiendo el mismo patrón que `autorretenedor_ica` dentro del flujo de ICA.
+  - `prompts/prompt_ica.py` (`crear_prompt_relacionar_actividades`) — el prompt de relación de actividades ahora extrae también `regimen_tributario` del RUT (SIMPLE / ORDINARIO / ESPECIAL / null) con reglas de texto exacto (códigos DIAN O-47, R-99-PN). Se añade el campo al formato JSON y a los ejemplos. `validar_estructura_actividades` lo valida de forma opcional y no bloqueante (retrocompatible con respuestas sin el campo).
+  - `Clasificador/clasificador_ica.py` (`_relacionar_actividades_gemini`, `analizar_ica`) — propaga `regimen_tributario` desde Gemini hasta el resultado entregado al liquidador.
+  - `Liquidador/liquidador_ica.py` (`liquidar_ica`) — nuevo corte por Régimen Simple antes del cálculo de actividades; preserva la estructura del resultado y la conversión USD→COP.
+
+## [3.16.0-experimental] - 2026-05-27
+
+### Añadido
+
+- `database/database.py` (`NexuraAPIDatabase`) — feature flag `USE_RETEFUENTE_NEW` (variable de entorno, default `false`) que conmuta la consulta de conceptos de retención en la fuente al endpoint experimental `/preliquidador/retefuenteNew/` de Nexura. El nuevo endpoint trae los conceptos con textos más normalizados (campo `concepto` más descriptivo, ya con categoría y referencia normativa) para mejorar el matching que hace Gemini en el clasificador.
+- `database/database.py` (`_mapear_conceptos_retefuente_new`, `_mapear_concepto_individual_new`) — mappers nuevos que adaptan la estructura del endpoint experimental (`id, numero_item, categoria, concepto, base_uvt, base, porcentaje`) al formato interno (`descripcion_concepto, index, base, porcentaje, codigo_concepto`). En modo nuevo, `codigo_concepto` queda vacío (la nueva tabla no lo trae) y los campos `numero_item`, `categoria` y `base_uvt` se ignoran en esta primera prueba.
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`) — endurecimiento del prompt para mejor rendimiento con Gemini 2.5 Flash:
+  - Nuevo CRITERIO 5 "Elección entre conceptos espejo (declarante / no declarante)" como decisor independiente, separado del CRITERIO 3 (pistas contextuales). Antes era un sub-criterio (e) ambiguo; ahora es secuencial: 1-4 identifican el giro, 5 elige entre espejos. Códigos DIAN: 05/O-13 → declarante; O-15 → declarante (con prioridad de autorretenedor en PASO 2); PJ sin 47/O-47 → declarante por defecto; PN sin 05/O-13 → no declarante (default conservador con observación obligatoria).
+  - REGLA DE DESEMPATE acotada: solo aplica a candidatos NO espejo. Elimina el riesgo de sub-retención sistemática por elegir "menor concepto_index" entre conceptos espejo declarante/no declarante.
+  - Few-shots reescritos (5 ejemplos, antes 4) con texto e IDs reales de la tabla `retefuenteNew` (id=1 Honorarios PJ, id=22/23 Compras declarante/no declarante, id=38 Servicios PN no declarante, id=43 Vigilancia base AIU). Antes los ejemplos usaban etiquetas cortas ("Honorarios", "Servicios técnicos") que no existen en la tabla nueva e inducían a Flash a abreviar el campo `concepto`.
+  - Contrato del campo `concepto` reforzado: debe ser EXACTAMENTE la clave del diccionario, sin abreviar.
+  - "RUT casilla 53" reemplazado por "sección Responsabilidades, Calidades y Atributos" para robustez ante texto OCR donde la etiqueta literal "casilla 53" no aparece.
+  - O-15 documentado como pista ambivalente (declarante + autorretenedor), con instrucción explícita de respetar la prioridad del flag `es_autorretenedor` que ya maneja el liquidador.
+  - Cambio aislado al prompt: no toca modelos, mappers, liquidador ni validadores.
+
+### Arquitectura
+
+- El cambio se aísla por completo en `NexuraAPIDatabase`: la firma pública de `obtener_conceptos_retefuente()` y `obtener_concepto_por_index()` se mantiene, así que `Clasificador/`, `prompts/`, `Liquidador/`, `app/` y `modelos/` no se tocan. En modo `USE_RETEFUENTE_NEW=true`, la lista de conceptos es global (no se filtra por `estructuraContable`).
+
+## [3.15.0] - 2026-05-26
+
+### Añadido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`, `PROMPT_MATCHING_CONCEPTOS`) — rúbrica explícita de 4 criterios (chain-of-thought) para el matching de conceptos de retención en la fuente nacional, replicando el patrón ya validado en ICA. La rúbrica fuerza a Gemini a evaluar 2-3 candidatos del diccionario y a citar pistas contextuales reales (objeto del contrato, cotizaciones, CIIU del RUT, nombre del proveedor) cuando el ítem facturado es genérico, antes de elegir. Incluye few-shots para ítem genérico con proveedor revelador, ítem específico confirmado por cotización, ambigüedad con regla de desempate y caso sin coincidencia. El prompt de facturación extranjera (`PROMPT_ANALISIS_FACTURA_EXTRANJERA`) NO se modifica: su diccionario de conceptos es reducido y el matching es directo.
+- `modelos/modelos.py` (`ConceptoIdentificado.razonamiento`) — nuevo campo `Optional[str]` que persiste el chain-of-thought del matching para auditoría/observabilidad. Retrocompatible: respuestas previas sin el campo siguen siendo válidas.
+- `Clasificador/clasificador_consorcio.py` — propaga el `razonamiento` retornado por `PROMPT_MATCHING_CONCEPTOS` al `ConceptoIdentificado` final del consorcio.
+
+### Cambiado
+
+- `prompts/prompt_retefuente.py` (`PROMPT_MATCHING_CONCEPTOS`) — el campo de explicación del matching se renombró de `justificacion` (opcional) a `razonamiento` (obligatorio) por consistencia con ICA y con el resto de prompts de retefuente. La segunda llamada de consorcios queda limitada a Criterios 1 y 2 (semántica + especificidad) porque no tiene acceso a los documentos originales.
+
+## [3.14.17] - 2026-05-25
+
+### Añadido
+
+- `app/extraccion_hibrida.py` (`_deduplicar_adjuntos_email`) — nuevo helper que implementa un mecanismo robusto de deduplicación para los archivos adjuntos binarios extraídos de emails `.msg`/`.eml`, comparando nombres (case-insensitive) y tamaños (tolerancia de +-10%). Esto previene el procesamiento duplicado de archivos ya recibidos directamente o extraídos de otros correos del mismo lote.
+
+### Optimizado
+
+- `Extraccion/extractor.py` (`ProcesadorArchivos.msg_attachments_cache`) — implementado un caché en memoria que almacena los adjuntos binarios de los archivos `.msg` en el primer y único pase donde se lee e instancia el email con la costosa librería `extract-msg` (cuerpo del email y metadatos).
+- `app/extraccion_hibrida.py` (`_procesar_adjuntos_emails`) — refactorizado para consultar la caché en memoria del procesador local antes de intentar instanciar de nuevo `extract_msg.Message` sobre el archivo `.msg`. Elimina la duplicación de lectura que antes sumaba más de 30 segundos de latencia inútil en el pipeline (reducción de latencia de ~40% para el procesamiento de correos electrónicos en Cloud Run con 1 vCPU).
+
+## [3.14.16] - 2026-05-24
+
+### Corregido
+
+- `Background/background_processor.py` — el límite de 20 archivos directos (`HTTPException` "Demasiados archivos directos" lanzada en `Clasificador/clasificador.py`) ahora se devuelve en el formato de contrato (`estado_procesamiento: "preliquidacion_sin_finalizar"`) con el mensaje "Error en el procesamiento, Límite de archivos adjuntos superado." y un diagnóstico propio (`servicio_externo: "Validacion de archivos"`, `retry_sugerido: False`). Antes este caso caía en el handler genérico, que entregaba el mensaje engañoso de fallo de Gemini con sugerencia de reintento (reintentar con los mismos archivos vuelve a fallar).
+- `tests/test_preliquidacion_sin_finalizar.py` — nuevo test `test_limite_archivos_envia_contrato_con_mensaje_especifico` que verifica el payload del webhook para este caso.
+
+## [3.14.15] - 2026-05-23
+
+### Añadido
+
+- `config.py` — constantes de límites para el preprocesamiento de Excel:
+  `EXCEL_MAX_FILAS_LECTURA` (10.000, filas leídas por hoja), `EXCEL_MAX_FILAS_POR_HOJA` (500, filas serializadas por hoja) y `EXCEL_MAX_CHARS_POR_ARCHIVO` (80.000, presupuesto total de caracteres). Centralizan los topes que acotan el texto enviado a Gemini y el consumo de memoria.
+- `Extraccion/extractor.py` (`_normalizar_enteros`) — nuevo helper que convierte a `Int64` (entero nullable) las columnas `float64` cuyos valores no nulos son todos enteros. Calamine fuerza `float64` en columnas numéricas con alguna celda vacía, lo que generaba dos formas de ruido sin valor: el sufijo `.0` en cada entero y notación científica en enteros grandes (que volvía ilegibles IDs/NITs). La conversión es vectorizada por columna y no muta el DataFrame de entrada. Las columnas con decimales reales (p. ej. tarifas) se conservan intactas.
+- `tests/test_preprocesado_excel.py` — cobertura de `_normalizar_enteros` y `preprocesar_excel_limpio` (sin `.0`, sin notación científica, decimales preservados, truncado por hoja, reparto del presupuesto entre hojas con arrastre, multi-hoja y limpieza de vacíos).
+
+### Cambiado
+
+- `Extraccion/extractor.py` (`preprocesar_excel_limpio`) — reescrito para reducir el consumo de la ventana de contexto y de memoria:
+  - Lectura **hoja por hoja** con `pd.ExcelFile(..., engine="calamine")` + `del` por hoja, en lugar de `pd.read_excel(sheet_name=None)` que mantenía todas las hojas en memoria a la vez. El pico de memoria pasa a ser ~una hoja (crítico en Cloud Run 2 GB / 1 vCPU).
+  - Topes configurables desde `config.py`: truncado por hoja (`EXCEL_MAX_FILAS_POR_HOJA`) y presupuesto de caracteres por archivo (`EXCEL_MAX_CHARS_POR_ARCHIVO`), reemplazando el `MAX_FILAS_TEXTO = 10_000` hardcodeado. Todo truncado se anota en el texto (`[...truncado N filas...]` / `[...hoja truncada por presupuesto...]`) y se registra en log.
+  - El presupuesto de caracteres se **reparte entre las hojas** en lugar de consumirse por orden de llegada: cada hoja recibe una cuota dinámica (`presupuesto_restante / hojas_restantes`) y el sobrante de las hojas pequeñas se arrastra a las siguientes. Así ninguna hoja se omite por completo (cada una conserva al menos su encabezado de columnas + nota) y el total sigue acotado a `EXCEL_MAX_CHARS_POR_ARCHIVO`. Tradeoff aceptado: al ser un solo pase (sin doble lectura del workbook, por costo en Cloud Run 2 GB / 1 vCPU), el reparto depende del orden de las hojas. Un techo duro final se conserva como salvaguarda.
+  - Higiene numérica vía `_normalizar_enteros` aplicada en `_dataframe_a_texto_tabular`. Medición real: el export `C1 Bases Fommur_linea3.xlsx` tenía ~22 % del texto en sufijos `.0` (54.154 ocurrencias); ahora 0. Los IDs/NITs dejan de salir en notación científica.
+
+### Notas
+
+- Precisión: enteros de más de 15 dígitos (p. ej. IDs compuestos de encuesta) ya perdían precisión al ser leídos como `float64` por calamine; `_normalizar_enteros` los muestra como entero limpio (mejor que la notación científica previa) aunque los últimos dígitos puedan diferir. Los NIT colombianos (≤10 dígitos) y los valores monetarios son exactos en `float64`, por lo que no se ven afectados.
+
+## [3.14.14] - 2026-05-23
+
+### Corregido
+
+- Excel (.xlsx/.xls): eliminado el doble parseo en el flujo híbrido. En `Extraccion/extractor.py` (`procesar_archivo`), los archivos Excel ya no se extraen en el primer pase (`extraer_texto_excel`); su texto lo produce únicamente `preprocesar_excel_limpio` en `app/extraccion_hibrida.py` (`_preprocesar_excel`). Antes, cada Excel se leía y parseaba dos veces completas con `pd.read_excel(..., sheet_name=None)` y el resultado del primer pase —además **sin límite de filas**— siempre se descartaba. Reduce a la mitad el trabajo CPU por Excel y elimina el mayor pico de memoria (crítico en Cloud Run 2 GB / 1 vCPU). `procesar_archivo` ahora detecta Excel antes de leer el binario y devuelve un placeholder que `_preprocesar_excel` sobrescribe.
+- `Extraccion/extractor.py` (`procesar_multiples_archivos`): el log `"Archivo procesado y guardado: ..."` ya no se emite para `.xlsx/.xls`. Tras diferir el Excel, ese log era engañoso (no se procesa ni guarda nada en esa etapa para Excel); la detección ya queda registrada por `"Excel detectado, extraccion diferida..."`. Solo logging, sin cambio funcional.
+
+### Arquitectura
+
+- `Extraccion/extractor.py` — removidas `extraer_texto_excel` y `_extraer_texto_excel_sync` por quedar sin uso tras diferir la extracción de Excel al preprocesamiento. Se conserva `_dataframe_a_texto_tabular`, usado por `preprocesar_excel_limpio`.
+- Efecto colateral: el Excel subido directo deja de generar el artefacto de auditoría `Results/Extracciones/<fecha>/*_EXCEL_*.txt` (sigue generándose `extracciones/*_preprocesado.txt`). Queda igual que el Excel dentro de ZIP/email, que ya operaba así.
+
+## [3.14.13] - 2026-05-20
+
+### Corregido
+
+- `Liquidador/liquidador.py` (`_validar_naturaleza_tercero`) — el corte por régimen SIMPLE exigía `es_persona_natural == False`, por lo que un proveedor persona natural en régimen SIMPLE atravesaba la validación de naturaleza y luego moría en la validación posterior de conceptos mapeados, devolviendo `preliquidacion_sin_finalizar` con el mensaje "El concepto facturado no se identifica en los soportes adjuntos" cuando la causa real era el régimen. Ahora cualquier proveedor en régimen SIMPLE (natural o jurídico) corta con `estado: "no_aplica_impuesto"` y mensaje "Régimen Simple de Tributación - NO aplica retención en la fuente". El proveedor SIMPLE está exento de retefuente por normativa, independientemente del tipo de persona.
+
+## [3.14.12] - 2026-05-20
+
+### Cambiado
+
+- `Extraccion/extractor.py` — lectura de Excel migrada al engine `python-calamine` (Rust, libera el GIL) en lugar de `openpyxl`. Aplica a las dos rutas: `preprocesar_excel_limpio` (`pd.read_excel(..., engine="calamine")`) y `extraer_texto_excel` (a través del nuevo helper `_extraer_texto_excel_sync`).
+- `Extraccion/extractor.py` — serialización de DataFrames a texto reemplazada de `DataFrame.to_string(...)` por `to_csv(sep='\t', index=False, na_rep='')` mediante el nuevo helper `_dataframe_a_texto_tabular`. `to_string` formatea celda a celda calculando anchos por columna (~O(n^2) en filas); `to_csv` está vectorizado en C y es 5–20× más rápido en DataFrames grandes. El separador `\t` mantiene la lectura tabular para Gemini y evita ambigüedad con comas dentro de celdas.
+- `Extraccion/extractor.py` — `extraer_texto_excel` (método async) ahora delega su trabajo CPU-bound a un thread vía `asyncio.to_thread(_extraer_texto_excel_sync, ...)`, evitando que la lectura y serialización bloqueen el event loop. `preprocesar_excel_limpio` ya estaba delegada vía `run_in_executor` en `app/extraccion_hibrida.py:206` y `:298`, por lo que no se tocó esa cadena.
+- `requirements.txt` — `pandas` subido de `2.1.3` a `>=2.2.2,<2.3` (engine calamine soportado nativamente desde pandas 2.2). Agregada dependencia `python-calamine>=0.2.0`. `openpyxl` se conserva como fallback.
+
+### Corregido
+
+- Preprocesamiento de Excel grandes (caso real: `C1 Bases Fommur_linea3.xlsx`, 3 hojas, ~1.7M caracteres) pasa de ~16 min a segundos en Cloud Run (1 vCPU / 2 GiB). Causa raíz: combinación de `openpyxl` (parser XML puro en Python) + `DataFrame.to_string` con `max_rows=None`, ambos cuellos de CPU que se sumaban en hardware modesto.
+
+## [3.14.11] - 2026-05-19
+
+### Corregido
+
+- `prompts/prompt_retefuente.py` (`PROMPT_ANALISIS_FACTURA`) — `regimen_tributario` devolvía `null` de forma intermitente (~2 de cada 10 intentos) cuando el documento no declara el régimen explícitamente pero sí da una pista inequívoca. Causa raíz: el prompt ordenaba `null` si no había texto exacto y la prohibición absoluta "NO deduzcas el régimen tributario" vetaba la única inferencia válida; los aciertos eran el modelo desobedeciendo el prompt, por eso ajustar la temperatura producía resultados erráticos y no monótonos. Solución (sin tocar temperatura): bloque RÉGIMEN TRIBUTARIO reescrito con prioridades explícitas (1: texto exacto + código DIAN R-99-PN; 2: inferencia acotada por la pista documental "depuración art. 383 del ET" manifestada por persona natural → ORDINARIO, con la lógica tributaria que la justifica; 3: `null`), exigencia de registrar en `observaciones` la frase textual de la pista usada, y excepción explícita y acotada abierta en PROHIBICIONES ABSOLUTAS para esa única pista.
+
+## [3.14.10] - 2026-05-18
+
+### Añadido
+
+- `tools/benchmark_prompt_caching.py` — herramienta de desarrollo: mini servidor FastAPI independiente (`POST /benchmark`, parámetro `archivos` multipart) que corre el fan-out real (bootstrap config + UVT + DB como `main.py`) e instrumenta el único chokepoint `ProcesadorGemini._ejecutar_con_retry` para comparar, llamada por llamada, latencia y tokens cacheados del orden NUEVO `[documentos..., prompt]` vs. el ANTERIOR `[prompt, documentos...]`. N pasadas configurables por orden. No se monta en `main.py` ni altera código de producción.
+
+## [3.14.9] - 2026-05-18
+
+### Añadido
+
+- `Clasificador/clasificador.py` — medición agregada de tokens Gemini por factura. Hook único en el punto de `return` de `_ejecutar_con_retry` (parámetro opcional `contexto`) que captura el 100% de las llamadas, incluidas las 2 de ICA que antes no se medían. Acumulador `_uso_acumulado` por instancia (la instancia es por factura) y `_log_resumen_uso_tokens()` que emite `RESUMEN Gemini factura: N llamadas | prompt_total=... cacheados_total=... (X% ahorro) ... | desglose por contexto`. NO se modificó la lógica de retry/recreación de cliente SSL-TLS.
+- `Background/background_processor.py` — llamada a `_log_resumen_uso_tokens()` en bloque `finally` (resumen siempre, aun si falla una tarea).
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — ambas llamadas a Gemini (identificar ubicaciones, relacionar actividades) reordenadas a `[documentos..., prompt]` para coherencia con la Fase 1 (release 3.14.8) y habilitar el implicit caching también en ICA.
+- `Clasificador/clasificador.py` — centralizada la instrumentación: eliminadas las 3 llamadas redundantes a `_log_uso_tokens` introducidas en 3.14.8 (`_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura`, `_llamar_gemini`); ahora pasan `contexto=` a `_ejecutar_con_retry`, que loguea y acumula en un solo sitio (evita doble conteo).
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` — ampliado: cobertura del reorden de ICA (`[documentos..., prompt]`) y de `_log_resumen_uso_tokens` (suma correcta de `_uso_acumulado`).
+
+## [3.14.8] - 2026-05-18
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — `_llamar_gemini_hibrido` y `_llamar_gemini_hibrido_factura`: invertido el orden de `contenido_multimodal` a `[documentos..., prompt]` (antes `[prompt, documentos...]`). El texto variable (prompt por impuesto) iba primero y rompía el prefijo común entre las ~8 llamadas del fan-out, inhabilitando el implicit caching de Gemini 2.5. Con los documentos como prefijo estable (idénticos y en el mismo orden porque vienen del mismo `cache_archivos`), Gemini reutiliza el prefill del documento en lugar de re-procesarlo N veces, reduciendo latencia y costo. NO se modificó `_ejecutar_con_retry` ni la lógica de retry/recreación de cliente SSL/TLS.
+
+### Añadido
+
+- `Clasificador/clasificador.py` — nuevo helper `_log_uso_tokens(respuesta, contexto)` que loguea `prompt_token_count`, `cached_content_token_count` y `candidates_token_count` de `usage_metadata` tras cada respuesta de Gemini (en `_llamar_gemini_hibrido`, `_llamar_gemini_hibrido_factura` y `_llamar_gemini`). Permite cuantificar el % de tokens servidos desde el implicit cache. Defensivo: nunca rompe el flujo si falta `usage_metadata`.
+
+### Tests
+
+- `tests/test_clasificador_orden_implicit_cache.py` (nuevo) — verifica que el último elemento enviado a `generate_content` es el prompt (str) y los previos son documentos, en clasificación y análisis de factura; y que `_log_uso_tokens` no rompe sin `usage_metadata`.
+
+## [3.14.7] - 2026-05-18
+
+### Corregido
+
+- `Clasificador/clasificador_ica.py` — un timeout de Gemini ya NO se reporta como si la IA no hubiera identificado la ubicación/actividad. Antes, `_identificar_ubicaciones_gemini` no tenía handler de `asyncio.TimeoutError`: caía en el `except Exception` genérico, devolvía lista vacía y `_validar_ubicaciones_manualmente` producía "No se pudo identificar el municipio de la actividad gravada." (mensaje engañoso). Lo mismo ocurría en `_relacionar_actividades_gemini` (timeout → `{}` → "No se pudo identificar la actividad económica facturada"). Ahora se distingue el fallo técnico: la 1ª llamada retorna una 4-tupla con `error_tecnico` y la 2ª un dict con clave `error_tecnico`; `analizar_ica` corta temprano con observaciones "Error analizando ubicaciones ICA..." / "Error mapeando actividades ICA..." (con texto específico para timeout: "el servicio de IA no respondió a tiempo"). El caso genuino (Gemini sin datos) conserva sus mensajes originales.
+
+### Cambiado
+
+- `Clasificador/clasificador_ica.py` — timeout de las 2 llamadas a Gemini de ICA aumentado a 240s: identificación de ubicaciones 60s → 240s, mapeo de actividades 180s → 240s. Causa: prompts grandes (muchas ubicaciones/actividades en BD) y carga en Cloud Run hacían superar los límites anteriores.
+
+### Tests
+
+- `tests/test_clasificador_ica_timeout.py` (nuevo) — cobertura de `ClasificadorICA.analizar_ica`: timeout en ubicaciones → "Error analizando ubicaciones ICA"; timeout en actividades → "Error mapeando actividades ICA"; regresión del caso genuino que conserva "No se pudo identificar el municipio de la actividad gravada.".
+
+## [3.14.6] - 2026-05-18
+
+### Corregido
+
+- `utils/mockups.py` — corregida la errata `preliquidacion_sin_finalzar` → `preliquidacion_sin_finalizar` (faltaba la 2ª "i") en 10 puntos: `estado_procesamiento`/`razon_fallo` de `crear_respuesta_error_validacion` y el campo `estado`/`estado_liquidacion` de los 8 helpers `_crear_mock_*_validacion`. Antes el estado por-impuesto no coincidía con el valor canónico usado en el resto del sistema, lo que podía romper el frontend si discrimina por ese campo.
+- `Clasificador/clasificador.py` — los fallos `httpx.ConnectError` / `httpcore.ConnectError` (falla de handshake TLS hacia Google Gemini API desde Cloud Run) ya NO abortan la clasificación sin reintentar. Causa: `"connecterror"` no estaba en la lista de patrones reintentables y `httpx.ConnectError` no deriva de `ssl.SSLError`/`ConnectionError`, por lo que `_ejecutar_con_retry` lo trataba como no transitorio. Además `client.aio.files.get()` (línea ~360) no tenía ninguna protección de reintento. Se añadieron patrones de conexión y tipos `httpx`/`httpcore` a la detección de transitoriedad, extraída a `_es_error_transitorio()`, y un nuevo `_files_get_con_retry()` con el mismo backoff + reinicialización de cliente. El mensaje del `ValueError` ya no queda vacío (`Error en clasificación híbrida: `) cuando `str(e)` es vacío: ahora incluye `type(e).__name__`.
+
+### Arquitectura
+
+- `utils/mockups.py` — nueva función pública `crear_respuesta_preliquidacion_sin_finalizar(mensaje, codigo_del_negocio, diagnostico)` que sigue el patrón de `crear_respuesta_error_validacion`, reutilizando los helpers `_crear_mock_*_validacion`. Devuelve la forma normal del contrato con `estado_procesamiento="preliquidacion_sin_finalizar"`, todos los impuestos presentes y un bloque `diagnostico_error` (sin traceback crudo). Exportada en `utils/__init__.py`.
+- `Background/background_processor.py` — el `except` de `procesar_factura_background` ya NO envía al webhook el blob ad-hoc `{"status":"error","error_traceback":...}` que rompía el frontend. Ahora envía el payload de contrato vía `crear_respuesta_preliquidacion_sin_finalizar` con un mensaje claro y sin nombre de proveedor ("No se pudo conectar con el servicio de procesamiento. Preliquidación sin finalizar..."). El proveedor de IA (`Google Gemini API`) solo se conserva en `diagnostico_error.servicio_externo`, no en las `observaciones` visibles al usuario. El traceback técnico completo se sigue logueando y guardando en `error_procesamiento_*` (uso interno de soporte), no en el payload al frontend.
+
+### Tests
+
+- `tests/test_preliquidacion_sin_finalizar.py` (nuevo) — cobertura de `crear_respuesta_preliquidacion_sin_finalizar` (claves de contrato, `estado_procesamiento`, todos los impuestos con `estado`/`aplica:false`, `diagnostico_error` sin `error_traceback`), de `_es_error_transitorio` / `_files_get_con_retry` ante `httpx.ConnectError`, y test de integración de `BackgroundProcessor.procesar_factura_background` que verifica que ante un fallo (502/bad_gateway IA o genérico) el webhook recibe el payload de contrato y NO el blob `{"status":"error"}`.
+
+## [3.14.5] - 2026-05-14
+
+### Corregido
+
+- `Liquidador/liquidador_consorcios.py` — `_liquidar_consorciado_individual`: validación explícita cuando Gemini devuelve `porcentaje_participacion: null` (caso permitido por `prompts/prompt_retefuente.py:559` cuando el porcentaje no se identifica en el documento). Antes `float(consorciado.get('porcentaje_participacion', 0))` lanzaba `TypeError: float() argument must be a string or a real number, not 'NoneType'` porque `dict.get(key, default)` no usa el default cuando la clave existe pero su valor es `None`. La excepción caía en el `try/except` genérico de `liquidar_consorcio` y reseteaba toda la respuesta a `es_consorcio=False, consorciados=[], procesamiento_exitoso=False`, ocultando los datos extraídos. Ahora el caso se reporta como "Información incompleta: falta el porcentaje de participación del consorciado X" reutilizando el flujo existente de `_campo_faltante` / `error_naturaleza_incompleta`. El usuario recibe `procesamiento_exitoso=False`, `estado="preliquidación_sin_finalizar"`, la lista completa de consorciados con la observación específica y el `valor_factura_sin_iva` preservado.
+
+### Arquitectura
+
+- `Liquidador/liquidador_consorcios.py` — eliminado el antipatrón `dict.get(key, 0)` → `float(...)`/`Decimal(str(...))` en 9 puntos (líneas 400, 413, 469, 481, 582, 675, 703, 718, 854). Reemplazado por `dict.get(key) or 0` en cada caso. Razón: `dict.get` con default ignora el default cuando el valor existe pero es `None`, lo que convertía cualquier `null` de Gemini en `TypeError`/`InvalidOperation` aguas abajo. El bug del `porcentaje_participacion` fue una manifestación; el resto de los puntos eran bombas latentes equivalentes (`valor_total`, `tarifa_retencion`, `base_gravable`).
+
+### Tests
+
+- `tests/test_liquidador_consorcios.py` (nuevo) — 6 casos en dos clases `IsolatedAsyncioTestCase`. Cobertura del fix de `porcentaje_participacion` (3 casos: null aislado reproduce el incidente real, null junto a otros consorciados válidos verifica preservación, 0 verifica que es valor numérico válido y no "incompleto") y del hardening del antipatrón `None`-vs-default (3 casos: `valor_total` null, `tarifa_retencion` null, `base_gravable` null).
+
+## [3.14.4] - 2026-05-06
+
+### Corregido
+
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: timeout aumentado de 60s a 180s para la segunda llamada Gemini (matching de actividades). Con prompts grandes (ej: 7634 actividades para Bogota) y razonamiento chain-of-thought, la generacion supera 60s en Cloud Run con 1 vCPU. Hay precedente: `_llamar_gemini_hibrido` ya usaba 120s.
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: captura `asyncio.TimeoutError` de forma explicita antes del handler generico `Exception`. Antes, `str(asyncio.TimeoutError())` retornaba `""` y el log quedaba vacio; ahora el mensaje incluye el limite de tiempo y la causa probable.
+
+## [3.14.3] - 2026-05-05
+
+### Cambiado
+
+- `prompts/prompt_ica.py` — `crear_prompt_relacionar_actividades`: anadida seccion "RUBRICA DE MATCHING" con 4 criterios priorizados (semantica > especificidad > tipo_actividad > tarifa-no-elegir) y regla de desempate explicita. El JSON de respuesta ahora pide un campo `razonamiento` por cada actividad relacionada, limitado a 60 palabras, citando 2-3 candidatos de la BD evaluados y justificando la eleccion. Anadido EJEMPLO 6 (caso ambiguo) como few-shot. Corregida errata `autorenedor_ica` → `autorretenedor_ica` en ejemplos 3 y 4.
+- `prompts/prompt_ica.py` — `validar_estructura_actividades`: presencia del campo `razonamiento` se valida de forma INFORMATIVA (logger warning si falta o no es string) sin bloquear el flujo. Liquidador (`Liquidador/liquidador_ica.py`) y validador (`app/validar_ica.py`) ignoran el campo (solo iteran sobre `nombre_act_rel`, `codigo_actividad`, `codigo_ubicacion`), por lo que no hay impacto rio abajo.
+- `Clasificador/clasificador_ica.py` — `_relacionar_actividades_gemini`: override local de `temperature` a `0.2` para la segunda llamada Gemini (matching). Se construye un dict local heredando `generation_config` global con `**spread`, sin modificar el config compartido por los otros 8 clasificadores. La primera llamada (`_identificar_ubicaciones_gemini`) conserva `temperature=0.4` global.
+- `tests/test_validar_ica.py` — anadidos 3 tests unitarios para `validar_estructura_actividades` verificando que el campo `razonamiento` se trata de forma no bloqueante.
+
+### Motivacion
+
+Mejora de precision en el matching factura-BD del clasificador ICA. Combinacion de chain-of-thought explicito (Opcion A) y rubrica + few-shots (Opcion B) sobre Gemini 2.5 Flash.
+
+## [3.14.2] - 2026-04-26
+
+### Cambiado
+
+- `requirements.txt` — `google-genai` actualizado `0.2.0` → `1.12.1`. Desde v1.3.0 del SDK el cliente async usa `httpx` nativo, eliminando el patrón `asyncio.to_thread(requests.post, ...)` que causaba `UNEXPECTED_EOF_WHILE_READING` en Cloud Run con 1 vCPU bajo carga concurrente. Ésta es la fix estructural del SSL EOF que la migración a `client.aio.*` (v3.14.1) no podía resolver sola.
+- `requirements.txt` — `httpx` actualizado `0.27.0` → `0.28.1` (requerido por `google-genai==1.12.1`); `supabase` actualizado `2.10.0` → `2.12.0` para compatibilidad con `httpx<0.29`.
+- `Clasificador/gemini_files_manager.py:104` — adoptado breaking change SDK v1.5.0: `files.upload(path=...)` → `files.upload(file=...)`.
+- `app/ejecucion_tareas_paralelo.py` — `max_workers` por defecto reducido `4` → `2` en `ControladorConcurrencia`, `CoordinadorEjecucionParalela` y función fachada `ejecutar_tareas_paralelo`. Defensa en profundidad para Cloud Run 2 GB / 1 vCPU.
+- `Background/background_processor.py` — eliminado kwarg explícito `max_workers=4` para usar el nuevo default.
+
+## [3.14.1] - 2026-04-26
+
+### Cambiado
+
+- `Clasificador/clasificador.py` — `_ejecutar_con_retry`: migrado de `run_in_executor + client.models.generate_content` (sync, urllib3/requests) a `await client.aio.models.generate_content` (async nativo, httpx). Elimina la competencia por CPU entre hilos y event loop que causaba `UNEXPECTED_EOF_WHILE_READING` en Cloud Run con 1 vCPU bajo carga concurrente.
+- `Clasificador/clasificador.py` — `clasificar_documentos` y `_llamar_gemini_hibrido_factura`: `client.files.get` convertido a `await client.aio.files.get`.
+- `Clasificador/gemini_files_manager.py` — todas las operaciones de Files API (`upload`, `get`, `delete`) convertidas a sus equivalentes async nativos via `client.aio.files.*`. Eliminado el `run_in_executor` en `delete_file`.
+- `tests/test_clasificador_files_api.py` — mocks actualizados de `client.models.generate_content` y `client.files.*` a `AsyncMock` en `client.aio.*` para reflejar el cliente async nativo.
+
+## [3.14.0 - Extracción de Archivos Embebidos en Emails] - 2026-03-10
+
+### 🏗️ Arquitectura
+
+- Nuevo módulo `Extraccion/extractor_adjuntos.py` siguiendo SRP: responsabilidad única de extraer bytes de adjuntos en `.msg` y `.eml`
+- `ExtractorHibrido` extendido con tres nuevos métodos privados para procesar adjuntos sin cambiar interfaz pública (`ResultadoExtraccion` y `background_processor.py` sin modificaciones)
+- Constantes de extensiones centralizadas en `ExtractorHibrido` como atributos de clase (`EXTENSIONES_DIRECTAS`, `EXTENSIONES_EXCEL`, `EXTENSIONES_WORD`)
+
+### 🆕 Añadido
+
+#### `Extraccion/extractor_adjuntos.py` (nuevo)
+- **`AdjuntoExtraido`** (dataclass): nombre, bytes y extensión de cada adjunto extraído
+- **`ExtractorAdjuntos.extraer_de_msg()`**: extrae adjuntos binarios de `.msg` via librería `extract_msg` (`attachment.data`)
+- **`ExtractorAdjuntos.extraer_de_eml()`**: extrae adjuntos binarios de `.eml` via stdlib `email` (`part.get_payload(decode=True)`)
+- Manejo de encoding RFC 2047 en nombres de adjuntos EML
+- Cleanup automático de archivo temporal tras procesar `.msg`
+
+#### `app/extraccion_hibrida.py`
+- **`ExtractorHibrido._procesar_adjuntos_emails()`**: orquesta la extracción de adjuntos de todos los emails en el lote
+- **`ExtractorHibrido._enrutar_adjunto()`**: enruta cada adjunto al procesador correcto según extensión
+- **`ExtractorHibrido._crear_upload_file()`**: crea `UploadFile` sintético desde bytes en memoria (`BytesIO`)
+- `ExtractorHibrido.extraer()` ahora fusiona adjuntos en `archivos_directos` y `textos_preprocesados` antes de retornar
+
+#### `Extraccion/__init__.py`
+- Exporta `ExtractorAdjuntos` y `AdjuntoExtraido`
+
+### 🔀 Routing de adjuntos embebidos
+
+| Tipo | Procesamiento | Destino |
+|---|---|---|
+| PDF, imagen | `UploadFile` sintético | `archivos_directos` → Gemini Files API (multimodal) |
+| Excel (.xlsx, .xls) | `preprocesar_excel_limpio()` | `textos_preprocesados` |
+| Word (.docx, .doc) | `extraer_texto_word()` | `textos_preprocesados` |
+| Otros | Log informativo | Ignorado |
+
+---
+
+## [3.13.0 - FIX: Re-autenticación por Tarea (Token TTL)] - 2026-02-07
+
+### 🎯 PROBLEMA RESUELTO
+
+**Issue:** Tokens expiran en instancias persistentes (min instances = 1)
+- **Síntoma:** 401 Unauthorized después de ~1 hora de inactividad
+- **Causa raíz:** Token obtenido en startup expira, pero la instancia sigue viva
+- **Impacto:** Facturas procesadas después del TTL fallan con errores de autenticación
+
+### 🏗️ SOLUCIÓN ARQUITECTÓNICA
+
+**Cambio de estrategia:** De "autenticar en startup" a "autenticar por tarea"
+
+**Principios SOLID aplicados:**
+- **SRP:** BackgroundProcessor ahora tiene responsabilidad de autenticación por tarea
+- **DIP:** Sigue usando IAuthProvider como abstracción (sin cambios en arquitectura)
+- **Robustez:** Retry con exponential backoff (2s, 4s, 8s) para fallos transitorios
+
+**Clean Architecture:**
+- **Application Layer:** BackgroundProcessor orquesta re-autenticación antes de procesar
+- **Infrastructure Layer:** NexuraAuthService reutilizado (sin cambios)
+- **Stateless Tasks:** Cada tarea obtiene token fresco independientemente
+
+### 🆕 AÑADIDO
+
+#### `Background/background_processor.py`
+- **Método `_autenticar_con_retry(factura_id: int) -> bool` (línea ~53):**
+  - Re-autentica con Nexura usando credenciales desde `.env`
+  - Implementa retry exponencial (3 intentos: 2s, 4s, 8s de espera)
+  - Actualiza token en `webhook_publisher.update_auth_token(token)`
+  - Actualiza token en `db_manager.db_connection.auth_provider.update_token(token, expiration)`
+  - Retorna `True` si exitoso, `False` si falló después de 3 intentos
+  - Logging detallado por factura para trazabilidad
+
+### 🔧 CAMBIADO
+
+#### `Background/background_processor.py`
+- **Método `procesar_factura_background()` (línea ~150):**
+  - AÑADE re-autenticación al inicio (antes de procesar archivos)
+  - Si autenticación falla: Aborta procesamiento, envía error al webhook, retorna
+  - Si autenticación exitosa: Continúa con flujo normal de procesamiento
+  - Actualiza docstring para reflejar flujo v3.13.0
+
+#### `database/setup.py`
+- **Función `inicializar_database_manager()` (línea ~236):**
+  - ELIMINA llamada a `inicializar_auth_service_nexura()` (líneas 237-248 removidas)
+  - ELIMINA manejo de NexuraAuthenticationError en except
+  - Pasa `auth_provider=None` a `crear_database_por_tipo()`
+  - Actualiza docstring: v3.13.0 elimina autenticación en startup
+  - Añade log: "La autenticación se ejecutará al inicio de cada tarea"
+
+- **Función `crear_database_por_tipo()` (línea ~154):**
+  - MODIFICA manejo de `auth_provider=None`:
+    - Antes: Creaba desde config (modo legacy)
+    - Ahora: Usa `AuthProviderFactory.create_no_auth()` directamente
+  - Simplifica lógica (elimina ~20 líneas de fallback legacy)
+  - Actualiza log: "NoAuthProvider inicial - token se actualizará por tarea"
+
+#### `main.py`
+- **Función `lifespan()` (línea ~156):**
+  - ELIMINA bloque de extracción de token desde auth_provider (líneas 196-202)
+  - MODIFICA creación de WebhookPublisher:
+    - Antes: `auth_token=auth_token` (token desde database)
+    - Ahora: `auth_token=None` (sin token inicial)
+  - AÑADE log: "WebhookPublisher creado (sin token inicial)"
+  - AÑADE log: "La autenticación se ejecutará al inicio de cada tarea"
+  - Actualiza docstring: v3.13.0 elimina autenticación en startup
+
+### ❌ ELIMINADO
+
+- **Autenticación en startup de FastAPI:**
+  - Llamada a `inicializar_auth_service_nexura()` en `database/setup.py` (línea 237-248)
+  - Bloque try/except para NexuraAuthenticationError
+  - Fail-fast behavior si login falla en startup
+
+- **Extracción de token en startup:**
+  - Bloque de extracción de token desde `db_manager.db_connection.auth_provider` (main.py línea 196-202)
+  - Inyección de token en WebhookPublisher desde startup
+
+- **Modo legacy de autenticación:**
+  - Código de fallback que creaba auth_provider desde config (NEXURA_AUTH_TYPE, NEXURA_JWT_TOKEN)
+  - Logs de advertencia sobre modo legacy
+
+### ✅ FLUJO v3.13.0
+
+**Startup (sin autenticación):**
+1. FastAPI inicia → inicializar_database_manager()
+2. Crear NexuraAPIDatabase con NoAuthProvider (sin token)
+3. Crear WebhookPublisher sin token
+4. Crear BackgroundProcessor
+5. ✅ Servicio listo (puede arrancar sin Nexura disponible)
+
+**Procesamiento de factura:**
+1. Request llega a `/api/procesar-facturas`
+2. `procesar_factura_background(factura_id, ...)` ejecuta
+3. **RE-AUTENTICAR:** `_autenticar_con_retry(factura_id)`
+   - Intento 1: Login inmediato
+   - Si falla: Esperar 2s, reintentar
+   - Si falla: Esperar 4s, reintentar
+   - Si falla: Esperar 8s, reintentar
+   - Si falla 3 veces: Abortar tarea, enviar error al webhook
+4. **ACTUALIZAR TOKENS:**
+   - `webhook_publisher.update_auth_token(token)`
+   - `db_manager.db_connection.auth_provider.update_token(token, expiration=now+1h)`
+5. **PROCESAR:** Ejecutar flujo completo con token fresco
+6. **ENVIAR:** POST resultado al webhook con token fresco
+
+### ⚠️ BREAKING CHANGES
+
+1. **Servicio YA NO falla en startup si Nexura está caído**
+   - Antes (v3.12.0): RuntimeError si login falla → FastAPI no inicia
+   - Ahora (v3.13.0): Servicio inicia OK → tareas fallan individualmente si Nexura caído
+
+2. **Cada tarea hace login independiente**
+   - Overhead: +200-500ms por factura (HTTP roundtrip de login)
+   - Trade-off: Robustez vs latencia
+
+3. **Si Nexura está caído, las tareas fallan individualmente**
+   - Antes: Servicio completo caído
+   - Ahora: Solo tareas afectadas fallan, servicio sigue vivo para otras tareas
+
+### 🧪 TESTING
+
+**Caso 1: Instancia persistente con token expirado**
+```bash
+# T0: Procesar factura 1
+POST /api/procesar-facturas {"facturaId": 100}
+✅ Re-autentica → Token1 (expira en 1 hora)
+✅ Procesa exitosamente
+
+# T+2h: Procesar factura 2 (token expirado)
+POST /api/procesar-facturas {"facturaId": 200}
+ℹ️ "Factura 200: Re-autenticando para obtener token fresco..."
+✅ Re-autentica → Token2 (nuevo, válido por 1 hora)
+✅ Procesa exitosamente (SIN 401 error)
+
+# Resultado: ✅ Token siempre fresco por tarea
+```
+
+**Caso 2: Nexura temporalmente lento**
+```bash
+POST /api/procesar-facturas
+⚠️ Intento 1: Timeout
+ℹ️ Reintentando en 2 segundos...
+✅ Intento 2: Exitoso
+✅ Tarea procesada con retry
+```
+
+**Caso 3: Nexura completamente caído**
+```bash
+POST /api/procesar-facturas
+❌ Intento 1, 2, 3: Connection refused
+❌ Tarea abortada, error enviado al webhook
+✅ Servicio sigue vivo para otras tareas
+```
+
+### 📊 IMPACTO EN PERFORMANCE
+
+- **Overhead por tarea:** +200-500ms (login HTTP roundtrip)
+- **Trade-off:** Robustez vs latencia
+- **Justificación:** Preferible 500ms extra que 401 errors en producción
+- **Mitigación futura:** Implementar cache de tokens con TTL (v3.14.0+)
+
+### 🔄 MIGRACIÓN
+
+**Antes (v3.12.0):**
+- Login en startup → Token compartido → Expira en instancias persistentes → 401 errors
+
+**Después (v3.13.0):**
+- Sin login en startup → Re-autenticación por tarea → Token siempre fresco → Sin 401 errors
+
+**Pasos de migración:**
+1. ✅ Sin cambios en `.env` (credenciales ya configuradas desde v3.12.0)
+2. ✅ Deploy nuevo código
+3. ✅ Verificar logs: "La autenticación se ejecutará al inicio de cada tarea"
+4. ✅ Monitorear overhead de login en cada tarea
+
+### 📝 NOTAS TÉCNICAS
+
+- NexuraAuthService reutilizado sin cambios (DIP funcionando correctamente)
+- JWTAuthProvider.update_token() ya existía (desde v3.12.0)
+- WebhookPublisher.update_auth_token() ya existía (desde v3.12.0)
+- Arquitectura SOLID permitió cambio con mínimas modificaciones
+
+---
+
+## [3.12.0 - AUTENTICACIÓN: Login Centralizado Nexura] - 2026-02-06
+
+### 🎯 OBJETIVO
+
+Implementar autenticación centralizada con Nexura API mediante login en startup. El sistema hace login al iniciar y usa el token JWT para todas las llamadas HTTP (consultas a base de datos + POST de resultados). Si el login falla, el servicio NO inicia (fail-fast crítico).
+
+### 🏗️ ARQUITECTURA
+
+**Principios SOLID Aplicados:**
+- **SRP:** NexuraAuthService tiene una sola responsabilidad (gestionar autenticación)
+- **DIP:** Retorna IAuthProvider (abstracción) para inyección en otros componentes
+- **OCP:** Extensible para nuevos métodos de autenticación sin modificar código existente
+- **Fail-Fast:** Sistema no opera sin autenticación válida (previene errores en cascada)
+
+**Clean Architecture:**
+- **Infrastructure Layer:** NexuraAuthService maneja comunicación externa (login)
+- **Dependency Injection:** AuthProvider se inyecta en NexuraAPIDatabase y WebhookPublisher
+- **Startup Critical:** Login es pre-requisito para inicializar servicios
+
+**Arquitectura de Autenticación:**
+- Login centralizado en startup ejecuta POST a `/usuarios/login`
+- Token JWT obtenido se almacena en JWTAuthProvider
+- Mismo token compartido entre database y webhook (consistencia)
+- Si login falla, RuntimeError detiene startup de FastAPI
+
+### 🆕 AÑADIDO
+
+#### `database/nexura_auth_service.py` (NUEVO ARCHIVO)
+- **Clase NexuraAuthService:** Servicio centralizado de autenticación
+  - Método `login()`: Ejecuta POST a `/usuarios/login` de forma asíncrona
+  - Valida respuesta y extrae token de `data.token`
+  - Crea y retorna JWTAuthProvider configurado con el token
+- **Excepción NexuraAuthenticationError:** Excepción crítica cuando falla autenticación
+  - Lanzada si login falla (status != 200, error.code != 0, token ausente)
+  - Detiene startup de FastAPI (fail-fast)
+
+#### `database/setup.py`
+- **Función `inicializar_auth_service_nexura()` (línea ~40):**
+  - Inicializa servicio de autenticación ejecutando login
+  - Valida variables requeridas: `NEXURA_LOGIN_USER` y `NEXURA_LOGIN_PASSWORD`
+  - Lanza NexuraAuthenticationError si falta configuración o login falla
+  - Retorna IAuthProvider (DIP) con token válido
+
+#### `.env`
+- **Variables nuevas para login centralizado:**
+  - `NEXURA_LOGIN_USER`: Usuario para autenticación (obligatorio)
+  - `NEXURA_LOGIN_PASSWORD`: Contraseña para autenticación (obligatorio)
+- **Webhook actualizado:**
+  - `WEBHOOK_URL` actualizado a endpoint `/preliquidador/savePreliquidacion/`
+  - `WEBHOOK_AUTH_TYPE=bearer` (configurado para usar token JWT)
+  - Nota: `WEBHOOK_AUTH_TOKEN` se inyecta automáticamente (no configurar manualmente)
+
+### 🔧 CAMBIADO
+
+#### `database/setup.py`
+- **Función `crear_database_por_tipo()` (línea 99):**
+  - **NUEVO parámetro:** `auth_provider: Optional[IAuthProvider] = None`
+  - Si `auth_provider` es None: crea desde config (modo legacy)
+  - Si `auth_provider` es inyectado: lo usa directamente (login centralizado)
+  - Logging mejorado para indicar si usa login centralizado o config
+
+- **Función `inicializar_database_manager()` (línea ~220):**
+  - **MODIFICADO:** Ahora es async para ejecutar login
+  - **Flujo nuevo:**
+    1. Si `DATABASE_TYPE='nexura'`: ejecuta `await inicializar_auth_service_nexura()`
+    2. Obtiene AuthProvider con token válido
+    3. Inyecta AuthProvider en `crear_database_por_tipo()`
+    4. Si login falla: re-lanza NexuraAuthenticationError (fail-fast)
+  - **Docstring actualizado:** Documenta comportamiento async y login centralizado
+
+#### `main.py`
+- **Función `lifespan()` (línea 156):**
+  - **MODIFICADO:** Ahora ejecuta `await inicializar_database_manager()` (async)
+  - **Try/except agregado:** Captura excepciones y detiene startup si falla
+  - **Inyección de token en WebhookPublisher:**
+    - Extrae token del `auth_provider` del `db_manager`
+    - Pasa token a WebhookPublisher constructor: `auth_token=auth_token`
+  - **Logging mejorado:** Indica cuando token se inyecta exitosamente
+  - **RuntimeError:** Si login falla o database_manager es None
+
+#### `Background/webhook_publisher.py`
+- **Método `update_auth_token()` (nuevo):**
+  - Permite actualizar token dinámicamente después de inicialización
+  - Útil para refresh de tokens o configuración posterior al login
+  - Logging al actualizar token
+
+### 📚 DOCUMENTACIÓN
+
+**Actualizado:** `CHANGELOG.md` - Esta entrada (v3.12.0)
+**Actualizado:** `.env` - Nuevas variables y comentarios explicativos
+
+### ✅ FLUJO DE AUTENTICACIÓN
+
+```
+1. FastAPI startup (lifespan)
+   ↓
+2. await inicializar_database_manager() [ASYNC]
+   ↓
+3. Si DATABASE_TYPE='nexura':
+   ├─ await inicializar_auth_service_nexura()
+   ├─ NexuraAuthService.login() → POST /usuarios/login
+   ├─ Obtener token JWT de response.data.token
+   └─ Crear JWTAuthProvider(token)
+   ↓
+4. Inyectar auth_provider en crear_database_por_tipo()
+   ↓
+5. NexuraAPIDatabase recibe auth_provider (DIP)
+   ↓
+6. Extraer token del auth_provider
+   ↓
+7. Inyectar token en WebhookPublisher (DIP)
+   ↓
+8. ✅ Servicio listo - token compartido entre database y webhook
+
+❌ Si falla paso 3 (login):
+   → NexuraAuthenticationError
+   → RuntimeError en lifespan
+   → FastAPI NO inicia (fail-fast)
+```
+
+### 🔐 SEGURIDAD
+
+- ✅ Credenciales en variables de entorno (nunca hardcoded)
+- ✅ Token obtenido dinámicamente en startup (no configurado manualmente)
+- ✅ Mismo token compartido (database + webhook) - consistencia
+- ✅ Fail-fast si autenticación falla (no operar sin auth válida)
+- ✅ Token manejado por JWTAuthProvider (auto-refresh preparado)
+
+### ⚠️ BREAKING CHANGES
+
+- **`inicializar_database_manager()`** ahora es async (requiere `await` en llamadas)
+- **Variables requeridas:** Sistema NO inicia sin `NEXURA_LOGIN_USER` y `NEXURA_LOGIN_PASSWORD`
+- **Fail-fast crítico:** Sistema NO inicia si login a Nexura falla
+- **`WEBHOOK_URL`** debe apuntar a `/preliquidador/savePreliquidacion/`
+- **`WEBHOOK_AUTH_TYPE`** debe ser `bearer`
+
+### 📊 IMPACTO
+
+- ✅ Autenticación centralizada y segura
+- ✅ Token compartido reduce complejidad
+- ✅ Fail-fast previene errores en cascada
+- ✅ Logging completo para debugging
+- ✅ Arquitectura SOLID mantenida
+- ✅ Fácil testing con inyección de dependencias
+
+### 🧪 TESTING
+
+**Login Exitoso:**
+```bash
+NEXURA_LOGIN_USER=pruebas
+NEXURA_LOGIN_PASSWORD=contraseña_correcta
+# Logs esperados:
+✅ "Iniciando login a Nexura API..."
+✅ "Login exitoso - Token obtenido"
+✅ "Autenticación Nexura inicializada correctamente"
+✅ "Token de autenticación inyectado en WebhookPublisher"
+```
+
+**Login Fallido (Fail-Fast):**
+```bash
+NEXURA_LOGIN_USER=usuario_invalido
+# Logs esperados:
+❌ "Login falló: status 401"
+❌ "FALLO CRÍTICO: No se pudo autenticar con Nexura"
+❌ "EL SERVICIO NO PUEDE INICIAR SIN AUTENTICACIÓN VALIDA"
+# FastAPI NO inicia
+```
+
+---
+
+## [3.11.2 - LIMPIEZA: Eliminación de JobManager] - 2026-02-06
+
+### 🎯 OBJETIVO
+
+Eliminar módulo `JobManager` no utilizado del paquete Background para mantener código limpio y adherirse a principios SOLID (eliminar código muerto).
+
+### 🏗️ ARQUITECTURA
+
+**Principios SOLID Aplicados:**
+- **SRP:** Eliminar responsabilidades no utilizadas del sistema
+- **YAGNI:** You Aren't Gonna Need It - remover código que nunca se usó
+- **Clean Code:** Mantener base de código libre de elementos obsoletos
+
+**Análisis de Impacto:**
+- JobManager se importaba pero nunca se instanciaba ni usaba
+- BackgroundProcessor no requería job_id en su flujo actual
+- Sistema usa factura_id del cliente directamente (más simple y directo)
+
+### 🗑️ ELIMINADO
+
+#### `Background/job_manager.py`
+- **ELIMINADO COMPLETAMENTE:** Clase JobManager con método generar_job_id()
+- **RAZÓN:** Código muerto - importado pero nunca usado en producción
+- **ALTERNATIVA:** Sistema usa factura_id proporcionado por el cliente
+
+### 🔧 CAMBIADO
+
+#### `Background/__init__.py`
+- **REMOVIDO:** Importación de JobManager
+- **REMOVIDO:** Exportación en __all__
+- **ACTUALIZADO:** Docstring de ejemplo de uso (eliminada referencia a job_manager)
+
+#### `Background/background_processor.py`
+- **REMOVIDO:** Importación de JobManager
+- **ACTUALIZADO:** Docstrings (DIP ahora solo menciona WebhookPublisher)
+- **MANTIENE:** Funcionalidad completa usando factura_id del cliente
+
+### 📚 DOCUMENTACIÓN
+
+**Actualizado:** `CHANGELOG.md` - Esta entrada
+
+### ✅ IMPACTO
+
+- ✅ Código más limpio y mantenible
+- ✅ Sin cambios funcionales (JobManager nunca se usaba)
+- ✅ Documentación actualizada y coherente
+- ✅ Reducción de complejidad innecesaria
+
+---
+
 ## [3.11.1 - ARQUITECTURA: Desactivación de Fallback Supabase] - 2026-01-29
 
 ### 🎯 OBJETIVO

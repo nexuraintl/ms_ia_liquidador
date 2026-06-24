@@ -1,84 +1,44 @@
-# 📚 Docs - Documentación Interna
+# Documentación del Preliquidador de Impuestos
 
-Esta carpeta contiene documentación interna, especificaciones técnicas y guías de desarrollo para el Preliquidador.
+Versión del sistema: **3.19.8**
 
-## 📁 Contenido
+El Preliquidador es un servicio REST que recibe facturas y documentos de soporte
+(PDF, imágenes, Excel, Word, ZIP, correos `.msg`/`.eml`), extrae su contenido y
+calcula automáticamente múltiples impuestos colombianos. La inteligencia artificial
+**identifica** datos (conceptos, valores, tipo de tercero); el código en Python
+**calcula y valida** según la normativa. La IA nunca aplica tarifas ni normativa.
 
-### 📋 `INSTRUCCIONES_CLAUDE_v2.md`
-**Propósito:** Guía completa para desarrolladores (especialmente Claude AI) sobre la metodología de desarrollo, arquitectura del sistema y normas de implementación.
+## Impuestos soportados
 
-**Contenido incluye:**
-- **🎭 Rol y capacidades** de desarrollo
-- **🚨 Metodología de trabajo** y normas críticas  
-- **📚 Documentación obligatoria** (CHANGELOG.md, README.md)
-- **🏗️ Arquitectura del sistema** integrado
-- **🧠 Funcionamiento** de múltiples impuestos
-- **🎯 Casos de uso** expandidos
-- **✅ Checklist para desarrolladores**
+1. Retención en la Fuente (nacional, 43+ conceptos, y pagos al exterior con convenios)
+2. IVA y ReteIVA
+3. ICA (Industria y Comercio) y Sobretasa Bomberil
+4. Estampilla Pro Universidad Nacional
+5. Contribución a Obra Pública (5%)
+6. Estampillas Generales
+7. Impuesto al Timbre
+8. Tasa Prodeporte
+9. Tratamiento especial de Consorcios
 
-**Audiencia:** Desarrolladores, Claude AI, mantenedores del sistema
+## Cómo navegar esta documentación
 
-## 📖 Estructura de Documentación
+| Si eres...                     | Empieza por                                                        |
+|--------------------------------|-------------------------------------------------------------------|
+| Desarrollador que continúa     | [01_ARQUITECTURA.md](01_ARQUITECTURA.md)                          |
+| Operaciones / DevOps           | [02_DESPLIEGUE_OPERACION.md](02_DESPLIEGUE_OPERACION.md)          |
+| Integrador / consumidor de API | [03_API.md](03_API.md)                                            |
+| QA / responsable de calidad    | [04_PRUEBAS.md](04_PRUEBAS.md)                                    |
+| Analista funcional / tributario| [05_REGLAS_NEGOCIO.md](05_REGLAS_NEGOCIO.md)                      |
 
-### Documentación Pública (Raíz del proyecto)
-- `README.md` - Documentación principal para usuarios
-- `CHANGELOG.md` - Historial de cambios y versiones
+## Documentos
 
-### Documentación Interna (Esta carpeta)
-- Especificaciones técnicas detalladas
-- Guías de desarrollo interno
-- Metodologías y normas de código
-- Arquitectura y diseño del sistema
+- **[01_ARQUITECTURA.md](01_ARQUITECTURA.md)** — Capas, flujo de procesamiento,
+  decisiones de diseño y cómo extender el sistema.
+- **[02_DESPLIEGUE_OPERACION.md](02_DESPLIEGUE_OPERACION.md)** — Variables de
+  entorno, ejecución local, Docker, Cloud Run, salud, logs y troubleshooting.
+- **[03_API.md](03_API.md)** — Endpoints, parámetros, respuestas y contrato del webhook.
+- **[04_PRUEBAS.md](04_PRUEBAS.md)** — Cómo ejecutar la suite de tests y su estado.
+- **[05_REGLAS_NEGOCIO.md](05_REGLAS_NEGOCIO.md)** — Resumen de la lógica tributaria
+  por impuesto.
 
-## 🔄 Mantenimiento de Documentación
-
-### Principios clave:
-1. **📝 SIEMPRE actualizar** cuando se hacen cambios al código
-2. **🔍 Verificar consistencia** entre documentación y código
-3. **📋 Documentar decisiones** de arquitectura importantes
-4. **🎯 Mantener ejemplos** actualizados y funcionales
-
-### Cuando actualizar:
-- ✅ Nuevas funcionalidades implementadas
-- ✅ Cambios en arquitectura del sistema  
-- ✅ Corrección de bugs importantes
-- ✅ Optimizaciones significativas
-- ✅ Nuevos endpoints o APIs
-- ✅ Cambios en configuración
-- ✅ Nuevos módulos o clases
-
-## 📋 Template para Nueva Documentación
-
-Al crear nueva documentación interna, incluir:
-
-```markdown
-# Título del Documento
-
-## Propósito
-¿Por qué existe este documento?
-
-## Audiencia  
-¿Quién debe leer esto?
-
-## Contenido
-Descripción detallada...
-
-## Mantenimiento
-- Responsable: [Nombre]
-- Última actualización: [Fecha]
-- Próxima revisión: [Fecha]
-```
-
-## 🗂️ Roadmap de Documentación
-
-### Documentos planeados:
-- [ ] `ARQUITECTURA_DETALLADA.md` - Diagramas y especificaciones técnicas
-- [ ] `GUIA_TESTING.md` - Estrategias de testing y validación
-- [ ] `INTEGRACIONES.md` - Guía para integrar con sistemas externos
-- [ ] `PERFORMANCE.md` - Optimizaciones y benchmarks  
-- [ ] `DEPLOY_PRODUCTION.md` - Guía de despliegue a producción
-- [ ] `TROUBLESHOOTING.md` - Solución de problemas comunes
-
----
-
-**Nota:** Esta documentación es para desarrollo interno. La documentación para usuarios finales está en la raíz del proyecto.
+> El historial detallado de cambios por versión está en `CHANGELOG.md` (raíz del proyecto).

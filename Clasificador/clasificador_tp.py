@@ -103,7 +103,7 @@ class ClasificadorTasaProdeporte:
                 if categoria == "FACTURA":
                     factura_texto += f"\n=== {nombre_archivo} ===\n{texto}\n"
                     logger.info(f"Factura encontrada para análisis Tasa Prodeporte: {nombre_archivo}")
-                elif categoria in ["ANEXO", "ANEXO_CONTRATO", "ANEXO CONCEPTO CONTRATO"]:
+                elif categoria in ["ANEXO", "ANEXO_CONTRATO", "ANEXO CONCEPTO CONTRATO", "ANEXO CONCEPTO DE CONTRATO"]:
                     anexos_texto += f"\n=== {nombre_archivo} ===\n{texto}\n"
 
             # Normalizar textos vacíos

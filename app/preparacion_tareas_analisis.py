@@ -250,13 +250,15 @@ class InstanciadorClasificadores:
         # Estampilla Universidad + Obra Publica (condicional, analisis integrado)
         if aplica_estampilla or aplica_obra_publica:
             clasificadores["obra_uni"] = ClasificadorObraUni(
-                procesador_gemini=self.clasificador
+                procesador_gemini=self.clasificador,
+                database_manager=self.clasificador.db_manager
             )
 
         # IVA/ReteIVA (condicional)
         if aplica_iva:
             clasificadores["iva"] = ClasificadorIva(
-                procesador_gemini=self.clasificador
+                procesador_gemini=self.clasificador,
+                database_manager=self.db_manager
             )
 
         # Tasa Prodeporte (condicional)
@@ -311,13 +313,15 @@ class PreparadorCacheArchivos:
 
     async def preparar_cache(
         self,
-        archivos_directos: List[UploadFile]
+        archivos_directos: List[UploadFile],
+        documentos_clasificados: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Prepara cache de Files API para evitar re-upload en workers paralelos.
 
         Args:
             archivos_directos: Lista de archivos UploadFile originales.
+            documentos_clasificados: Opcional. Documentos clasificados con flag de relevancia.
 
         Returns:
             Dict con cache de FileUploadResult por nombre de archivo.
@@ -335,6 +339,19 @@ class PreparadorCacheArchivos:
             - Evita timeout por re-upload de archivos grandes
         """
         logger.info(" Preparando cache para workers paralelos")
+        
+        # Filtrar archivos directos al conjunto relevante si está disponible
+        if documentos_clasificados:
+            from utils.utils_archivos import obtener_nombre_archivo
+            archivos_filtrados = []
+            for i, archivo in enumerate(archivos_directos):
+                nombre = obtener_nombre_archivo(archivo, i)
+                info = documentos_clasificados.get(nombre, {})
+                if info.get("relevante", True):
+                    archivos_filtrados.append(archivo)
+            archivos_directos = archivos_filtrados
+            logger.info(f"Archivos directos filtrados a relevantes (≤20): {len(archivos_directos)} archivos")
+
         cache_archivos = await self.clasificador.preparar_archivos_para_workers_paralelos(
             archivos_directos
         )
@@ -1026,8 +1043,8 @@ class CoordinadorPreparacionTareas:
             aplica_tasa_prodeporte=aplica_tasa_prodeporte
         )
 
-        # PASO 2: Preparar cache de archivos
-        cache_archivos = await self.preparador_cache.preparar_cache(archivos_directos)
+        # PASO 2: Preparar cache de archivos (filtrado a relevantes)
+        cache_archivos = await self.preparador_cache.preparar_cache(archivos_directos, documentos_clasificados)
 
         # PASO 3: Crear tareas async
         preparador_tareas = PreparadorTareasAnalisis(

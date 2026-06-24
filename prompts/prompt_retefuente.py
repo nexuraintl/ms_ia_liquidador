@@ -114,18 +114,34 @@ Si no encuentras el RUT, buscar en FACTURA, si no en ANEXOS.
 ├─ Si encuentras "Persona jurídica" → es_persona_natural: false
 └─ Si NO encuentras → es_persona_natural: null
 
- RÉGIMEN TRIBUTARIO (Buscar texto exacto):
+ RÉGIMEN TRIBUTARIO (aplicar en este orden estricto de prioridad):
+
+ PRIORIDAD 1 - TEXTO EXACTO (la evidencia textual SIEMPRE manda):
 ├─ Si encuentras "RÉGIMEN SIMPLE" o "SIMPLE" o codigo "O-47" → regimen_tributario: "SIMPLE"
 ├─ Si encuentras "RÉGIMEN ORDINARIO" , "ORDINARIO" o "régimen ordinar" → regimen_tributario: "ORDINARIO"
 ├─ Si encuentras "RÉGIMEN ESPECIAL", "ESPECIAL" o "SIN ÁNIMO DE LUCRO" → regimen_tributario: "ESPECIAL"
-└─ Si NO encuentras → regimen_tributario: null
+└─ Si encuentras codigo DIAN "R-99-PN" → regimen_tributario: "ORDINARIO"
+
+ PRIORIDAD 2 - INFERENCIA POR PISTA DOCUMENTAL (SOLO si la PRIORIDAD 1 no dio resultado Y es_persona_natural == true):
+├─ Esta es la ÚNICA inferencia de régimen permitida. NO es deducción por tipo de empresa: es una pista
+│  documental explícita y unívoca escrita por el propio contribuyente.
+├─ PISTA "DEPURACIÓN ART. 383": Si en la factura/cuenta de cobro/anexos el contribuyente persona natural
+│  manifiesta expresamente que se le aplique la depuración del "artículo 383 del ET" / "art. 383" /
+│  "artículo 383 del Estatuto Tributario" sobre sus rentas de trabajo (típicamente una manifestación
+│  bajo gravedad de juramento sobre costos/deducciones, p. ej. Ley 2277 de 2022 / Decreto 2231 de 2023 /
+│  DUR 1625 de 2016 arts. 1.2.4.1.6 y 1.2.4.1.17) → regimen_tributario: "ORDINARIO"
+├─ RAZÓN (no la inventes, esta es la lógica): la depuración del art. 383 (tabla de retención sobre rentas
+│  de trabajo) SOLO aplica a personas naturales del régimen ORDINARIO; quien tributa bajo el régimen
+│  SIMPLE no está sujeto a esa retención y no solicitaría dicha depuración.
+└─ Si aplicas esta inferencia, DEBES registrar en "observaciones" la frase textual de la pista encontrada
+   y que el régimen "ORDINARIO" fue INFERIDO por esa manifestación (no leído de un campo de régimen).
+
+ PRIORIDAD 3 - SIN EVIDENCIA:
+└─ Si ninguna de las anteriores aplica → regimen_tributario: null
 
  AUTORRETENEDOR:
 ├─ Si encuentras texto "ES AUTORRETENEDOR" o codigo "O-15" → es_autorretenedor: true
 └─ Si NO encuentras esa frase → es_autorretenedor: false
-
-CODIGO COMODIN DIAN :
-├─ Si encuentras codigo "R-99-PN" →  regimen_tributario: "ORDINARIO" 
 
 IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RUT sobre los demas documentos.
 
@@ -139,12 +155,141 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
 4. IMPORTANTE: Solo puedes relacionar un concepto facturado con UN concepto del diccionario
 5. IMPORTANTE: El diccionario CONCEPTOS VÁLIDOS tiene formato {{descripcion: index}}
 6. PUEDEN HABER MULTIPLES CONCEPTOS FACTURADOS en la misma factura
+7. NO extraigas como concepto facturado ninguna linea cuya naturaleza sea un IMPUESTO (IVA, ReteIVA, INC / impuesto al consumo). En contratos de obra civil/construccion (estructura AIU: Administracion, Imprevistos, Utilidad) el IVA suele aparecer como un item mas dentro de la tabla de productos —comunmente calculado como 19% de la Utilidad, con codigos tipicos "IVAUTIL19" o "IVA"— pero es un IMPUESTO y NO debe incluirse en conceptos_identificados. Si excluyes una linea de IVA, AGREGA a "observaciones" una nota del tipo: "Linea de IVA sobre utilidad ($VALOR) excluida de conceptos por ser impuesto (contrato AIU)".
+
+═══════════════════════════════════════════════════════════════════
+ PASO 3.0: CUOTAS / APORTES GREMIALES NO RETENIBLES (GATE PREVIO)
+═══════════════════════════════════════════════════════════════════
+
+Antes de correr la rúbrica del PASO 3.1, evalúa la NATURALEZA de cada concepto
+facturado. Hay una familia de pagos cuya naturaleza es PERTENECER A o SOSTENER
+una entidad, gremio o asociación —NO la remuneración de un servicio, bien o renta
+tipificada— y que NO corresponde a NINGUNO de los CONCEPTOS VÁLIDOS del diccionario:
+
+   FAMILIA CUOTA/APORTE (lista enunciativa, reconoce equivalentes):
+   - "cuota de sostenimiento", "cuota de administración" (gremial), "cuota de
+     afiliación", "cuota de membresía", "membresía", "afiliación"
+   - "aporte", "contribución", "donación" a una entidad, gremio o asociación
+
+REGLA DEL GATE:
+├─ Si el concepto facturado pertenece a esta FAMILIA CUOTA/APORTE →
+│  concepto: "CONCEPTO_NO_IDENTIFICADO", concepto_index: 0, y NO corras la rúbrica
+│  del PASO 3.1 para ese ítem. En "razonamiento" indica que es una cuota/aporte
+│  gremial sin contraprestación tipificada y que no corresponde a ningún concepto
+│  del diccionario.
+│
+├─ ANTI-RACIONALIZACIÓN (CRÍTICA): que el proveedor sea una asociación/gremio, o
+│  que su actividad económica o CIIU sea "de servicios", NO convierte una cuota o
+│  aporte en "Servicios en general" ni en ningún otro concepto. Una cuota de
+│  sostenimiento NO es la prestación de un servicio identificable. NO la fuerces
+│  a un concepto del diccionario.
+│
+└─ ACOTACIÓN DE SEGURIDAD: este gate aplica SOLO a la familia cuota/aporte de
+   arriba. NO lo uses para desviar a CONCEPTO_NO_IDENTIFICADO rentas legítimas que
+   SÍ tienen concepto en el diccionario aunque no sean "servicios" (arrendamientos,
+   transporte, rendimientos financieros, dividendos, loterías, indemnizaciones,
+   emolumentos, compras de bienes, etc.). Esas siguen el flujo normal del PASO 3.1.
+
+IMPORTANTE: esta decisión se basa en la NATURALEZA del concepto facturado, NO en
+leyendas o avisos de la factura (p. ej. "no sujeto a retención"). Ignora ese tipo
+de leyendas para esta clasificación.
+
+═══════════════════════════════════════════════════════════════════
+ PASO 3.1: RÚBRICA DE MATCHING (ORDEN DE PRIORIDAD - CHAIN OF THOUGHT)
+═══════════════════════════════════════════════════════════════════
+
+Para CADA concepto facturado, EVALÚA 2-3 candidatos del diccionario CONCEPTOS VÁLIDOS
+aplicando estos criterios EN ORDEN. No avances al siguiente criterio si el anterior
+ya discrimina entre candidatos. Documenta el análisis en el campo "razonamiento"
+del JSON de respuesta.
+
+CRITERIO 1 - Equivalencia semántica:
+   - Compara el núcleo del concepto facturado (sustantivo + objeto) con la
+     descripción del diccionario. Coincidencia exacta o sinónimo del sector
+     tributario gana.
+   - Ejemplo: "asesoría jurídica" coincide con "Honorarios" (servicios
+     profesionales prestados por profesional).
+
+CRITERIO 2 - Especificidad sobre generalidad:
+   - Si dos candidatos encajan, prefiere el MÁS ESPECÍFICO (descripción más
+     restringida al servicio facturado), NO el genérico tipo "Servicios
+     generales" cuando hay un candidato puntual aplicable.
+   - REGLA ANTI-COMODÍN (CRÍTICA): "Servicios en general" / "Servicios
+     generales" y cualquier otro concepto genérico NO son un valor por
+     defecto ni un cajón comodín. Solo pueden asignarse cuando el ítem
+     facturado ES efectivamente ese servicio por equivalencia semántica
+     positiva (Criterio 1). PROHIBIDO elegir el genérico solo porque "se
+     parece", porque no hallaste algo mejor, o para no dejar el concepto sin
+     clasificar. Si el ítem facturado no es claramente un servicio (o un bien
+     en los conceptos de compras), el genérico NO aplica.
+
+CRITERIO 3 - Pistas contextuales del expediente:
+   - Cuando el concepto facturado es genérico o ambiguo, recurre a pistas REALES
+     presentes en los documentos. En orden de fuerza probatoria:
+     (a) Objeto del contrato (anexo de contrato) — suele ser la pista más
+         descriptiva.
+     (b) Descripciones detalladas en cotizaciones o anexos técnicos.
+     (c) Actividad económica / CIIU principal del RUT del proveedor.
+     (d) Nombre / razón social del proveedor cuando revela el giro del negocio
+         (ej: "KPMG" → auditoría / honorarios profesionales; "Constructora X
+         SAS" → obra civil; "Transportes Y" → servicios de transporte).
+   - Estas pistas son evidencia COMPLEMENTARIA, no inferencia libre: cita
+     textualmente la pista en el razonamiento.
+
+CRITERIO 4 - Genérico contextual:
+   - Si el ítem facturado es genérico (ej: "servicios mes de octubre",
+     "honorarios", "consultoría") pero las pistas del Criterio 3 apuntan
+     unívocamente a un concepto específico del diccionario, las pistas
+     PREVALECEN sobre la literalidad del ítem genérico.
+
+CRITERIO 5 - Elección entre conceptos "espejo" (declarante / no declarante):
+   - Aplicar SOLO cuando los Criterios 1-4 reducen a dos o más candidatos
+     que describen el MISMO servicio y solo difieren en "declarante" vs
+     "no declarante" (ej. "Compras declarante" idx N vs "Compras no
+     declarante" idx M).
+   - Reusa los códigos DIAN ya detectados en el PASO 2 — no vuelvas a
+     buscarlos en los documentos.
+   - Regla de elección por evidencia disponible:
+     ├─ RUT, sección "Responsabilidades, Calidades y Atributos"
+     │  contiene código "05"                                  → DECLARANTE
+     ├─ Factura electrónica trae "O-13" en responsabilidades
+     │  fiscales del emisor                                   → DECLARANTE
+     ├─ Factura electrónica trae "O-15" (autorretenedor)      → DECLARANTE
+     │  
+     ├─ es_persona_natural==false (Persona juridica colombiana) sin "47"/"O-47"
+     │  visibles                                              → DECLARANTE por defecto
+     └─ es_persona_natural==true sin "05" ni "O-13" visibles  → NO DECLARANTE
+        (default conservador fiscal)
+   - Si aplicas el default conservador (PN sin códigos visibles), AGREGA
+     a "observaciones" la frase: "Régimen de declarancia asumido por
+     default conservador (sin códigos DIAN visibles en RUT ni factura)."
+   - Cita textualmente el código DIAN visto (o "sin códigos visibles") en
+     el campo "razonamiento".
+
+REGLA DE DESEMPATE:
+   - Solo desempata entre candidatos que YA superaron el Criterio 1
+     (equivalencia semántica positiva). NUNCA uses el desempate para
+     "rescatar" un concepto genérico hacia el cual ningún candidato tenía
+     equivalencia: en ese caso el resultado es CONCEPTO_NO_IDENTIFICADO.
+   - Si tras los 5 criterios siguen empatados dos candidatos que NO son
+     espejo declarante/no declarante (ej. dos conceptos de honorarios
+     PJ con tarifa idéntica), elige el de MENOR concepto_index y
+     regístralo en el campo razonamiento.
+   - NO uses esta regla para elegir entre conceptos espejo: para ese caso
+     usa SIEMPRE el CRITERIO 5.
+
+LÍMITE DEL CAMPO razonamiento:
+   - Máximo 80 palabras. Conciso, citando indices candidatos y pistas
+     contextuales reales por nombre del criterio.
 
  MATCHING DE CONCEPTOS - ESTRICTO:
-├─ Si encuentras coincidencia EXACTA → usar ese concepto + su index del diccionario
-├─ Si encuentras coincidencia PARCIAL clara → usar el concepto más específico + su index
-├─ Si NO hay coincidencia clara → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
-├─  NUNCA inventes un concepto que no esté en la lista
+├─ Aplicar la RÚBRICA del PASO 3.1 sobre 2-3 candidatos antes de elegir
+├─ Si NINGÚN candidato cumple el Criterio 1 (equivalencia semántica clara) tras aplicar los 5 criterios → "CONCEPTO_NO_IDENTIFICADO" con concepto_index: 0
+├─ Es PREFERIBLE dejar el concepto como CONCEPTO_NO_IDENTIFICADO (queda para revisión manual) que clasificarlo de más al cajón genérico "Servicios en general". Ante la duda, NO clasifiques al genérico.
+├─ NUNCA inventes un concepto que no esté en la lista
+├─ El valor de "concepto" en el JSON debe ser EXACTAMENTE la clave del
+│  diccionario CONCEPTOS VÁLIDOS, copiada tal cual (incluyendo paréntesis,
+│  guiones y referencias normativas). NO la abrevies ni resumas.
 └─ REVISA TODA LA LISTA DE CONCEPTOS VALIDOS ANTES DE ASIGNARLO
 
  EXTRACCIÓN DE VALORES:
@@ -164,9 +309,13 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
  NO asumas valores por defecto excepto los especificados
  NO modifiques nombres de conceptos del diccionario
  NO calcules valores no mostrados
- NO deduzcas el régimen tributario por el tipo de empresa
+ NO deduzcas el régimen tributario por el tipo de empresa, el sector, el concepto facturado ni el nombre del proveedor. ÚNICA excepción permitida: la PISTA "DEPURACIÓN ART. 383" descrita en la PRIORIDAD 2 del bloque RÉGIMEN TRIBUTARIO (manifestación expresa del contribuyente persona natural). Fuera de esa pista documental explícita, el régimen NO se infiere
  NO asumas que alguien es autorretenedor sin confirmación explícita
  NO extraigas conceptos facturados de documentos que NO sean la FACTURA
+ NO extraigas lineas de IVA u otros impuestos (ReteIVA, INC) como conceptos facturados
+ NO inventes pistas en el campo "razonamiento": cita SOLO texto realmente presente
+   en FACTURA, RUT, ANEXOS, COTIZACIONES u OBJETO DEL CONTRATO. Si una pista no
+   aparece textualmente, NO la menciones.
 ═══════════════════════════════════════════════════════════════════
  FORMATO DE RESPUESTA OBLIGATORIO (JSON ESTRICTO):
 ═══════════════════════════════════════════════════════════════════
@@ -176,7 +325,8 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
             "concepto_facturado": "Nombre exacto del concepto facturado" o "",
             "concepto": "Nombre exacto relacionado del diccionario o CONCEPTO_NO_IDENTIFICADO",
             "concepto_index": número del index del diccionario o 0,
-            "base_gravable": número encontrado o 0.0
+            "base_gravable": número encontrado o 0.0,
+            "razonamiento": "Facturado: '<texto>'. Pistas: <proveedor/CIIU/objeto/cotización si aplican>. Candidatos: (a) idx N '<desc>'; (b) idx M '<desc>'. Elegido (a) por Criterio X (motivo). (b) descartado por Criterio Y (motivo)."
         }}
     ],
     "naturaleza_tercero": {{
@@ -186,6 +336,111 @@ IMPORTANTE : Si encuentras el RUT, prioriza la información de naturaleza del RU
     }},
     "valor_total": número encontrado o 0.0,
     "observaciones": ["Lista de observaciones relevantes"]
+}}
+
+═══════════════════════════════════════════════════════════════════
+ EJEMPLOS DE RAZONAMIENTO (FEW-SHOTS):
+═══════════════════════════════════════════════════════════════════
+
+NOTA SOBRE LOS EJEMPLOS: el campo "concepto" se muestra abreviado con
+[...] solo para legibilidad de los ejemplos. En tu respuesta real DEBES
+copiar la clave completa del diccionario CONCEPTOS VÁLIDOS, sin abreviar.
+Los "idx" de los ejemplos son ilustrativos: usa los del diccionario real.
+
+EJEMPLO 1 - Ítem genérico, proveedor revela el giro:
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Servicios prestados mes de octubre 2025",
+            "concepto": "Honorarios y comisiones - Beneficiario persona jurídica o asimilada [...texto completo del diccionario...]",
+            "concepto_index": 1,
+            "base_gravable": 4500000.0,
+            "razonamiento": "Facturado: 'Servicios prestados mes octubre' (genérico). Pistas: proveedor 'KPMG Advisory Services SAS' (PJ), CIIU RUT 6920 'Actividades de contabilidad'. Candidatos: (a) idx 1 'Honorarios PJ'; (b) idx 36 'Servicios en general PJ'. Elegido (a) por Criterio 4 (CIIU contable + razón social apuntan a honorarios sobre servicios generales)."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
+    "valor_total": 4500000.0,
+    "observaciones": []
+}}
+
+EJEMPLO 2 - Ítem específico con base AIU (vigilancia/aseo):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Servicios de vigilancia mes octubre 2025",
+            "concepto": "Servicios de vigilancia y aseo prestados por empresas especializadas - Base: AIU [...texto completo...]",
+            "concepto_index": 43,
+            "base_gravable": 25000000.0,
+            "razonamiento": "Facturado: 'Servicios de vigilancia'. Pistas: cotización detalla 'puestos de vigilancia 24h'; factura emisor 'Seguridad XYZ SAS' (PJ). Candidatos: (a) idx 43 'Vigilancia y aseo - Base AIU'; (b) idx 36 'Servicios en general PJ'. Elegido (a) por Criterio 1 (equivalencia directa vigilancia) y Criterio 2 (más específico)."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
+    "valor_total": 25000000.0,
+    "observaciones": []
+}}
+
+EJEMPLO 3 - Elección entre conceptos ESPEJO por declarancia (Criterio 5):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Cono de señalización con base naranja 90 cm",
+            "concepto": "Compras generales y otros ingresos tributarios - Beneficiario declarante de renta (Art. 401 E.T.) [...texto completo...]",
+            "concepto_index": 22,
+            "base_gravable": 8374800.0,
+            "razonamiento": "Facturado: 'Cono de señalización' (bien físico). Criterios 1-4 reducen a candidatos espejo: (a) idx 22 'Compras declarante'; (b) idx 23 'Compras no declarante'. Aplicar Criterio 5: factura electrónica del emisor trae 'O-13' en responsabilidades fiscales → DECLARANTE. Elegido (a)."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ORDINARIO", "es_autorretenedor": false}},
+    "valor_total": 8374800.0,
+    "observaciones": []
+}}
+
+EJEMPLO 4 - Espejo con default conservador (PN sin códigos visibles):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Servicios de fotografía evento corporativo",
+            "concepto": "Servicios en general - Beneficiario persona natural no declarante de renta [...texto completo...]",
+            "concepto_index": 38,
+            "base_gravable": 3500000.0,
+            "razonamiento": "Facturado: 'Servicios de fotografía'. Candidatos espejo: (a) idx 37 'Servicios PN declarante'; (b) idx 38 'Servicios PN no declarante'. Criterio 5: persona natural sin códigos '05' ni 'O-13' visibles → NO DECLARANTE (default conservador). Elegido (b)."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": true, "regimen_tributario": null, "es_autorretenedor": false}},
+    "valor_total": 3500000.0,
+    "observaciones": ["Régimen de declarancia asumido por default conservador (sin códigos DIAN visibles en RUT ni factura)."]
+}}
+
+EJEMPLO 5 - Sin coincidencia razonable:
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Pago varios",
+            "concepto": "CONCEPTO_NO_IDENTIFICADO",
+            "concepto_index": 0,
+            "base_gravable": 1500000.0,
+            "razonamiento": "Facturado: 'Pago varios' (sin descripción adicional). Pistas: RUT, contrato y cotización NO disponibles; proveedor sin giro determinable. Candidatos evaluados: (a) idx 36 'Servicios PJ'; (b) idx 22 'Compras declarante'. Ninguno cumple Criterio 1 (sin equivalencia semántica) ni Criterio 3 (sin pistas). Reportar como CONCEPTO_NO_IDENTIFICADO."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": null, "es_autorretenedor": false}},
+    "valor_total": 1500000.0,
+    "observaciones": ["Sin información suficiente para clasificar el concepto"]
+}}
+
+EJEMPLO 6 - Cuota/aporte gremial (GATE PASO 3.0, NO retenible):
+{{
+    "conceptos_identificados": [
+        {{
+            "concepto_facturado": "Cuota de sostenimiento junio 2026",
+            "concepto": "CONCEPTO_NO_IDENTIFICADO",
+            "concepto_index": 0,
+            "base_gravable": 18607410.0,
+            "razonamiento": "Facturado: 'Cuota de sostenimiento'. GATE PASO 3.0: pertenece a la familia cuota/aporte gremial (pertenecer a/sostener una asociación), no es prestación de servicio ni renta tipificada. Que el proveedor sea una asociación no lo convierte en 'Servicios en general' (anti-racionalización). No corresponde a ningún concepto del diccionario → CONCEPTO_NO_IDENTIFICADO."
+        }}
+    ],
+    "naturaleza_tercero": {{"es_persona_natural": false, "regimen_tributario": "ESPECIAL", "es_autorretenedor": false}},
+    "valor_total": 18607410.0,
+    "observaciones": ["Concepto facturado es una cuota/aporte gremial; no corresponde a ningún concepto de retención del diccionario."]
 }}
 
  RESPONDE ÚNICAMENTE CON EL JSON. SIN EXPLICACIONES ADICIONALES.
@@ -420,9 +675,10 @@ BUSCAR: "AFC" O "ahorro para fomento" O "cuenta AFC"
                 "planilla_de_cuenta_AFC": boolean (default: false)
             }},
             "planilla_seguridad_social": {{
-                "IBC_seguridad_social": número o 0.0 (SOLO de planilla)
+                "IBC_seguridad_social": número o 0.0 (SOLO de planilla),
                 "planilla_seguridad_social": boolean (default: false),
-                "fecha_de_planilla_seguridad_social": "AAAA-MM-DD" (default: "0000-00-00")
+                "fecha_de_planilla_seguridad_social": "AAAA-MM-DD" (default: "0000-00-00"),
+                "valor_pagado_seguridad_social": número o 0.0
             }}
         }}
     }}
@@ -583,14 +839,19 @@ PASO C: EXTRAER CONCEPTOS LITERALES
 Identificar los servicios/bienes facturados:
 ├─ Extraer el nombre LITERAL del concepto tal como aparece en la factura
 ├─ SOLO extrae el texto exacto que describe el servicio/bien
+├─ NO extraigas como concepto ninguna linea cuya naturaleza sea un IMPUESTO. En contratos de obra civil/construccion (estructura AIU: Administracion, Imprevistos, Utilidad) el IVA suele aparecer como un item mas dentro de la tabla de productos —comunmente calculado como 19% de la Utilidad, con codigos tipicos "IVAUTIL19" o "IVA"— pero es un IMPUESTO, no un concepto facturado sujeto a retencion. EXCLUYELO de conceptos_literales. Lo mismo aplica a lineas de ReteIVA, INC / impuesto al consumo u otros impuestos.
+├─ Si excluyes una linea de IVA, AGREGA a "observaciones" una nota del tipo: "Linea de IVA sobre utilidad ($VALOR) excluida de conceptos por ser impuesto (contrato AIU)".
 └─ Extrae la base_gravable asociada a cada concepto
 
 EJEMPLO:
 Si la factura dice "Servicios de consultoria especializada" → nombre_concepto: "Servicios de consultoria especializada"
 Si dice "Honorarios profesionales mes de octubre" → nombre_concepto: "Honorarios profesionales mes de octubre"
 
+EJEMPLO DE EXCLUSION:
+Si la factura trae una linea "IVA" / "IVA UTILIDAD 19%" / "IVAUTIL19" → NO la incluyas como concepto (es impuesto, no concepto facturado).
+
 PASO D: EXTRAER VALORES
-├─ valor_total: Valor total de la factura SIN IVA
+├─ valor_total: Valor total de la factura SIN IVA (NO incluyas el valor de la linea de IVA aunque aparezca como item de la tabla de productos)
 ├─ base_gravable: Para cada concepto facturado identificado
 └─ Si no encuentras valores claros → usar 0.0
 
@@ -603,6 +864,7 @@ NO deduzcas naturaleza sin informacion especifica
 NO mapees conceptos a categorias tributarias (solo extrae literal)
 NO calcules valores no mostrados
 NO asumas que consorciados tienen misma naturaleza
+NO extraigas lineas de IVA u otros impuestos (ReteIVA, INC) como conceptos facturados
 
 ═══════════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (JSON ESTRICTO):
@@ -706,36 +968,78 @@ Debes buscar la descripcion que mejor coincida y usar su index.
 {json.dumps(conceptos_dict, indent=2, ensure_ascii=False)}
 
 ═══════════════════════════════════════════════════════════════════
-REGLAS DE MATCHING ESTRICTAS:
+GATE PREVIO: CUOTAS / APORTES GREMIALES NO RETENIBLES
 ═══════════════════════════════════════════════════════════════════
 
-CRITERIOS DE COINCIDENCIA (en orden de prioridad):
+Antes de la rubrica, evalua la NATURALEZA de cada concepto literal. Hay una familia
+de pagos cuya naturaleza es PERTENECER A o SOSTENER una entidad, gremio o asociacion
+y que NO corresponde a NINGUN concepto del diccionario:
 
-1. COINCIDENCIA EXACTA:
-   - Si el concepto literal coincide palabra por palabra → usar ese concepto
+   FAMILIA CUOTA/APORTE (lista enunciativa, reconoce equivalentes):
+   - "cuota de sostenimiento", "cuota de administracion" (gremial), "cuota de
+     afiliacion", "cuota de membresia", "membresia", "afiliacion"
+   - "aporte", "contribucion", "donacion" a una entidad, gremio o asociacion
 
-2. COINCIDENCIA POR PALABRAS CLAVE:
-   Ejemplos de palabras clave que indican conceptos especificos:
+REGLA DEL GATE:
+- Si el concepto literal pertenece a esta FAMILIA CUOTA/APORTE ->
+  concepto: "CONCEPTO_NO_IDENTIFICADO", concepto_index: 0. En "razonamiento" indica
+  que es una cuota/aporte gremial sin contraprestacion tipificada.
+- ANTI-RACIONALIZACION: una cuota/aporte NO es "Servicios generales" ni ningun otro
+  concepto, aunque la entidad sea una asociacion. NO la fuerces a un concepto.
+- ACOTACION DE SEGURIDAD: el gate aplica SOLO a la familia cuota/aporte. NO desvies a
+  CONCEPTO_NO_IDENTIFICADO rentas legitimas que SI tienen concepto en el diccionario
+  aunque no sean "servicios" (arrendamientos, transporte, rendimientos, dividendos,
+  loterias, indemnizaciones, emolumentos, compras de bienes, etc.).
 
-   "honorarios" → Buscar en conceptos de honorarios profesionales
-   "arrendamiento" → Buscar en conceptos de arrendamiento
-   "servicios" → Buscar en conceptos de servicios
-   "consultoria" → Servicios generales o servicios tecnicos
-   "transporte" → Servicios de transporte
-   "licencias", "software" → Licenciamiento de software
-   "publicidad", "marketing" → Servicios de publicidad
-   "construccion", "obra" → Servicios de construccion
-   "mantenimiento" → Servicios de mantenimiento
-   "capacitacion", "formacion" → Servicios de capacitacion
-   "interventoria" → Servicios de interventoria
+═══════════════════════════════════════════════════════════════════
+RUBRICA DE MATCHING (CHAIN OF THOUGHT - ORDEN DE PRIORIDAD):
+═══════════════════════════════════════════════════════════════════
 
-3. COINCIDENCIA POR CATEGORIA:
-   - Si el concepto literal describe una categoria amplia → usar el concepto generico
-   - Ejemplo: "Servicios varios" → "Servicios generales (declarantes)"
+IMPORTANTE: En esta llamada NO tienes acceso al texto original de la factura ni
+a documentos contextuales (proveedor, RUT, contrato, cotizaciones). Solo recibes
+los conceptos literales ya extraidos. Por lo tanto SOLO puedes aplicar
+Criterios 1 y 2.
+Para CADA concepto literal, evalua 2-3 candidatos del diccionario aplicando:
 
-4. NO HAY COINCIDENCIA:
-   - Si NO encuentras ninguna coincidencia razonable → "CONCEPTO_NO_IDENTIFICADO"
-   - concepto_index: 0
+CRITERIO 1 - Equivalencia semantica:
+   - Compara el nucleo del concepto literal (sustantivo + objeto) con la
+     descripcion del diccionario. Coincidencia exacta o sinonimo directo gana.
+   - Ejemplos de equivalencias:
+     "honorarios" -> conceptos de honorarios profesionales
+     "arrendamiento" -> conceptos de arrendamiento
+     "consultoria" -> servicios tecnicos / servicios generales
+     "transporte" -> servicios de transporte
+     "licencias", "software" -> licenciamiento de software
+     "publicidad" -> servicios de publicidad
+     "construccion", "obra" -> servicios de construccion
+     "mantenimiento" -> servicios de mantenimiento
+     "interventoria" -> servicios de interventoria
+
+CRITERIO 2 - Especificidad sobre generalidad:
+   - Si dos candidatos encajan, prefiere el MAS ESPECIFICO. No uses el generico
+     ("Servicios generales") cuando exista un concepto puntual aplicable.
+   - REGLA ANTI-COMODIN (CRITICA): "Servicios generales" / "Servicios en general"
+     y cualquier concepto generico NO son un valor por defecto ni un comodin.
+     Solo se asignan cuando el concepto literal ES efectivamente ese servicio por
+     equivalencia semantica positiva (Criterio 1). PROHIBIDO elegir el generico
+     solo porque "se parece" o porque no hallaste algo mejor.
+
+REGLA DE DESEMPATE:
+   - Solo desempata entre candidatos que YA superaron el Criterio 1. Nunca uses
+     el desempate para rescatar un generico sin equivalencia.
+   - Si tras Criterios 1 y 2 siguen empatados dos candidatos, elige el de
+     MENOR concepto_index y registralo en razonamiento.
+
+SIN COINCIDENCIA:
+   - Si ningun candidato cumple Criterio 1 -> concepto "CONCEPTO_NO_IDENTIFICADO",
+     concepto_index 0. Documenta en razonamiento por que ningun candidato encaja.
+   - Es PREFERIBLE dejar el concepto como CONCEPTO_NO_IDENTIFICADO que clasificarlo
+     de mas al cajon generico "Servicios generales". Ante la duda, NO clasifiques
+     al generico.
+
+LIMITE DEL CAMPO razonamiento:
+   - Maximo 60 palabras. Conciso, citando indices candidatos y criterios por
+     nombre. No menciones pistas contextuales (no las tienes en esta llamada).
 
 ═══════════════════════════════════════════════════════════════════
 PROHIBICIONES ABSOLUTAS:
@@ -743,8 +1047,8 @@ PROHIBICIONES ABSOLUTAS:
 NO inventes conceptos que no esten en el diccionario
 NO modifiques los nombres de los conceptos del diccionario
 NO incluyas tarifa_retencion (se obtiene de la base de datos)
-NO mapees conceptos ambiguos sin justificacion clara
-Si tienes duda → usar "CONCEPTO_NO_IDENTIFICADO"
+NO inventes pistas contextuales en el razonamiento (no tienes documentos en esta llamada)
+Si tienes duda tras aplicar la rubrica -> usar "CONCEPTO_NO_IDENTIFICADO"
 
 ═══════════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (JSON ESTRICTO):
@@ -758,7 +1062,7 @@ Retorna un JSON con esta estructura EXACTA:
             "nombre_concepto": "Texto literal del concepto (igual al input)",
             "concepto": "Nombre EXACTO del concepto del diccionario o CONCEPTO_NO_IDENTIFICADO",
             "concepto_index": numero del index del diccionario o 0,
-            "justificacion": "Breve explicacion del matching (opcional)"
+            "razonamiento": "Candidatos: (a) idx N '<desc>'; (b) idx M '<desc>'. Elegido (a) por Criterio X. (b) descartado por Criterio Y."
         }}
     ]
 }}
@@ -767,6 +1071,7 @@ IMPORTANTE:
 - La lista de conceptos_mapeados debe tener el MISMO ORDEN que los conceptos a mapear
 - Debe haber EXACTAMENTE UN resultado por cada concepto de entrada
 - El campo "nombre_concepto" debe ser IDENTICO al concepto literal de entrada
+- El campo "razonamiento" es OBLIGATORIO en cada item
 - NO incluir tarifa_retencion (se obtendra de la base de datos usando concepto_index)
 
 EJEMPLO DE RESPUESTA:
@@ -774,15 +1079,15 @@ EJEMPLO DE RESPUESTA:
     "conceptos_mapeados": [
         {{
             "nombre_concepto": "Servicios de consultoria especializada",
-            "concepto": "Servicios generales (declarantes)",
-            "concepto_index": 1,
-            "justificacion": "Consultoria se clasifica como servicios generales"
+            "concepto": "Servicios tecnicos",
+            "concepto_index": 8,
+            "razonamiento": "Candidatos: (a) idx 8 'Servicios tecnicos'; (b) idx 5 'Servicios generales'. Elegido (a) por Criterio 1 (consultoria especializada = servicio tecnico) y Criterio 2 (mas especifico que servicios generales)."
         }},
         {{
             "nombre_concepto": "Arrendamiento oficina Bogota",
             "concepto": "Arrendamiento de bienes inmuebles",
             "concepto_index": 5,
-            "justificacion": "Coincidencia exacta con categoria arrendamiento"
+            "razonamiento": "Candidatos: (a) idx 5 'Arrendamiento bienes inmuebles'; (b) idx 6 'Arrendamiento muebles'. Elegido (a) por Criterio 1 (oficina = bien inmueble)."
         }}
     ]
 }}

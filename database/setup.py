@@ -27,16 +27,59 @@ import os
 import logging
 from typing import Optional, Tuple
 
+import httpx
+
 # Importar componentes del modulo database (DIP: depender de abstracciones)
 from .database import DatabaseManager, SupabaseDatabase, NexuraAPIDatabase, DatabaseInterface, DatabaseWithFallback
 from .database_service import crear_business_service, BusinessDataService
 from .auth_provider import AuthProviderFactory, IAuthProvider
+from config import URL_UVT_API
 
 # Logger para este modulo
 logger = logging.getLogger(__name__)
 
 
-def crear_database_por_tipo(tipo_db: str) -> Optional[DatabaseInterface]:
+# ELIMINADO v3.13.0: inicializar_auth_service_nexura() ya no se usa
+# La autenticacion ahora se realiza por tarea en BackgroundProcessor._autenticar_con_retry()
+
+
+async def obtener_uvt_desde_api() -> int:
+    """
+    Consulta el valor UVT vigente desde la API externa.
+    Lanza RuntimeError si no se puede obtener el valor.
+
+    SRP: Responsabilidad unica de obtener el UVT desde servicio externo.
+    """
+    try:
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "Preliquidador/1.0",
+        }
+        async with httpx.AsyncClient(timeout=15.0, headers=headers) as client:
+            response = await client.get(URL_UVT_API)
+            response.raise_for_status()
+
+        datos = response.json()
+        codigo_error = datos.get("error", {}).get("code")
+        if codigo_error != 0:
+            mensaje = datos.get("error", {}).get("message", "Error desconocido")
+            raise RuntimeError(f"API UVT retorno error: {mensaje}")
+
+        valor_uvt = datos.get("data", {}).get("valor")
+        if not isinstance(valor_uvt, (int, float)) or valor_uvt <= 0:
+            raise RuntimeError(f"Valor UVT invalido recibido: {valor_uvt}")
+
+        return int(valor_uvt)
+
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Error HTTP al consultar UVT: {e.response.status_code}") from e
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Error de conexion al consultar UVT: {e}") from e
+    except (KeyError, TypeError, ValueError) as e:
+        raise RuntimeError(f"Error al parsear respuesta UVT: {e}") from e
+
+
+def crear_database_por_tipo(tipo_db: str, auth_provider: Optional[IAuthProvider] = None) -> Optional[DatabaseInterface]:
     """
     Factory para crear instancia de database segun tipo configurado (Factory Pattern + OCP)
 
@@ -52,6 +95,7 @@ def crear_database_por_tipo(tipo_db: str) -> Optional[DatabaseInterface]:
 
     Args:
         tipo_db: Tipo de database ('supabase' o 'nexura')
+        auth_provider: AuthProvider pre-configurado (opcional, para Nexura con login centralizado)
 
     Returns:
         DatabaseInterface o None si falta configuracion
@@ -93,45 +137,31 @@ def crear_database_por_tipo(tipo_db: str) -> Optional[DatabaseInterface]:
         return SupabaseDatabase(supabase_url, supabase_key)
 
     elif tipo_db == 'nexura':
-        logger.info("Creando database tipo: Nexura API (fallback desactivado)")
+        logger.info("Creando database tipo: Nexura API")
 
         nexura_url = os.getenv("NEXURA_API_BASE_URL")
-        auth_type = os.getenv("NEXURA_AUTH_TYPE", "none")
-        jwt_token = os.getenv("NEXURA_JWT_TOKEN", "")
-        api_key = os.getenv("NEXURA_API_KEY", "")
-        # Timeout aumentado a 30 segundos (sin fallback activo desde v3.11.1)
         timeout = int(os.getenv("NEXURA_API_TIMEOUT", "30"))
 
         if not nexura_url:
             logger.warning("Variable NEXURA_API_BASE_URL no configurada")
             return None
 
-        # Crear auth provider segun configuracion (Factory Pattern)
-        try:
-            auth_provider = AuthProviderFactory.create_from_config(
-                auth_type=auth_type,
-                token=jwt_token,
-                api_key=api_key
-            )
-            logger.info(f"Auth provider creado: tipo={auth_type}")
-        except ValueError as e:
-            logger.error(f"Error creando auth provider: {e}")
-            return None
+        # MODIFICADO v3.13.0: Si no se pasa auth_provider, usar NoAuthProvider
+        if auth_provider is None:
+            logger.info("No se inyecto auth_provider - usando NoAuthProvider inicial")
+            provider = AuthProviderFactory.create_no_auth()
+        else:
+            provider = auth_provider
+            logger.info("Usando auth_provider pre-configurado")
 
-        # Crear database primaria (Nexura)
+        # Crear database con auth provider (NoAuthProvider o inyectado)
         nexura_db = NexuraAPIDatabase(
             base_url=nexura_url,
-            auth_provider=auth_provider,
+            auth_provider=provider,  # DIP: Inyeccion de dependencia
             timeout=timeout
         )
 
-        # DECISIÓN ARQUITECTÓNICA v3.11.1+: Fallback desactivado
-        logger.info(
-            "⚠️  FALLBACK A SUPABASE DESACTIVADO - Sistema usando solo Nexura API en producción"
-        )
-        logger.info(
-            "ℹ️  Para reactivar fallback: Descomentar código en database/setup.py líneas 127-150"
-        )
+        logger.info("NexuraAPIDatabase creado (token se actualizara por tarea)")
 
         # ========================================
         # CÓDIGO DE FALLBACK PRESERVADO (COMENTADO)
@@ -149,11 +179,11 @@ def crear_database_por_tipo(tipo_db: str) -> Optional[DatabaseInterface]:
         #         primary_db=nexura_db,
         #         fallback_db=supabase_db
         #     )
-        #     logger.info("✅ Sistema de fallback Nexura -> Supabase configurado correctamente")
+        #     logger.info("Sistema de fallback Nexura -> Supabase configurado correctamente")
         #     return fallback_db
         # else:
         #     logger.warning(
-        #         "⚠️ Variables SUPABASE_URL y/o SUPABASE_KEY no configuradas. "
+        #         "Variables SUPABASE_URL y/o SUPABASE_KEY no configuradas. "
         #         "Nexura funcionará SIN fallback (puede fallar si Nexura está caída)"
         #     )
         # ========================================
@@ -166,7 +196,7 @@ def crear_database_por_tipo(tipo_db: str) -> Optional[DatabaseInterface]:
         return None
 
 
-def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[BusinessDataService]]:
+async def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[BusinessDataService]]:
     """
     Inicializa el gestor de base de datos y servicios asociados usando variables de entorno.
 
@@ -177,7 +207,7 @@ def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[
 
     ARQUITECTURA:
     - Obtiene credenciales de variables de entorno (seguridad)
-    - Crea implementacion concreta de database (SupabaseDatabase)
+    - Crea implementacion concreta de database
     - Crea DatabaseManager usando Strategy Pattern
     - Crea BusinessDataService con Dependency Injection
     - Implementa graceful degradation si no hay credenciales
@@ -187,13 +217,18 @@ def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[
     - Si hay error: Loggea error y retorna None + BusinessService sin DB
     - Si exitoso: Retorna DatabaseManager + BusinessService completo
 
+    MODIFICADO v3.13.0:
+    - ELIMINA autenticacion en startup
+    - La autenticacion se realiza por tarea en BackgroundProcessor
+    - Database se crea con NoAuthProvider inicial (token se actualiza por tarea)
+
     Returns:
         tuple: (database_manager, business_service)
             - database_manager: DatabaseManager o None si error
             - business_service: BusinessDataService (siempre disponible, con o sin DB)
 
     Environment Variables:
-        DATABASE_TYPE: Tipo de database a usar ('supabase' o 'nexura', default: 'supabase')
+        DATABASE_TYPE: Tipo de database a usar ('supabase' o 'nexura', default: 'nexura')
 
         SUPABASE (si DATABASE_TYPE='supabase'):
             - SUPABASE_URL: URL de la instancia de Supabase
@@ -201,31 +236,33 @@ def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[
 
         NEXURA (si DATABASE_TYPE='nexura'):
             - NEXURA_API_BASE_URL: URL base de la API de Nexura
-            - NEXURA_AUTH_TYPE: Tipo de auth ('none', 'jwt', 'api_key')
-            - NEXURA_JWT_TOKEN: Token JWT (si auth_type='jwt')
-            - NEXURA_API_KEY: API Key (si auth_type='api_key')
+            - NEXURA_LOGIN_USER: Usuario para login (v3.12.0+)
+            - NEXURA_LOGIN_PASSWORD: Contrasena para login (v3.12.0+)
             - NEXURA_API_TIMEOUT: Timeout en segundos (default: 30)
 
-    NOTA v3.11.1+:
-        - Fallback Nexura → Supabase DESACTIVADO por defecto
-        - DATABASE_TYPE='nexura' retorna NexuraAPIDatabase directamente
-        - Para reactivar fallback: ver database/setup.py líneas 127-150
-        - DATABASE_TYPE='supabase' sigue funcionando sin cambios
+    NOTA v3.13.0+:
+        - Sin autenticacion en startup
+        - Database se crea con NoAuthProvider inicial
+        - Cada tarea hace re-autenticacion independiente en BackgroundProcessor
+        - Token siempre fresco por tarea (evita expiracion en instancias persistentes)
 
     Example:
-        >>> db_manager, business_service = inicializar_database_manager()
+        >>> db_manager, business_service = await inicializar_database_manager()
         >>> if db_manager:
         ...     print("Base de datos inicializada correctamente")
         >>> # business_service siempre esta disponible
         >>> resultado = business_service.obtener_datos_negocio(codigo)
     """
     try:
-        # Obtener tipo de database desde variable de entorno (default: supabase)
+        # Obtener tipo de database desde variable de entorno (default: nexura)
         tipo_db = os.getenv("DATABASE_TYPE", "nexura")
         logger.info(f"Inicializando database tipo: {tipo_db}")
 
-        # Usar factory para crear la implementacion correcta (Factory Pattern + OCP)
-        db_implementation = crear_database_por_tipo(tipo_db)
+        # ELIMINADO v3.13.0: Ya NO hacer login en startup
+        # La autenticacion se hara por tarea en BackgroundProcessor
+
+        # Crear database SIN auth_provider (usar NoAuthProvider inicial)
+        db_implementation = crear_database_por_tipo(tipo_db, auth_provider=None)
 
         if not db_implementation:
             logger.warning(f"No se pudo crear implementacion de database tipo '{tipo_db}'")
@@ -245,15 +282,16 @@ def inicializar_database_manager() -> Tuple[Optional[DatabaseManager], Optional[
         logger.info("BusinessDataService inicializado con database manager")
 
         logger.info(f"Stack completo de base de datos inicializado exitosamente (tipo: {tipo_db})")
+        logger.info("La autenticacion se ejecutara al inicio de cada tarea")
         return db_manager, business_service
 
     except Exception as e:
-        logger.error(f" Error inicializando DatabaseManager: {e}")
+        logger.error(f"Error inicializando DatabaseManager: {e}")
         logger.exception("Traceback completo del error:")
 
-        # Graceful degradation: crear business service sin database manager
+        # Graceful degradation
         business_service = crear_business_service(None)
-        logger.info(" BusinessService creado en modo degradado tras error")
+        logger.info("BusinessService creado en modo degradado tras error")
 
         return None, business_service
 

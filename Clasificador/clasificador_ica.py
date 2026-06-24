@@ -23,7 +23,7 @@ Arquitectura: SOLID + Clean Architecture + Validaciones Manuales
 import logging
 import json
 import asyncio
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 
@@ -167,6 +167,7 @@ class ClasificadorICA:
             "actividades_facturadas": [],
             "actividades_relacionadas": [],  # NUEVO FORMATO v3.0
             "valor_factura_sin_iva": 0.0,  # NUEVO FORMATO v3.0
+            "regimen_tributario": None,  # Regimen tributario del proveedor (RUT)
             "observaciones": [],
             "fecha_analisis": datetime.now().isoformat()
         }
@@ -197,27 +198,43 @@ class ClasificadorICA:
             logger.info(f"Ubicaciones obtenidas de BD: {len(ubicaciones_bd)}")
 
             # PASO 3: Primera llamada Gemini - Identificar ubicaciones (MULTIMODAL)
-            ubicaciones_identificadas = await self._identificar_ubicaciones_gemini(
+            ubicaciones_identificadas, aplica_ica, obs_gemini, error_tecnico_ubic = await self._identificar_ubicaciones_gemini(
                 ubicaciones_bd, textos_documentos, archivos_directos, nit_administrativo
             )
 
-            if not ubicaciones_identificadas:
+            # Si hubo un fallo TECNICO (timeout/excepcion) no enmascararlo como
+            # "no se pudo identificar el municipio": reportarlo distinto.
+            if error_tecnico_ubic is not None:
                 resultado_base["estado"] = "preliquidacion_sin_finalizar"
-                resultado_base["observaciones"].append(
-                    "No se pudo identificar el municipio de la actividad gravada"
-                )
-                logger.error("Gemini no identificó ubicaciones")
+                if error_tecnico_ubic == "timeout":
+                    resultado_base["observaciones"].append(
+                        "Error analizando ubicaciones ICA "
+                        ". Por favor intente nuevamente."
+                    )
+                else:
+                    resultado_base["observaciones"].append(
+                        "Error analizando ubicaciones ICA. Por favor intente nuevamente."
+                    )
+                logger.warning(f"Fallo técnico identificando ubicaciones ICA: {error_tecnico_ubic}")
                 return resultado_base
 
             logger.info(f"Ubicaciones identificadas por Gemini: {len(ubicaciones_identificadas)}")
 
             # PASO 4: Validaciones manuales de ubicaciones (Python)
             validacion_ubicaciones = self._validar_ubicaciones_manualmente(
-                ubicaciones_identificadas
+                ubicaciones_identificadas, aplica_ica, obs_gemini
             )
 
             if not validacion_ubicaciones["valido"]:
-                resultado_base["estado"] = "preliquidacion_sin_finalizar"
+                if validacion_ubicaciones.get("rechazo_por_tercero"):
+                    resultado_base["estado"] = "no_aplica_impuesto"
+                    resultado_base["observaciones"].append(validacion_ubicaciones.get("mensaje_rechazo"))
+                    logger.warning("ICA no aplica por Adquirente/Cliente (factura de tercero)")
+                    return resultado_base
+                elif validacion_ubicaciones.get("ubicacion_no_parametrizada", False):
+                    resultado_base["estado"] = "no_aplica_impuesto"
+                else:
+                    resultado_base["estado"] = "preliquidacion_sin_finalizar"
                 resultado_base["observaciones"].extend(validacion_ubicaciones["errores"])
                 logger.warning(f"Validación de ubicaciones falló: {validacion_ubicaciones['errores']}")
                 return resultado_base
@@ -252,6 +269,24 @@ class ClasificadorICA:
                 nit_administrativo
             )
 
+            # Fallo TECNICO al mapear actividades (timeout/excepcion): no confundir
+            # con "Gemini no identificó la actividad".
+            if isinstance(datos_actividades, dict) and datos_actividades.get("error_tecnico"):
+                resultado_base["estado"] = "preliquidacion_sin_finalizar"
+                if datos_actividades["error_tecnico"] == "timeout":
+                    resultado_base["observaciones"].append(
+                        "Error mapeando actividades ICA "
+                        " Por favor intente nuevamente."
+                    )
+                else:
+                    resultado_base["observaciones"].append(
+                        "Error mapeando actividades ICA. Por favor intente nuevamente."
+                    )
+                logger.warning(
+                    f"Fallo técnico mapeando actividades ICA: {datos_actividades['error_tecnico']}"
+                )
+                return resultado_base
+
             if not datos_actividades:
                 resultado_base["estado"] = "preliquidacion_sin_finalizar"
                 resultado_base["observaciones"].append(
@@ -265,6 +300,7 @@ class ClasificadorICA:
             actividades_relacionadas = datos_actividades.get("actividades_relacionadas", [])
             valor_factura_sin_iva = datos_actividades.get("valor_factura_sin_iva", 0.0)
             autorretenedor_ica = datos_actividades.get("autorretenedor_ica", False)
+            regimen_tributario = datos_actividades.get("regimen_tributario")
 
             logger.info(f"Actividades facturadas: {len(actividades_facturadas)}, Actividades relacionadas: {len(actividades_relacionadas)}")
 
@@ -287,7 +323,8 @@ class ClasificadorICA:
                 resultado_base["actividades_facturadas"] = actividades_facturadas
                 resultado_base["actividades_relacionadas"] = actividades_relacionadas
                 resultado_base["valor_factura_sin_iva"] = valor_factura_sin_iva
-                resultado_base["autorretenedor_ica"] = autorretenedor_ica   
+                resultado_base["autorretenedor_ica"] = autorretenedor_ica
+                resultado_base["regimen_tributario"] = regimen_tributario
                 resultado_base["observaciones"].extend(validacion_actividades["errores"])
                 resultado_base["observaciones"].extend(validacion_actividades.get("advertencias", []))
                 logger.warning(f"Validación de actividades falló: {validacion_actividades['errores']}")
@@ -307,8 +344,10 @@ class ClasificadorICA:
             resultado_base["actividades_relacionadas"] = actividades_relacionadas
             resultado_base["valor_factura_sin_iva"] = valor_factura_sin_iva
             resultado_base["autorretenedor_ica"] = autorretenedor_ica
-            
+            resultado_base["regimen_tributario"] = regimen_tributario
+
             logger.info(f"autorretenedor detectado: {autorretenedor_ica} ")
+            logger.info(f"regimen tributario detectado: {regimen_tributario}")
 
             # Aquí el liquidador se encargará del cálculo
             logger.info("Análisis ICA completado exitosamente")
@@ -369,7 +408,7 @@ class ClasificadorICA:
         textos_documentos: Dict[str, str],
         archivos_directos: List[Any],
         nit_administrativo: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], bool, str, Optional[str]]:
         """
         Primera llamada a Gemini para identificar ubicaciones de la actividad (MULTIMODAL).
 
@@ -388,7 +427,10 @@ class ClasificadorICA:
             nit_administrativo: NIT para organizar archivos guardados (opcional)
 
         Returns:
-            List[Dict]: Ubicaciones identificadas por Gemini
+            Tuple[List[Dict[str, Any]], bool, str, Optional[str]]:
+                (ubicaciones, aplica_ica, observaciones, error_tecnico).
+                error_tecnico es None en exito; "timeout" o "error" ante un fallo tecnico
+                (no es lo mismo que Gemini no haber identificado ubicaciones).
         """
         logger.info("Primera llamada Gemini: identificando ubicaciones (MULTIMODAL)...")
 
@@ -404,28 +446,27 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1)
+            # para habilitar el implicit caching de Gemini 2.5.
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
                 # CORRECCIÓN: Procesar archivos al formato esperado por Gemini
                 archivos_procesados = await self._procesar_archivos_para_gemini(archivos_directos)
                 contenido_gemini.extend(archivos_procesados)
-                logger.info(f"📎 ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
+                logger.info(f"ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para identificar ubicaciones")
 
-            # Llamar a Gemini con contexto completo (timeout 60 segundos) - NUEVO SDK v3.0
-            loop = asyncio.get_event_loop()
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.procesador_gemini.client.models.generate_content(
-                        model=self.procesador_gemini.model_name,
-                        contents=contenido_gemini,
-                        config=self.procesador_gemini.generation_config
-                    )
-                ),
-                timeout=60.0
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
+
+            # Llamar a Gemini con retry automatico para errores SSL
+            respuesta = await self.procesador_gemini._ejecutar_con_retry(
+                contenido=contenido_gemini,
+                config=self.procesador_gemini.generation_config,
+                timeout_segundos=240.0,
+                contexto="ica_ubicaciones"
             )
 
             # Limpiar y parsear respuesta
@@ -433,7 +474,7 @@ class ClasificadorICA:
             json_limpio = limpiar_json_gemini(respuesta_texto)
             data = json.loads(json_limpio)
 
-            # 💾 GUARDAR RESPUESTA DE GEMINI (Primera llamada - ubicaciones)
+            # GUARDAR RESPUESTA DE GEMINI (Primera llamada - ubicaciones)
             self._guardar_respuesta_gemini(
                 respuesta_texto=respuesta_texto,
                 data_parseada=data,
@@ -444,22 +485,31 @@ class ClasificadorICA:
             # Validar estructura
             if not validar_estructura_ubicaciones(data):
                 logger.error("Estructura de JSON de ubicaciones inválida")
-                return []
+                return [], True, "Estructura de JSON inválida", "error"
 
             ubicaciones = data.get("ubicaciones", [])
-            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones")
-            return ubicaciones
+            aplica_ica = data.get("aplica_ica", True)
+            observaciones = data.get("observaciones", "")
 
+            logger.info(f"Gemini identificó {len(ubicaciones)} ubicaciones. Aplica ICA: {aplica_ica}")
+            return ubicaciones, aplica_ica, observaciones, None
+
+        except asyncio.TimeoutError:
+            logger.error("Timeout en llamada a Gemini (ubicaciones): la respuesta superó 240s. "
+                         "Posible causa: prompt muy grande (muchas ubicaciones en BD) o carga en Cloud Run.")
+            return [], True, "", "timeout"
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (ubicaciones): {e}")
-            return []
+            return [], True, f"Error parseando JSON: {e}", "error"
         except Exception as e:
             logger.error(f"Error en llamada a Gemini (ubicaciones): {e}")
-            return []
+            return [], True, f"Error en llamada a Gemini: {e}", "error"
 
     def _validar_ubicaciones_manualmente(
         self,
-        ubicaciones_identificadas: List[Dict[str, Any]]
+        ubicaciones_identificadas: List[Dict[str, Any]],
+        aplica_ica: bool = True,
+        observaciones_gemini: str = ""
     ) -> Dict[str, Any]:
         """
         Valida manualmente las ubicaciones identificadas por Gemini.
@@ -473,6 +523,8 @@ class ClasificadorICA:
 
         Args:
             ubicaciones_identificadas: Ubicaciones de Gemini
+            aplica_ica: Indica si la factura aplica para ICA
+            observaciones_gemini: Observaciones de la identificación
 
         Returns:
             Dict con validación: {"valido": bool, "errores": List[str], "advertencias": List[str]}
@@ -481,6 +533,15 @@ class ClasificadorICA:
 
         errores = []
         advertencias = []
+
+        if not aplica_ica:
+            return {
+                "valido": False,
+                "errores": [],
+                "advertencias": [],
+                "rechazo_por_tercero": True,
+                "mensaje_rechazo": observaciones_gemini or "La factura no está a nombre de una compañía o consorcio válido."
+            }
 
         # VALIDACIÓN 0: Debe haber al menos una ubicación
         if not ubicaciones_identificadas or len(ubicaciones_identificadas) == 0:
@@ -521,7 +582,7 @@ class ClasificadorICA:
                     f"La ubicación '{ubicacion['nombre_ubicacion']}' no está parametrizada "
                     "en la base de datos. Por favor agregar esta ubicación"
                 )
-                return {"valido": False, "errores": errores, "advertencias": advertencias}
+                return {"valido": False, "errores": errores, "advertencias": advertencias, "ubicacion_no_parametrizada": True}
 
             logger.info("Validaciones de ubicación única exitosas")
             return {"valido": True, "errores": [], "advertencias": advertencias}
@@ -587,7 +648,7 @@ class ClasificadorICA:
         # Determinar si las validaciones pasaron
         if errores:
             logger.warning(f"Validaciones de ubicaciones fallaron: {len(errores)} errores")
-            return {"valido": False, "errores": errores, "advertencias": advertencias}
+            return {"valido": False, "errores": errores, "advertencias": advertencias, "ubicacion_no_parametrizada": bool(ubicaciones_no_parametrizadas)}
 
         logger.info("Validaciones de múltiples ubicaciones exitosas")
         return {"valido": True, "errores": [], "advertencias": advertencias}
@@ -635,13 +696,16 @@ class ClasificadorICA:
 
                 actividades = resultado['data']
 
-                # Validar que el nombre de ubicación coincida
-                if actividades and actividades[0]["nombre_ubicacion"] != nombre_ubicacion:
-                    logger.error(
-                        f"El nombre de ubicación de BD '{actividades[0]['nombre_ubicacion']}' "
-                        f"no coincide con el identificado por Gemini '{nombre_ubicacion}'"
-                    )
-                    continue
+                # Validar que el nombre de ubicación coincida (comparación flexible)
+                if actividades:
+                    nombre_bd = actividades[0]["nombre_ubicacion"].strip().upper()
+                    nombre_gemini = nombre_ubicacion.strip().upper()
+                    if nombre_bd not in nombre_gemini and nombre_gemini not in nombre_bd:
+                        logger.error(
+                            f"El nombre de ubicación de BD '{actividades[0]['nombre_ubicacion']}' "
+                            f"no coincide con el identificado por Gemini '{nombre_ubicacion}'"
+                        )
+                        continue
 
                 actividades_por_ubicacion[str(codigo_ubicacion)] = actividades
                 logger.info(f"Actividades obtenidas para ubicación {codigo_ubicacion}: {len(actividades)}")
@@ -696,8 +760,9 @@ class ClasificadorICA:
                 nombres_archivos_directos=nombres_archivos_directos if archivos_directos else None
             )
 
-            # Preparar contenido para Gemini (MULTIMODAL)
-            contenido_gemini = [prompt]
+            # Preparar contenido para Gemini (MULTIMODAL).
+            # Orden: documentos primero, prompt al final (coherente con Fase 1).
+            contenido_gemini = []
 
             # Agregar archivos directos para análisis multimodal
             if archivos_directos:
@@ -706,18 +771,20 @@ class ClasificadorICA:
                 contenido_gemini.extend(archivos_procesados)
                 logger.info(f" ICA - Enviando {len(archivos_procesados)} archivos procesados a Gemini para relacionar actividades")
 
-            # Llamar a Gemini con contexto completo (timeout 60 segundos) - NUEVO SDK v3.0
-            loop = asyncio.get_event_loop()
-            respuesta = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: self.procesador_gemini.client.models.generate_content(
-                        model=self.procesador_gemini.model_name,
-                        contents=contenido_gemini,
-                        config=self.procesador_gemini.generation_config
-                    )
-                ),
-                timeout=60.0
+            # Prompt al final (sufijo variable)
+            contenido_gemini.append(prompt)
+
+            # Override local: temperature reducida para tarea deterministica de matching.
+            # No se modifica generation_config global (compartido con otros 8 clasificadores).
+            config_matching = {
+                **self.procesador_gemini.generation_config,
+                'temperature': 0.2,
+            }
+            respuesta = await self.procesador_gemini._ejecutar_con_retry(
+                contenido=contenido_gemini,
+                config=config_matching,
+                timeout_segundos=240.0,
+                contexto="ica_actividades"
             )
 
             # Limpiar y parsear respuesta
@@ -725,7 +792,7 @@ class ClasificadorICA:
             json_limpio = limpiar_json_gemini(respuesta_texto)
             data = json.loads(json_limpio)
 
-            #  GUARDAR RESPUESTA DE GEMINI (Segunda llamada - actividades)
+            # GUARDAR RESPUESTA DE GEMINI (Segunda llamada - actividades)
             self._guardar_respuesta_gemini(
                 respuesta_texto=respuesta_texto,
                 data_parseada=data,
@@ -743,6 +810,7 @@ class ClasificadorICA:
             actividades_relacionadas = data.get("actividades_relacionadas", [])
             valor_factura_sin_iva = data.get("valor_factura_sin_iva", 0.0)
             autorretenedor_ica = data.get("autorretenedor_ica", False)
+            regimen_tributario = data.get("regimen_tributario")
 
             logger.info(f"Gemini identificó {len(actividades_facturadas)} actividades facturadas y {len(actividades_relacionadas)} actividades relacionadas")
 
@@ -750,15 +818,20 @@ class ClasificadorICA:
                 "actividades_facturadas": actividades_facturadas,
                 "actividades_relacionadas": actividades_relacionadas,
                 "valor_factura_sin_iva": valor_factura_sin_iva,
-                "autorretenedor_ica": autorretenedor_ica
+                "autorretenedor_ica": autorretenedor_ica,
+                "regimen_tributario": regimen_tributario
             }
 
+        except asyncio.TimeoutError:
+            logger.error("Timeout en llamada a Gemini (actividades): la respuesta superó 240s. "
+                         "Posible causa: prompt muy grande (muchas actividades en BD) o carga en Cloud Run.")
+            return {"error_tecnico": "timeout"}
         except json.JSONDecodeError as e:
             logger.error(f"Error parseando JSON de Gemini (actividades): {e}")
-            return {}
+            return {"error_tecnico": "error"}
         except Exception as e:
             logger.error(f"Error en llamada a Gemini (actividades): {e}")
-            return {}
+            return {"error_tecnico": "error"}
 
     def _validar_actividades_manualmente(
         self,

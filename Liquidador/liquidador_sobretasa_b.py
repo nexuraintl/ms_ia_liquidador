@@ -111,13 +111,21 @@ class LiquidadorSobretasaBomberil:
         try:
             # VALIDACIÓN 1: Verificar que ICA tiene valor > 0
             valor_total_ica = resultado_ica.get("valor_total_ica", 0.0)
+            estado_ica = resultado_ica.get("estado", "")
 
             if valor_total_ica <= 0:
-                resultado["estado"] = "preliquidacion_sin_finalizar"
-                resultado["observaciones"] = (
-                    "No aplica ICA, por tanto no aplica Sobretasa Bomberil"
-                )
-                logger.info("Sobretasa Bomberil no aplica - ICA no tiene valor")
+                if estado_ica == "no_aplica_impuesto":
+                    resultado["estado"] = "no_aplica_impuesto"
+                    resultado["observaciones"] = (
+                        "ICA no aplica, por tanto no aplica Sobretasa Bomberil"
+                    )
+                    logger.info("Sobretasa Bomberil no aplica - ICA no aplica impuesto")
+                else:
+                    resultado["estado"] = "preliquidacion_sin_finalizar"
+                    resultado["observaciones"] = (
+                        "No aplica ICA, por tanto no aplica Sobretasa Bomberil"
+                    )
+                    logger.info("Sobretasa Bomberil no aplica - ICA no tiene valor")
                 return resultado
 
             # PASO 2: Extraer todas las ubicaciones de ICA

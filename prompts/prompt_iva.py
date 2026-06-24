@@ -22,7 +22,8 @@ from .prompt_clasificador import _generar_seccion_archivos_directos
 
 def PROMPT_ANALISIS_IVA(factura_texto: str, rut_texto: str, anexos_texto: str,
                                     cotizaciones_texto: str, anexo_contrato: str,
-                                    nombres_archivos_directos: list[str] = None) -> str:
+                                    nombres_archivos_directos: list[str] = None,
+                                    database_manager = None) -> str:
     """
     Prompt optimizado para Gemini - Enfocado en extracción y clasificación de IVA.
 
@@ -33,14 +34,30 @@ def PROMPT_ANALISIS_IVA(factura_texto: str, rut_texto: str, anexos_texto: str,
         cotizaciones_texto: Texto de cotizaciones
         anexo_contrato: Texto del anexo de concepto de contrato
         nombres_archivos_directos: Lista de nombres de archivos directos
+        database_manager: DatabaseManager REQUERIDO para obtener config IVA desde BD
 
     Returns:
         str: Prompt formateado para enviar a Gemini
+
+    Raises:
+        ValueError: Si database_manager es None
     """
     # Importar configuraciones de IVA
     from config import obtener_configuracion_iva
-    # Obtener configuración de IVA
-    config_iva = obtener_configuracion_iva()
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.info("Generando PROMPT_ANALISIS_IVA - Obteniendo configuracion IVA desde BD")
+
+    # Obtener configuración de IVA desde BD (REQUERIDO)
+    config_iva = obtener_configuracion_iva(database_manager=database_manager)
+
+    logger.debug(
+        f"Configuracion IVA cargada en prompt: "
+        f"{len(config_iva.get('bienes_no_causan_iva', {}))} bienes no causan, "
+        f"{len(config_iva.get('bienes_exentos_iva', {}))} bienes exentos, "
+        f"{len(config_iva.get('servicios_excluidos_iva', {}))} servicios excluidos"
+    )
 
     return f"""
 ROL: Eres un EXTRACTOR y CLASIFICADOR de información tributaria especializado en IVA colombiano.

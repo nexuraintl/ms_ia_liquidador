@@ -9,7 +9,7 @@ import os
 import json
 import pandas as pd
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import logging
 from datetime import datetime
 
@@ -274,7 +274,6 @@ PREGUNTAS_FUENTE_NACIONAL = [
 # ===============================
 
 CONFIG = {
-    "archivo_excel": "RETEFUENTE_CONCEPTOS.xlsx",
     "max_archivos": 6,
     "max_tamaño_mb": 50,
     "extensiones_soportadas": [".pdf", ".xlsx", ".xls", ".jpg", ".jpeg", ".png", ".docx", ".doc"],
@@ -282,6 +281,25 @@ CONFIG = {
     "timeout_gemini_segundos": 30,
     "encoding_default": "utf-8"
 }
+
+# ===============================
+# LÍMITES DE PREPROCESAMIENTO EXCEL
+# ===============================
+# Topes para acotar el texto que se envía a Gemini y el consumo de memoria
+# (Cloud Run 2GB / 1 vCPU). Los usa Extraccion/extractor.py:preprocesar_excel_limpio.
+
+# Filas máximas a LEER por hoja desde el workbook (antes de limpiar). Cota
+# superior de memoria por hoja; debe ser >= EXCEL_MAX_FILAS_POR_HOJA.
+EXCEL_MAX_FILAS_LECTURA = 10_000
+
+# Filas máximas (tras limpieza) que se serializan por hoja. Al exceder, se
+# conservan las primeras N y se anota el truncado.
+EXCEL_MAX_FILAS_POR_HOJA = 500
+
+# Presupuesto total de caracteres del texto final por archivo Excel, REPARTIDO
+# dinámicamente entre las hojas (cuota por hoja con arrastre del sobrante). Ninguna
+# hoja se omite por completo; cada una conserva al menos su encabezado de columnas.
+EXCEL_MAX_CHARS_POR_ARCHIVO = 80_000
 
 # ===============================
 # CONFIGURACIÓN DE NITS ADMINISTRATIVOS
@@ -466,8 +484,11 @@ def obtener_tarifa_extranjera(concepto: str, tiene_convenio: bool = False) -> fl
 # ===============================
 
 # Valores para la vigencia 2025
-UVT_2025 = 49799  # Valor UVT 2025 en pesos
-SMMLV_2025 = 1423500  # Salario Mínimo Mensual Legal Vigente 2025
+UVT_2025 = None  # Se obtiene dinamicamente desde API al iniciar el servidor
+
+# URL para obtener el valor UVT vigente
+URL_UVT_API = "https://liqimpuestos.fiducoldex.com.co/api/preliquidador/getValorUvt/"
+SMMLV_2025 = 1750905   # Salario Mínimo Mensual Legal Vigente 2025
 
 # Conceptos que aplican para Artículo 383 ET
 CONCEPTOS_ARTICULO_383 = [
@@ -509,16 +530,16 @@ def es_concepto_articulo_383(concepto: str) -> bool:
     """Verifica si un concepto aplica para Artículo 383"""
     return concepto in CONCEPTOS_ARTICULO_383
 
-def obtener_tarifa_articulo_383(base_gravable_pesos: float) -> float:
-    """Obtiene la tarifa del Artículo 383 según la base gravable en pesos"""
+def obtener_tarifa_articulo_383(base_gravable_pesos: float) -> Tuple[float, float]:
+    """Obtiene la tarifa del Artículo 383 y el límite inferior en UVT según la base gravable en pesos"""
     base_gravable_uvt = base_gravable_pesos / UVT_2025
     
     for rango in TARIFAS_ARTICULO_383:
         if rango["desde_uvt"] <= base_gravable_uvt < rango["hasta_uvt"]:
-            return rango["tarifa"]
+            return float(rango["tarifa"]), float(rango["desde_uvt"])
     
     # Si no encuentra rango, usar la última tarifa (39%)
-    return TARIFAS_ARTICULO_383[-1]["tarifa"]
+    return float(TARIFAS_ARTICULO_383[-1]["tarifa"]), float(TARIFAS_ARTICULO_383[-1]["desde_uvt"])
 
 def calcular_limite_deduccion(tipo_deduccion: str, ingreso_bruto: float, valor_deducido: float) -> float:
     """Calcula el límite permitido para una deducción específica"""
@@ -560,16 +581,15 @@ def obtener_constantes_articulo_383() -> Dict[str, Any]:
 # IMPORTANTE: Desde 2025, estampilla pro universidad nacional y contribución
 # a obra pública aplican para los MISMOS códigos de negocio
 
-# Códigos de negocio válidos para AMBOS impuestos (estampilla + obra pública)
-# Estos códigos identifican a los negocios que aplican estos dos impuestos
-CODIGOS_NEGOCIO_ESTAMPILLA = {
-    69164: "PATRIMONIO AUTONOMO INNPULSA COLOMBIA",
-    69166: "PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA",
-    99664: "PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE"
-}
+# Códigos de negocio válidos para AMBOS impuestos (estampilla + obra pública).
+# Ya NO se hardcodean: se cargan por solicitud desde la API
+# (/preliquidador/codigoNegociosFiduciaria/) con caché TTL, vía
+# refrescar_codigos_negocio(). Se mutan EN SITIO (clear()+update()) para no
+# romper los `from config import ...` que hacen otros módulos.
+CODIGOS_NEGOCIO_ESTAMPILLA = {}
 
-# Alias para compatibilidad hacia atrás - MISMO contenido
-CODIGOS_NEGOCIO_OBRA_PUBLICA = CODIGOS_NEGOCIO_ESTAMPILLA.copy()
+# Alias hacia atrás - se llena con el mismo contenido en cada refresco
+CODIGOS_NEGOCIO_OBRA_PUBLICA = {}
 
 # NITs administrativos válidos para Estampilla Universidad y Obra Pública
 # Estos NITs determinan si se deben liquidar estos impuestos
@@ -586,11 +606,9 @@ NITS_REQUIEREN_VALIDACION_CODIGO = {"830054060"}
 # DEPRECATED: Mantener por compatibilidad legacy (NO USAR en nuevo código)
 NITS_ESTAMPILLA_UNIVERSIDAD = {}
 NITS_CONTRIBUCION_OBRA_PUBLICA = {}
-TERCEROS_RECURSOS_PUBLICOS = {
-    "PATRIMONIO AUTONOMO INNPULSA COLOMBIA": True,
-    "PATRIMONIO AUTONOMO COLOMBIA PRODUCTIVA": True,
-    "PATRIMONIO AUTÓNOMO FONDO MUJER EMPRENDE": True
-}
+# Se deriva de los nombres de CODIGOS_NEGOCIO_ESTAMPILLA en cada refresco
+# (ver refrescar_codigos_negocio). Arranca vacío y se llena por solicitud.
+TERCEROS_RECURSOS_PUBLICOS = {}
 
 # Objetos de contrato que aplican para estampilla universidad
 OBJETOS_CONTRATO_ESTAMPILLA = {
@@ -638,6 +656,91 @@ RANGOS_ESTAMPILLA_UNIVERSIDAD = [
     {"desde_uvt": 52652, "hasta_uvt": 157904, "tarifa": 0.01},   # 1.0%
     {"desde_uvt": 157904, "hasta_uvt": float('inf'), "tarifa": 0.02}  # 2.0%
 ]
+
+# ===============================
+# CARGA DE CÓDIGOS DE NEGOCIO DESDE API (caché TTL)
+# ===============================
+
+# Caché en memoria con expiración. Cada instancia (worker) mantiene su propia
+# copia y la refresca al expirar el TTL. Ver "Consideraciones Cloud Run" en el
+# plan: con 1 CPU / worker async único el refresco queda serializado por el
+# fetch bloqueante, por lo que no se requiere lock.
+_cache_codigos_negocio_timestamp = None
+_CODIGOS_NEGOCIO_TTL_SEGUNDOS = 600  # 10 min
+
+
+def refrescar_codigos_negocio(business_service=None) -> None:
+    """
+    Asegura que CODIGOS_NEGOCIO_ESTAMPILLA / CODIGOS_NEGOCIO_OBRA_PUBLICA /
+    TERCEROS_RECURSOS_PUBLICOS estén poblados con datos frescos desde la API
+    (/preliquidador/codigoNegociosFiduciaria/).
+
+    Comportamiento:
+    - Si el caché está fresco (dentro del TTL y no vacío), no llama a la API.
+    - Si está vacío o expirado, consulta la API y MUTA EN SITIO los 3 dicts.
+    - Si la API falla y no hay caché válido, lanza RuntimeError (se aborta la
+      preliquidación; NO se usan valores hardcodeados).
+
+    SRP: Solo gestiona la carga/caché de los códigos de negocio.
+    DIP: Recibe business_service como dependencia inyectada.
+    """
+    global _cache_codigos_negocio_timestamp
+
+    # Caché fresco: nada que hacer
+    if (_cache_codigos_negocio_timestamp is not None
+            and CODIGOS_NEGOCIO_ESTAMPILLA
+            and (datetime.now() - _cache_codigos_negocio_timestamp).total_seconds() < _CODIGOS_NEGOCIO_TTL_SEGUNDOS):
+        logger.debug("Códigos de negocio: usando caché vigente")
+        return
+
+    if business_service is None:
+        raise RuntimeError(
+            "No se pudieron obtener los códigos de negocio desde la API "
+            "(business_service no disponible) y no hay caché válido; se aborta la preliquidación"
+        )
+
+    logger.info("Obteniendo códigos de negocio desde la API (/preliquidador/codigoNegociosFiduciaria/)")
+    resultado = business_service.obtener_codigos_negocios_fiduciaria()
+
+    if not resultado or not resultado.get("success") or not resultado.get("data"):
+        mensaje = (resultado or {}).get("message", "respuesta vacía")
+        raise RuntimeError(
+            f"No se pudieron obtener los códigos de negocio desde la API y no hay caché válido; "
+            f"se aborta la preliquidación. Detalle: {mensaje}"
+        )
+
+    data = resultado["data"]  # { "69164": "PATRIMONIO ...", ... }
+
+    try:
+        nuevos_codigos = {int(codigo): nombre for codigo, nombre in data.items()}
+    except (ValueError, TypeError) as e:
+        raise RuntimeError(
+            f"Códigos de negocio con formato inválido desde la API: {e}; se aborta la preliquidación"
+        ) from e
+
+    nuevos_terceros = {str(nombre).upper().strip(): True for nombre in data.values()}
+
+    # Mutación EN SITIO de los mismos objetos importados por otros módulos
+    CODIGOS_NEGOCIO_ESTAMPILLA.clear()
+    CODIGOS_NEGOCIO_ESTAMPILLA.update(nuevos_codigos)
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.clear()
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.update(nuevos_codigos)
+    TERCEROS_RECURSOS_PUBLICOS.clear()
+    TERCEROS_RECURSOS_PUBLICOS.update(nuevos_terceros)
+
+    _cache_codigos_negocio_timestamp = datetime.now()
+    logger.info(f"Códigos de negocio cargados desde API: {len(nuevos_codigos)} códigos")
+
+
+def limpiar_cache_codigos_negocio() -> None:
+    """Limpia el caché de códigos de negocio (vacía los 3 dicts + timestamp). Para tests/refresh manual."""
+    global _cache_codigos_negocio_timestamp
+    CODIGOS_NEGOCIO_ESTAMPILLA.clear()
+    CODIGOS_NEGOCIO_OBRA_PUBLICA.clear()
+    TERCEROS_RECURSOS_PUBLICOS.clear()
+    _cache_codigos_negocio_timestamp = None
+    logger.info("Caché de códigos de negocio limpiado")
+
 
 # ===============================
 # FUNCIONES ESTAMPILLA UNIVERSIDAD
@@ -692,7 +795,7 @@ def validar_nit_administrativo_para_impuestos(nit_administrativo: str, codigo_ne
                 "nit_valido": True,
                 "requiere_validacion_codigo": True,
                 "codigo_valido": False,
-                "razon_no_aplica": f"El NIT {nit_administrativo} ({nombre_entidad}) requiere que el código de negocio sea uno de los patrimonios autónomos válidos (69164, 69166, 99664)",
+                "razon_no_aplica": f"El NIT {nit_administrativo} ({nombre_entidad}) requiere que el código de negocio sea uno de los patrimonios autónomos válidos {tuple(CODIGOS_NEGOCIO_ESTAMPILLA.keys())}",
                 "nombre_entidad": nombre_entidad
             }
 
@@ -751,28 +854,154 @@ def es_tercero_recursos_publicos(nombre_tercero: str) -> bool:
     nombre_upper = nombre_tercero.upper().strip()
     return nombre_upper in TERCEROS_RECURSOS_PUBLICOS
 
-def obtener_tarifa_estampilla_universidad(valor_contrato_pesos: float) -> Dict[str, Any]:
-    """Obtiene la tarifa de estampilla según el valor del contrato en pesos"""
+def obtener_tarifa_estampilla_universidad(
+    valor_contrato_pesos: float,
+    database_manager=None
+) -> Dict[str, Any]:
+    """
+    Obtiene la tarifa de estampilla según el valor del contrato en pesos.
+
+    ESTRATEGIA DE OBTENCION v3.0:
+    1. Si database_manager esta disponible: consultar desde BD Nexura
+    2. Si falla o no disponible: ERROR (no fallback a hardcoded)
+
+    PRINCIPIOS SOLID:
+    - SRP: Solo busca rango UVT aplicable (no accede a BD directamente)
+    - DIP: Depende de abstraccion DatabaseInterface
+
+    Args:
+        valor_contrato_pesos: Valor del contrato en pesos colombianos
+        database_manager: DatabaseManager para consultar BD (opcional para compatibilidad)
+
+    Returns:
+        Dict con estructura:
+        {
+            "tarifa": float,                # Multiplicador (0.005 = 0.5%)
+            "rango_desde_uvt": float,       # Inicio del rango
+            "rango_hasta_uvt": float,       # Fin del rango (float('inf') para infinito)
+            "valor_contrato_uvt": float,    # Valor del contrato en UVT
+            "uvt_2025": int,                # Valor UVT vigente
+            "fuente": str                   # 'database' o 'error'
+        }
+
+    Raises:
+        ValueError: Si database_manager es None o si falla la consulta a BD
+    """
+    global _cache_rangos_estampilla_db, _cache_timestamp_estampilla
+
+    # Calcular valor en UVT
     valor_uvt = valor_contrato_pesos / UVT_2025
-    
-    for rango in RANGOS_ESTAMPILLA_UNIVERSIDAD:
-        if rango["desde_uvt"] <= valor_uvt < rango["hasta_uvt"]:
+
+    # VALIDAR QUE DATABASE_MANAGER ESTE DISPONIBLE
+    if database_manager is None:
+        error_msg = (
+            "database_manager es requerido para obtener tarifas de estampilla universidad. "
+            "No se utiliza fallback a valores hardcodeados."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    # OBTENER RANGOS DESDE BASE DE DATOS (con cache)
+    if _cache_rangos_estampilla_db is None:
+        logger.info("Obteniendo rangos de estampilla universidad desde base de datos")
+        resultado = database_manager.obtener_rangos_estampilla_universidad()
+
+        if not resultado.get('success', False) or not resultado.get('data'):
+            error_msg = (
+                f"No se pudo obtener rangos de estampilla desde BD: "
+                f"{resultado.get('message', 'Error desconocido')}"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        # Guardar en cache
+        _cache_rangos_estampilla_db = resultado['data']
+        _cache_timestamp_estampilla = datetime.now()
+
+        logger.info(
+            f"Rangos estampilla obtenidos y cacheados: "
+            f"{len(_cache_rangos_estampilla_db)} rangos disponibles"
+        )
+    else:
+        logger.debug("Usando rangos de estampilla desde cache")
+
+    # BUSCAR RANGO APLICABLE
+    rangos = _cache_rangos_estampilla_db
+
+    for rango in rangos:
+        desde_uvt = rango['desde_uvt']
+        hasta_uvt = rango['hasta_uvt']
+
+        # Verificar si valor_uvt esta en este rango
+        if desde_uvt <= valor_uvt < hasta_uvt:
+            logger.debug(
+                f"Rango encontrado para {valor_uvt:.2f} UVT: "
+                f"{desde_uvt} - {hasta_uvt} (tarifa: {rango['tarifa']*100:.1f}%)"
+            )
+
             return {
                 "tarifa": rango["tarifa"],
-                "rango_desde_uvt": rango["desde_uvt"],
-                "rango_hasta_uvt": rango["hasta_uvt"],
+                "rango_desde_uvt": desde_uvt,
+                "rango_hasta_uvt": hasta_uvt,
                 "valor_contrato_uvt": valor_uvt,
-                "uvt_2025": UVT_2025
+                "uvt_2025": UVT_2025,
+                "fuente": "database"
             }
-    
-    # Por defecto, rango más bajo si no encuentra
-    return {
-        "tarifa": RANGOS_ESTAMPILLA_UNIVERSIDAD[0]["tarifa"],
-        "rango_desde_uvt": RANGOS_ESTAMPILLA_UNIVERSIDAD[0]["desde_uvt"],
-        "rango_hasta_uvt": RANGOS_ESTAMPILLA_UNIVERSIDAD[0]["hasta_uvt"],
-        "valor_contrato_uvt": valor_uvt,
-        "uvt_2025": UVT_2025
-    }
+
+    # Si no se encuentra rango exacto, determinar si es menor o mayor a los rangos
+    if rangos:
+        primer_rango = min(rangos, key=lambda r: r['desde_uvt'])
+        ultimo_rango = max(rangos, key=lambda r: r['desde_uvt'])
+
+        # Si el valor es menor al primer rango (< 26 UVT), NO APLICA el impuesto
+        if valor_uvt < primer_rango['desde_uvt']:
+            logger.info(
+                f"Valor {valor_uvt:.2f} UVT es menor al mínimo de {primer_rango['desde_uvt']} UVT. "
+                f"Estampilla Universidad NO APLICA para contratos menores a {primer_rango['desde_uvt']} UVT."
+            )
+            raise ValueError(
+                f"NO_APLICA_ESTAMPILLA_UNIVERSIDAD: "
+                f"Contrato de {valor_uvt:.2f} UVT es menor al mínimo requerido de {primer_rango['desde_uvt']} UVT"
+            )
+
+        # Si el valor es mayor al último rango, usar el último rango
+        elif valor_uvt >= ultimo_rango['desde_uvt']:
+            logger.debug(
+                f"Valor {valor_uvt:.2f} UVT está en el rango mayor (>= {ultimo_rango['desde_uvt']} UVT), "
+                f"usando tarifa: {ultimo_rango['tarifa']*100:.1f}%"
+            )
+            rango_aplicable = ultimo_rango
+
+            return {
+                "tarifa": rango_aplicable["tarifa"],
+                "rango_desde_uvt": rango_aplicable["desde_uvt"],
+                "rango_hasta_uvt": rango_aplicable["hasta_uvt"],
+                "valor_contrato_uvt": valor_uvt,
+                "uvt_2025": UVT_2025,
+                "fuente": "database"
+            }
+
+    # ERROR: No hay rangos disponibles
+    error_msg = "No se encontraron rangos de estampilla universidad en base de datos"
+    logger.error(error_msg)
+    raise ValueError(error_msg)
+
+def limpiar_cache_estampilla_universidad():
+    """
+    Limpia el cache de rangos estampilla universidad.
+
+    Util cuando se necesita forzar una recarga desde la base de datos.
+
+    SRP: Solo limpia cache de rangos estampilla
+
+    Example:
+        >>> limpiar_cache_estampilla_universidad()
+        >>> config = obtener_tarifa_estampilla_universidad(1000000, db_manager)
+    """
+    global _cache_rangos_estampilla_db, _cache_timestamp_estampilla
+    _cache_rangos_estampilla_db = None
+    _cache_timestamp_estampilla = None
+    logger.info("Cache de rangos estampilla universidad limpiado")
 
 def obtener_configuracion_estampilla_universidad() -> Dict[str, Any]:
     """
@@ -851,7 +1080,7 @@ def detectar_impuestos_aplicables_por_codigo(codigo_negocio: int, nombre_negocio
     Args:
         codigo_negocio: Código único del negocio
         nombre_negocio: Nombre del negocio (opcional, para logging)
-        nit_administrativo: NIT del administrativo extraído de la base de datos (opcional)
+        nit_administrativo: NIT del administrativo extraído de la base de datos (obligatorio)
         business_service: Servicio de datos de negocio para validar tipo de recurso (DIP)
 
     Returns:
@@ -861,33 +1090,15 @@ def detectar_impuestos_aplicables_por_codigo(codigo_negocio: int, nombre_negocio
         - Si no se proporciona nit_administrativo, solo valida por código de negocio (compatibilidad)
         - Si se proporciona nit_administrativo, valida PRIMERO el NIT, DESPUÉS el código
         - Si se proporciona business_service, valida tipo de recurso (Públicos/Privados) en BD
+        - Refresca los códigos de negocio desde la API (caché TTL) antes de validar;
+          si la fuente falla sin caché válido, lanza RuntimeError (aborta la preliquidación)
     """
+    # Cargar/refrescar códigos de negocio desde la API antes de leerlos.
+    # Si falla sin caché válido, propaga el error y la factura se aborta.
+    refrescar_codigos_negocio(business_service)
+
     nombre_registrado = CODIGOS_NEGOCIO_ESTAMPILLA.get(codigo_negocio, nombre_negocio or "Desconocido")
 
-    # Si no se proporciona NIT, retornar validación solo por código (compatibilidad legacy)
-    if nit_administrativo is None:
-        # SOLO EN MODO LEGACY: validar por código de negocio
-        aplica_por_codigo_estampilla = codigo_negocio_aplica_estampilla_universidad(codigo_negocio)
-        aplica_por_codigo_obra_publica = codigo_negocio_aplica_obra_publica(codigo_negocio)
-
-        return {
-            "codigo_negocio": codigo_negocio,
-            "nombre_negocio": nombre_registrado,
-            "aplica_estampilla_universidad": aplica_por_codigo_estampilla,
-            "aplica_contribucion_obra_publica": aplica_por_codigo_obra_publica,
-            "impuestos_aplicables": [
-                impuesto for impuesto, aplica in [
-                    ("ESTAMPILLA_UNIVERSIDAD", aplica_por_codigo_estampilla),
-                    ("CONTRIBUCION_OBRA_PUBLICA", aplica_por_codigo_obra_publica)
-                ] if aplica
-            ],
-            "procesamiento_paralelo": aplica_por_codigo_estampilla and aplica_por_codigo_obra_publica,
-            "nombre_entidad_estampilla": nombre_registrado if aplica_por_codigo_estampilla else None,
-            "nombre_entidad_obra_publica": nombre_registrado if aplica_por_codigo_obra_publica else None,
-            "validacion_nit": None,
-            "razon_no_aplica_estampilla": None,
-            "razon_no_aplica_obra_publica": None
-        }
 
     # VALIDACIÓN POR NIT ADMINISTRATIVO
     # La función validar_nit_administrativo_para_impuestos() ya hace TODA la validación:
@@ -1008,14 +1219,6 @@ def detectar_impuestos_aplicables_por_codigo(codigo_negocio: int, nombre_negocio
     }
 
 
-def obtener_configuracion_impuestos_integrada() -> Dict[str, Any]:
-    """Obtiene configuración integrada para ambos impuestos"""
-    return {
-        "estampilla_universidad": obtener_configuracion_estampilla_universidad(),
-        "contribucion_obra_publica": obtener_configuracion_obra_publica(),
-        "terceros_recursos_publicos_compartidos": list(TERCEROS_RECURSOS_PUBLICOS.keys())
-    }
-
 # ===============================
 # CONFIGURACIÓN IVA Y RETEIVA
 # ===============================
@@ -1039,281 +1242,6 @@ NITS_IVA_RETEIVA = {
     }
 }
 
-# Diccionarios de bienes y servicios relacionados con IVA (inicialmente vacíos)
-BIENES_NO_CAUSAN_IVA = {
-    "1": "Animales vivos de la especie porcina",
-    "2": "Animales vivos de las especies ovina o caprina",
-    "3": "Gallos, gallinas, patos, gansos, pavos (gallipavos) y pintadas, de las especies domésticas, vivos",
-    "4": "Los demás animales vivos, excepto los animales domésticos de compañía",
-    "5": "Peces vivos, excepto los peces ornamentales",
-    "6": "Albacoras o atunes blancos",
-    "7": "Atunes de aleta amarilla (rabiles)",
-    "8": "Atunes comunes o de aleta azul, del Atlántico y del Pacífico",
-    "9": "Pescado seco, salado o en salmuera, pescado ahumado, incluso cocido antes o durante el ahumado, harina, polvo y «pellets» de pescado, aptos para la alimentación humana",
-    "10": "Productos constituidos por los componentes naturales de la leche",
-    "11": "Miel natural",
-    "12": "Semen de Bovino",
-    "13": "Bulbos, cebollas, tubérculos, raíces y bulbos tuberosos, turiones y rizomas, en reposo vegetativo, en vegetación o en flor, plantas y raíces de achicoria, excepto las raíces",
-    "14": "Las demás plantas vivas (incluidas sus raíces), esquejes e injertos; micelios",
-    "15": "Plántulas para la siembra, incluso de especies forestales maderables",
-    "16": "Papas (patatas) frescas o refrigeradas",
-    "17": "Tomates frescos o refrigerados",
-    "18": "Cebollas, chalotes, ajos, puerros y demás hortalizas aliáceas, frescos o refrigerados",
-    "19": "Coles, incluidos los repollos, coliflores, coles rizadas, colinabos y productos comestibles similares del género Brassica, frescos o refrigerados",
-    "20": "Lechugas (Lactuca sativa) y achicorias, comprendidas la escarola y la endibia (Cichoriumspp), frescas o refrigeradas",
-    "21": "Zanahorias, nabos, remolachas para ensalada, salsifies, apionabos, rábanos y raíces comestibles similares, frescos o refrigerados",
-    "22": "Pepinos y pepinillos, frescos o refrigerados",
-    "23": "Hortalizas de vaina, aunque estén desvainadas, frescas o refrigeradas",
-    "24": "Las demás hortalizas, frescas o refrigeradas",
-    "25": "Hortalizas secas, incluidas las cortadas en trozos o en rodajas o las trituradas o pulverizadas, pero sin otra preparación",
-    "26": "Hortalizas de vaina secas desvainadas, aunque estén mondadas o partidas",
-    "27": "Raíces de yuca (mandioca), arrurruz o salep, aguaturmas (patacas), camotes (batatas, boniatos) y raíces y tubérculos similares ricos en fécula o inulina, frescos, refrigerados, congelados o secos, incluso troceados o en «pellets», médula de sagú",
-    "28": "Cocos con la cáscara interna (endocarpio)",
-    "29": "Los demás cocos frescos",
-    "30": "Bananas, incluidos los plátanos «plantains», frescos o secos",
-    "31": "Dátiles, higos, piñas (ananás), aguacates (paltas), guayabas, mangos y mangostanes, frescos o secos",
-    "32": "Agrios (cítricos) frescos o secos",
-    "33": "Uvas, frescas o secas, incluidas las pasas",
-    "34": "Melones, sandías y papayas, frescos",
-    "35": "Manzanas, peras y membrillos, frescos",
-    "36": "Damascos (albaricoques, chabacanos), cerezas, duraznos (melocotones) (incluidos los griñones nectarines), ciruelas y endrinas, frescos",
-    "37": "Las demás frutas u otros frutos, frescos",
-    "38": "Café en grano sin tostar, cáscara y cascarilla de café",
-    "39": "Semillas de cilantro para la siembra",
-    "40": "Trigo duro para la siembra",
-    "41": "Las demás semillas de trigo para la siembra",
-    "42": "Centeno para la siembra",
-    "43": "Cebada",
-    "44": "Avena para la siembra",
-    "45": "Maíz para la siembra",
-    "46": "Maíz para consumo humano",
-    "47": "Arroz para consumo humano",
-    "48": "Arroz para la siembra",
-    "49": "Arroz con cáscara (Arroz Paddy)",
-    "50": "Sorgo de grano para la siembra",
-    "51": "Maíz trillado para consumo humano",
-    "52": "Habas de soya para la siembra",
-    "53": "Maníes (cacahuetes, cacahuates) para la siembra",
-    "54": "Copra para la siembra",
-    "55": "Semillas de lino para la siembra",
-    "56": "Semillas de nabo (nabina) o de colza para siembra",
-    "57": "Semillas de girasol para la siembra",
-    "58": "Semillas de nueces y almendras de palma para la siembra",
-    "59": "Semillas de algodón para la siembra",
-    "60": "Semillas de ricino para la siembra",
-    "61": "Semillas de sésamo (ajonjolí) para la siembra",
-    "62": "Semillas de mostaza para la siembra",
-    "63": "Semillas de cártamo para la siembra",
-    "64": "Semillas de melón para la siembra",
-    "65": "Las demás semillas y frutos oleaginosos para la siembra",
-    "66": "Semillas, frutos y esporas, para siembra",
-    "67": "Caña de azúcar",
-    "68": "Chancaca (panela, raspadura) obtenida de la extracción y evaporación en forma artesanal de los jugos de caña de azúcar en trapiches paneleros",
-    "69": "Cacao en grano para la siembra",
-    "70": "Cacao en grano crudo",
-    "71": "Únicamente la Bienestarina",
-    "72": "Productos alimenticios elaborados de manera artesanal a base de leche",
-    "73": "Pan horneado o cocido y producido a base principalmente de harinas de cereales, con o sin levadura, sal o dulce, sea integral o no",
-    "74": "Productos alimenticios elaborados de manera artesanal a base de guayaba",
-    "75": "Agua, incluidas el agua mineral natural o artificial y la gaseada, sin adición de azúcar u otro edulcorante ni aromatizada, hielo y nieve",
-    "76": "Sal (incluidas la de mesa y la desnaturalizada) y cloruro de sodio puro, incluso en disolución acuosa o con adición de antiaglomerantes",
-    "77": "Azufre de cualquier clase, excepto el sublimado, el precipitado y el coloidal",
-    "78": "Fosfatos de calcio naturales, fosfatos aluminocálcicos naturales y cretas fosfatadas",
-    "79": "Dolomita sin calcinar ni sinterizar, llamada «cruda»",
-    "80": "Hullas, briquetas, ovoides y combustibles sólidos similares, obtenidos de la hulla",
-    "81": "Coques y semicoques de hulla",
-    "82": "Coques y semicoques de lignito o turba",
-    "83": "Gas natural licuado",
-    "84": "Gas propano únicamente para uso domiciliario",
-    "85": "Butanos licuados",
-    "86": "Gas natural en estado gaseoso, incluido el biogás",
-    "87": "Gas propano en estado gaseoso únicamente para uso domiciliario y gas butano en estado gaseoso",
-    "88": "Energía eléctrica",
-    "89": "Material radiactivo para uso médico",
-    "90": "Guatas, gasas, vendas y artículos análogos impregnados o recubiertos de sustancias farmacéuticas",
-    "91": "Abonos de origen animal o vegetal, incluso mezclados entre sí o tratados químicamente",
-    "92": "Abonos minerales o químicos nitrogenados",
-    "93": "Abonos minerales o químicos fosfatados",
-    "94": "Abonos minerales o químicos potásicos",
-    "95": "Abonos minerales o químicos con dos o tres de los elementos fertilizantes: nitrógeno, fósforo y potasio",
-    "96": "Insecticidas, raticidas y demás antirroedores, fungicidas, herbicidas, inhibidores de germinación",
-    "97": "Reactivos de diagnóstico sobre cualquier soporte y reactivos de diagnóstico preparados",
-    "98": "Caucho natural",
-    "99": "Neumáticos de los tipos utilizados en vehículos y máquinas agrícolas o forestales",
-    "100": "Preservativos",
-        "101": "Papel prensa en bobinas (rollos) o en hojas",
-    "102": "Los demás papeles prensa en bobinas (rollos)",
-    "103": "Pita (Cabuya, fique)",
-    "104": "Tejidos de las demás fibras textiles vegetales",
-    "105": "Redes confeccionadas para la pesca",
-    "106": "Empaques de yute, cáñamo y fique",
-    "107": "Sacos (bolsas)y talegas, para envasar de yute",
-    "108": "Sacos (bolsas) y talegas, para envasar de pita (cabuya, fique)",
-    "109": "Sacos (bolsas) y talegas, para envasar de cáñamo",
-    "110": "Ladrillos de construcción y bloques de calicanto, de arcilla, y con base en cemento, bloques de arcilla silvocalcarea",
-    "111": "Monedas de curso legal",
-    "112": "Motores fuera de borda, hasta 115HP",
-    "113": "Motores Diesel hasta 150HP",
-    "114": "Sistemas de riego por goteo o aspersión",
-    "115": "Los demás sistemas de riego",
-    "116": "Aspersores y goteros, para sistemas de riego",
-    "117": "Guadañadoras, incluidas las barras de corte para montar sobre un tractor",
-    "118": "Las demás máquinas y aparatos de henificar",
-    "119": "Prensas para paja o forraje, incluidas las prensas recogedoras",
-    "120": "Cosechadoras-trilladoras",
-    "121": "Las demás máquinas y aparatos de trillar",
-    "122": "Máquinas de cosechar raíces o tubérculos",
-    "123": "Las demás máquinas y aparatos de cosechar, máquinas y aparatos de trillar",
-    "124": "Máquinas para limpieza o clasificación de huevos, frutos o demás productos agrícolas",
-    "125": "Partes de máquinas, aparatos y artefactos de cosechar o trillar, incluidas las prensas para paja o forraje, cortadoras de césped y guadañadoras, máquinas para limpieza o clasificación de huevos, frutos o demás productos agrícolas, excepto las de la partida 8437",
-    "126": "Máquinas y aparatos para preparar alimentos o piensos para animales",
-    "127": "Las demás máquinas y aparatos para uso agropecuario",
-    "128": "Partes de las demás máquinas y aparatos para uso agropecuario",
-    "129": "Máquinas para limpieza, clasificación o cribado de semillas, granos u hortalizas de vaina secas",
-    "130": "Tractores para uso agropecuario",
-    "131": "Tractores para uso agropecuario",
-    "132": "Sillones de ruedas y demás vehículos para inválidos, incluso con motor u otro mecanismo de propulsión",
-    "133": "Partes y accesorios de sillones de ruedas y demás vehículos para inválidos",
-    "134": "Remolques y semirremolques, autocargadores o autodescargadores, para uso agrícola",
-    "135": "Lentes de contacto",
-    "136": "Lentes de vidrio para gafas",
-    "137": "Lentes de otras materias para gafas",
-    "138": "Catéteres y catéteres peritoneales y equipos para la infusión de líquidos y filtros para diálisis renal de esta subpartida",
-    "139": "Equipos para la infusión de sangre",
-    "140": "Artículos y aparatos de ortopedia, incluidas las fajas y vendajes médicoquirúrgicos y las muletas tablillas, férulas u otros artículos y aparatos para fracturas, artículos y aparatos de prótesis, audífonos y demás aparatos que lleve la propia persona o se le implanten para compensar un defecto o incapacidad; las impresoras braille, máquinas inteligentes de lectura para ciegos, software lector de pantalla para ciegos, estereotipadoras braille, líneas braille, regletas braille, cajas aritméticas y de dibujo braille, elementos manuales o mecánicos de escritura del sistema braille, así como los bastones para ciegos aunque estén dotados de tecnología, contenidos en esta partida arancelaria",
-    "141": "Lápices de escribir y colorear",
-    "142": "Las materias primas químicas con destino a la producción de plaguicidas e insecticidas y de los fertilizantes y con destino a la producción de medicamentos",
-    "143": "Las materias primas destinadas a la producción de vacunas para lo cual deberá acreditarse tal condición en la forma como lo señale el reglamento",
-    "144": "Todos los productos de soporte nutricional (incluidos los suplementos dietarios y los complementos nutricionales en presentaciones líquidas, sólidas, granuladas, gaseosas, en polvo) del régimen especial destinados a ser administrados por vía enteral, para pacientes con patologías específicas o con condiciones especiales; y los alimentos para propósitos médicos especiales para pacientes que requieren nutrición enteral por sonda a corto o largo plazo",
-    "145": "Los dispositivos anticonceptivos para uso femenino",
-    "146": "Los computadores personales de escritorio o portátiles, cuyo valor no exceda de cincuenta (50) UVT",
-    "147": "Los dispositivos móviles inteligentes (tabletas y celulares) cuyo valor no exceda de veintidós (22) UVT",
-    "148": "Los equipos y elementos nacionales o importados que se destinen a la construcción, instalación, montaje y operación de sistemas de control y monitoreo, necesarios para el cumplimiento de las disposiciones, regulaciones y estándares ambientales vigentes, para lo cual deberá acreditarse tal condición ante el Ministerio de Ambiente y Desarrollo Sostenible",
-    "149": "Los alimentos de consumo humano y animal que se importen de los países colindantes a los departamentos de Vichada, Guajira, Guainía y Vaupés, siempre y cuando se destinen exclusivamente al consumo local en esos departamentos",
-    "150": "Los alimentos aptos para el consumo humano así como bienes de higiene y aseo, donados a favor de los bancos de alimentos que se encuentren constituidos como entidades sin ánimo de lucro del Régimen Tributario Especial, los bancos de alimentos que bajo la misma personería jurídica posea la iglesia o confesión religiosa reconocida por el Ministerio del Interior o por la ley y las asociaciones de bancos de alimentos (Modificado Ley 2380 de 2024)",
-    "151": "Los vehículos, automotores, destinados al transporte público de pasajeros, destinados solo a reposición. Tendrán derecho a este beneficio los pequeños transportadores propietarios de menos de 3 vehículos y solo para efectos de la reposición de uno solo, y por una única vez. Este beneficio tendrá una vigencia hasta el año 2019",
-    "152": "Los objetos con interés artístico, cultural e histórico comprados por parte de los museos que integren la Red Nacional de Museos y las entidades públicas que posean o administren estos bienes, estarán exentos del cobro del IVA",
-    "153": "La venta de bienes inmuebles",
-    "154": "El consumo humano y animal, vestuario, elementos de aseo y medicamentos para uso humano o veterinario, materiales de construcción que se introduzcan y comercialicen a los departamentos de Guainía, Guaviare, Vaupés y Vichada, siempre y cuando se destinen exclusivamente al consumo dentro del mismo departamento. El Gobierno nacional reglamentará la materia para garantizar que la exclusión del IVA se aplique en las ventas al consumidor final",
-    "155": "El combustible para aviación que se suministre para el servicio de transporte aéreo nacional de pasajeros y de carga con origen y destino a los departamentos de Guainía, Amazonas, Vaupés, San Andrés Islas y Providencia, Arauca y Vichada",
-    "156": "Los productos que se compren o introduzcan al departamento del Amazonas en el marco del convenio Colombo-Peruano y el convenio con la República Federativa del Brasil",
-    "157": "La compraventa de maquinaria y equipos destinados al desarrollo de proyectos o actividades que se encuentren registrados en el Registro Nacional de Reducción de Emisiones de Gases Efecto Invernadero definido en el artículo 155 de la Ley 1753 de 2015, que generen y certifiquen reducciones de Gases Efecto Invernadero - GEl, según reglamentación que expida el Ministerio de Ambiente y Desarrollo Sostenible. (GEMINI: SE DEBE VALIDAR MANUALMENTE SI EL PROYECTO SE ENCUENTRA REGISTRADO en el Registro Nacional de Reducción de Emisiones de Gases Efecto Invernadero definido en el artículo 155 de la Ley 1753 de 2015)",
-    "158": "Las bicicletas, bicicletas eléctricas, motos eléctricas, patines, monopatines, monopatines eléctricos, patinetas, y patinetas eléctricas, de hasta 50 UVT",
-    "159": "La venta de los bienes facturados por los comerciantes (librero): se entiende por librero la persona natural o jurídica que se dedica exclusivamente a la venta de libros, revistas, folletos o coleccionables seriados de carácter científico o cultural, en establecimientos mercantiles legalmente habilitados y de libre acceso al público consumidor",
-    "160": "Incentivos de premio inmediato de Juegos de suerte y azar territoriales",
-    "161": "El petróleo crudo recibido por parte de la Agencia Nacional de Hidrocarburos por concepto de pago de regalías para su respectiva monetización",
-    "162": "Para los efectos del presente artículo y de conformidad con la reglamentación vigente expedida por el Ministerio de Salud y el Instituto Colombiano Agropecuario, se entienden como animales domésticos de compañía los gatos, perros, hurones, conejos, chinchillas, hámster, cobayos, jerbos y Mini-Pigs"
-}
-BIENES_EXENTOS_IVA = {
-    
-    "1": "Animales vivos de la especie bovina, excepto los de lidia.",
-    "2": "Pollitos de un día de nacidos.",
-    "3": "Carne de animales de la especie bovina, fresca o refrigerada.",
-    "4": "Carne de animales de la especie bovina, congelada.",
-    "5": "Carne de animales de la especie porcina, fresca, refrigerada o congelada.",
-    "6": "Carne de animales de las especies ovina o caprina, fresca, refrigerada o congelada.",
-    "7": "Despojos comestibles de animales de las especies bovina, porcina, ovina, caprina, caballar, asnal o mular, frescos, refrigerados o congelados.",
-    "8": "Carne y despojos comestibles, de aves, refrigerados o congelados.",
-    "9": "Carnes y despojos comestibles de conejo o liebre, frescos, refrigerados o congelados.",
-    "10": "Pescado fresco o refrigerado, excepto los filetes y demás carne de pescado.",
-    "11": "Pescado congelado, excepto los filetes y demás carne de pescado (con excepciones).",
-    "12": "Filetes y demás carne de pescado (incluso picada), frescos, refrigerados o congelados.",
-    "13": "Únicamente camarones de cultivo.",
-    "14": "Leche y nata (crema), sin concentrar, sin adición de azúcar ni otro edulcorante.",
-    "15": "Leche y nata (crema), concentradas o con adición de azúcar u otro edulcorante.",
-    "16": "Queso fresco (sin madurar), incluido el lactosuero, y requesón.",
-    "17": "Huevos de gallina de la especie Gallus domesticus, fecundados para incubación.",
-    "18": "Huevos fecundados para incubación de las demás aves.",
-    "19": "Huevos frescos de gallina.",
-    "20": "Huevos frescos de las demás aves.",
-    "21": "Arroz para consumo humano (excepto el arroz con cáscara o 'Arroz Paddy' y el arroz para la siembra, los cuales conservan la calidad de bienes excluidos del IVA).",
-    "22": "Fórmulas lácteas para niños de hasta 12 meses de edad, únicamente la leche maternizada o humanizada.",
-    "23": "Únicamente preparaciones infantiles a base de leche.",
-    "24": "Provitaminas y vitaminas, naturales o reproducidas por síntesis (incluidos los concentrados naturales) y sus derivados utilizados principalmente como vitaminas, mezclados o no entre sí o en disoluciones de cualquier clase.",
-    "25": "Antibióticos.",
-    "26": "Glándulas y demás órganos para usos opoterápicos, desecados, incluso pulverizados; extractos de glándulas o de otros órganos o de sus secreciones para usos opoterápicos; heparina y sus sales; las demás sustancias humanas o animales preparadas para usos terapéuticos o profilácticos no expresadas ni comprendidas en otra parte.",
-    "27": "Sangre humana, sangre animal preparada para usos terapéuticos, profilácticos o de diagnóstico; antisueros (sueros con anticuerpos); demás fracciones de la sangre y productos inmunológicos modificados, incluso obtenidos por proceso biotecnológico; vacunas, toxinas, cultivos de microrganismos (excepto las levaduras) y productos similares.",
-    "28": "Medicamentos (revisar excepciones) constituidos por productos mezclados entre sí, preparados para usos terapéuticos o profilácticos, sin dosificar ni acondicionar para la venta al por menor.",
-    "29": "Medicamentos (revisar excepciones) constituidos por productos mezclados o sin mezclar, preparados para usos terapéuticos o profilácticos, dosificados o acondicionados para la venta al por menor.",
-    "30": "Preparaciones y artículos farmacéuticos a que se refiere la nota 4 de este capítulo.",
-    "31": "Inversor de energía para sistema de energía solar con paneles.",
-    "32": "Paneles solares.",
-    "33": "Controlador de carga para sistema de energía solar con paneles.",
-    "34": "Armas de guerra, excepto los revólveres, pistolas y armas blancas, de uso privativo de las Fuerzas Militares y la Policía Nacional.",
-    "35": "Compresas y toallas higiénicas.",
-    "36": "Las municiones y material de guerra o reservado y, por consiguiente, de uso privativo, y los siguientes elementos pertenecientes a las Fuerzas Militares y la Policía Nacional: a) Sistemas de armas y armamento mayor y menor con sus accesorios, repuestos y elementos necesarios para instrucción, operación y mantenimiento; b) Naves, artefactos navales y aeronaves destinados al servicio del Ramo de Defensa Nacional con sus accesorios y repuestos; c) Municiones, torpedos y minas; d) Material blindado; e) Semovientes destinados al mantenimiento del orden público; f) Materiales explosivos y pirotécnicos, materias primas para su fabricación y accesorios; g) Paracaídas y equipos de salto; h) Elementos, equipos y accesorios contra motines; i) Equipos de ingenieros de combate; j) Equipos de buceo y de voladuras submarinas; k) Equipos de detección aérea, de superficie y submarina; l) Elementos para control de incendios y averías; m) Herramientas y equipos para pruebas y mantenimiento; n) Equipos, software y demás implementos de sistemas y comunicaciones para uso de las Fuerzas Militares y la Policía Nacional; o) Otros elementos aplicables al servicio y fabricación del material de guerra o reservado; p) Servicios de diseño, construcción y mantenimiento de armas, municiones y material de guerra con destino a la fuerza pública, así como capacitación de tripulaciones, prestados por entidades descentralizadas del sector defensa.",
-    "37": "Los vehículos automotores de transporte público de pasajeros completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo, de transporte público de pasajeros. Beneficio aplicable a ventas a pequeños transportadores propietarios de hasta dos (2) vehículos, para reposición de uno o dos vehículos propios, por única vez; vigencia de cinco (5) años.",
-    "38": "Los vehículos automotores de servicio público o particular de transporte de carga completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo de transporte de carga de más de 10.5 toneladas de peso bruto vehicular. Beneficio aplicable a ventas a pequeños transportadores propietarios de hasta dos (2) vehículos, para reposición de uno o dos vehículos propios, por única vez; vigencia de cinco (5) años.",
-    "39": "Las bicicletas y sus partes; motocicletas y sus partes y motocarros y sus partes, que se introduzcan y comercialicen en los departamentos de Amazonas, Guainía, Guaviare, Vaupés y Vichada, siempre que se destinen exclusivamente al consumo dentro del mismo departamento y las motocicletas y motocarros sean registrados en el departamento. También estarán exentos los bienes indicados anteriormente que se importen al territorio aduanero nacional y se destinen posteriormente exclusivamente a estos departamentos.",
-    "40": "El Gobierno nacional reglamentará la materia para que la exención del IVA se aplique en las ventas al consumidor final y para que los importadores ubicados fuera de los territorios indicados puedan descontar a su favor, en la cuenta corriente del IVA, el valor total pagado en la nacionalización y las compras nacionales cuando las mercancías se comercialicen con destino exclusivo a los departamentos señalados.",
-    "41": "El consumo humano y animal, vestuario, elementos de aseo y medicamentos para uso humano o veterinario, materiales de construcción que se introduzcan y comercialicen al departamento de Amazonas, siempre que se destinen exclusivamente al consumo dentro del mismo departamento. Requisitos: a) El adquiriente sea sociedad constituida y domiciliada en el Departamento del Amazonas y cuya actividad económica se realice únicamente en dicho departamento; b) El adquiriente esté inscrito en factura electrónica; c) El documento de transporte aéreo y/o fluvial debe garantizar que las mercancías ingresan efectivamente al Departamento del Amazonas y se enajenan únicamente a consumidores finales allí ubicados.",
-    "42": "Las ventas de libros y revistas de carácter científico y cultural, según la calificación que hará el Gobierno Nacional.",
-    "43": "Exenciones para: bienes corporales muebles que se exporten; servicio de reencauche; servicios de reparación a embarcaciones marítimas y aerodinos de bandera o matrícula extranjera; y la venta en el país de bienes de exportación a sociedades de comercialización internacional siempre que hayan de ser efectivamente exportados.",
-    "44": "Exenciones para ventas e importaciones de bienes y equipos destinados al deporte, a la salud, a la investigación científica y tecnológica, y a la educación, donados a favor de entidades oficiales o sin ánimo de lucro, por personas o entidades nacionales o por entidades, personas o gobiernos extranjeros, siempre que obtengan calificación favorable en el comité previsto en el artículo 362. También las importaciones de bienes y equipos para la seguridad nacional con destino a la Fuerza Pública.",
-    "45": "Ventas e importaciones de bienes y equipos efectuadas en desarrollo de convenios, tratados, acuerdos internacionales e interinstitucionales o proyectos de cooperación, donados a favor del Gobierno Nacional o entidades de derecho público del orden nacional por personas naturales o jurídicas, organismos multilaterales o gobiernos extranjeros, según reglamento que expida el Gobierno Nacional."
-
-    
-}
-
-SERVICIOS_EXCLUIDOS_IVA = {
-  "1": "Los servicios médicos, odontológicos, hospitalarios, clínicos y de laboratorio, para la salud humana.",
-    "2": "Los servicios de administración de fondos del Estado y los servicios vinculados con la seguridad social de acuerdo con lo previsto en la Ley 100 de 1993.",
-    "3": "Los planes obligatorios de salud del sistema de seguridad social en salud expedidos por entidades autorizadas por la Superintendencia Nacional de Salud, los servicios prestados por las administradoras dentro del régimen de ahorro individual con solidaridad y de prima media con prestación definida, los servicios prestados por administradoras de riesgos laborales y los servicios de seguros y reaseguros para invalidez y sobrevivientes, contemplados dentro del régimen de ahorro individual con solidaridad a que se refiere el artículo 135 de la Ley 100 de 1993 o las disposiciones que la modifiquen o sustituyan.",
-    "4": "Las comisiones por intermediación por la colocación de los planes de salud del sistema general de seguridad social en salud expedidos por las entidades autorizadas legalmente por la Superintendencia Nacional de Salud, que no estén sometidos al impuesto sobre las ventas - IVA.",
-    "5": "Los servicios de educación prestados por establecimientos de educación preescolar, primaria, media e intermedia, superior y especial o no formal, reconocidos como tales por el Gobierno nacional, y los servicios de educación prestados por personas naturales a dichos establecimientos. Están excluidos igualmente los servicios prestados por los establecimientos de educación relativos a restaurantes, cafeterías y transporte, así como los que se presten en desarrollo de las Leyes 30 de 1992 y 115 de 1994, o las disposiciones que las modifiquen o sustituyan. Igualmente están excluidos los servicios de evaluación de la educación y de elaboración y aplicación de exámenes para la selección y promoción de personal, prestados por organismos o entidades de la administración pública.",
-    "6": "Los servicios de educación virtual para el desarrollo de contenidos digitales, de acuerdo con la reglamentación expedida por el Ministerio de Tecnologías de la Información y las Comunicaciones, prestados en Colombia o en el exterior.",
-    "7": "Los servicios de conexión y acceso a internet de los usuarios residenciales del estrato 3.",
-    "8": "En el caso del servicio telefónico local, se excluyen del impuesto los primeros trescientos veinticinco (325) minutos mensuales del servicio telefónico local facturado a los usuarios de los estratos 1, 2 y 3 y el servicio telefónico prestado desde teléfonos públicos.",
-    "9": "El servicio de transporte público, terrestre, fluvial y marítimo de personas en el territorio nacional, y el de transporte público o privado nacional e internacional de carga marítimo, fluvial, terrestre y aéreo. Igualmente, se excluye el transporte de gas e hidrocarburos.",
-    "10": "El transporte aéreo nacional de pasajeros con destino o procedencia de rutas nacionales donde no exista transporte terrestre organizado. Esta exclusión también aplica para el transporte aéreo turístico con destino o procedencia al departamento de La Guajira y los municipios de Nuquí (Chocó), Mompóx (Bolívar), Tolú (Sucre), Miraflores (Guaviare) y Puerto Carreño (Vichada).",
-    "11": "Los servicios públicos de energía. La energía y los servicios públicos de energía a base de gas u otros insumos.",
-    "12": "El agua para la prestación del servicio público de acueducto y alcantarillado, los servicios públicos de acueducto y alcantarillado, los servicios de aseo público y los servicios públicos de recolección de basuras.",
-    "13": "El gas para la prestación del servicio público de gas domiciliario y el servicio de gas domiciliario, ya sea conducido por tubería o distribuido en cilindros.",
-    "14": "Los servicios de alimentación, contratados con recursos públicos, destinados al sistema penitenciario, de asistencia social, de escuelas de educación pública, a las Fuerzas Militares, Policía Nacional, Centro de Desarrollo Infantil, centros geriátricos públicos, hospitales públicos y comedores comunitarios.",
-    "15": "El servicio de arrendamiento de inmuebles para vivienda y el arrendamiento de espacios para exposiciones y muestras artesanales nacionales, incluidos los eventos artísticos y culturales.",
-    "16": "Los intereses y rendimientos financieros por operaciones de crédito, siempre que no formen parte de la base gravable señalada en el artículo 447, y el arrendamiento financiero (leasing).",
-    "17": "Los servicios de intermediación para el pago de incentivos o transferencias monetarias condicionadas en el marco de los programas sociales del Gobierno Nacional.",
-    "18": "Las boletas de entrada a cine, a los eventos deportivos, culturales (incluidos los musicales) y de recreación familiar. También se encuentran excluidos los servicios de que trata el artículo 6° de la Ley 1493 de 2011.",
-    "19": "Los servicios funerarios, los de cremación, inhumación y exhumación de cadáveres, alquiler y mantenimiento de tumbas y mausoleos.",
-    "20": "Adquisición de licencias de software para el desarrollo comercial de contenidos digitales, de acuerdo con la reglamentación expedida por el Ministerio de Tecnologías de la Información y Comunicaciones.",
-    "21": "Suministro de páginas web, servidores (hosting), computación en la nube (cloud computing).",
-    "22": "Las comisiones pagadas por los servicios que se presten para el desarrollo de procesos de titularización de activos a través de universalidades y patrimonios autónomos cuyo pago se realice exclusivamente con cargo a los recursos de tales universalidades o patrimonios autónomos.",
-    "23": "Las comisiones percibidas por las sociedades fiduciarias, sociedades administradoras de inversión y comisionistas de bolsa por la administración de fondos de inversión colectiva.",
-    "24": "Los siguientes servicios, siempre que se destinen a la adecuación de tierras, a la producción agropecuaria y pesquera y a la comercialización de los respectivos productos:\n"
-          "a) El riego de terrenos dedicados a la explotación agropecuaria;\n"
-          "b) El diseño de sistemas de riego, su instalación, construcción, operación, administración y conservación;\n"
-          "c) La construcción de reservorios para la actividad agropecuaria;\n"
-          "d) La preparación y limpieza de terrenos de siembra;\n"
-          "e) El control de plagas, enfermedades y malezas, incluida la fumigación aérea y terrestre de sembradíos;\n"
-          "f) El corte y recolección manual y mecanizada de productos agropecuarios;\n"
-          "g) Aplicación de fertilizantes y elementos de nutrición edáfica y foliar de los cultivos;\n"
-          "h) Aplicación de sales mineralizadas;\n"
-          "i) Aplicación de enmiendas agrícolas;\n"
-          "j) Aplicación de insumos como vacunas y productos veterinarios;\n"
-          "k) El pesaje y el alquiler de corrales en ferias de ganado mayor y menor;\n"
-          "l) La siembra;\n"
-          "m) La construcción de drenajes para la agricultura;\n"
-          "n) La construcción de estanques para la piscicultura;\n"
-          "o) Los programas de sanidad animal;\n"
-          "p) La perforación de pozos profundos para la extracción de agua;\n"
-          "q) El desmonte de algodón, la trilla y el secamiento de productos agrícolas;\n"
-          "r) La selección, clasificación y el empaque de productos agropecuarios sin procesamiento industrial;\n"
-          "s) La asistencia técnica en el sector agropecuario;\n"
-          "t) La captura, procesamiento y comercialización de productos pesqueros;\n"
-          "u) El servicio de recaudo de derechos de acceso vehicular a las centrales mayoristas de abasto.",
-    "25": "La comercialización de animales vivos, excepto los animales domésticos de compañía.",
-    "26": "El servicio de faenamiento.",
-    "27": "Están excluidos de IVA los servicios de hotelería y turismo que sean prestados en los municipios que integran las siguientes zonas de régimen aduanero especial: a) Zona de régimen aduanero especial de Urabá, Tumaco y Guapi; b) Zona de régimen aduanero especial de Inírida, Puerto Carreño, La Primavera y Cumaribo; c) Zona de régimen aduanero especial de Maicao, Uribía y Manaure.",
-    "28": "Las operaciones cambiarias de compra y venta de divisas, así como las operaciones cambiarias sobre instrumentos derivados financieros.",
-    "29": "Las comisiones percibidas por la utilización de tarjetas crédito y débito.",
-    "30": "Los servicios de promoción y fomento deportivo prestados por los clubes deportivos definidos en el artículo 2 del Decreto Ley 1228 de 1995.",
-    "31": "Los servicios de reparación y mantenimiento de naves y artefactos navales tanto marítimos como fluviales de bandera colombiana, excepto los servicios que se encuentran en el literal P) del numeral 3 del artículo 477 de este Estatuto.",
-    "32": "Los servicios de publicidad en periódicos que registren ventas en publicidad a 31 de diciembre del año inmediatamente anterior inferiores a 180.000 UVT.",
-    "33": "La publicidad en las emisoras de radio cuyas ventas sean inferiores a 30.000 UVT al 31 de diciembre del año inmediatamente anterior y programadoras de canales regionales de televisión cuyas ventas sean inferiores a 60.000 UVT al 31 de diciembre del año inmediatamente anterior. Aquellas que superen este monto se regirán por la regla general.",
-    "34": "Las exclusiones previstas en este numeral no se aplicarán a las empresas que surjan como consecuencia de la escisión de sociedades que antes de la expedición de la presente Ley conformen una sola empresa ni a las nuevas empresas que se creen cuya matriz o empresa dominante se encuentre gravada con el IVA por este concepto.",
-    "35": "Los servicios de corretaje de contratos de reaseguros."
-
-}
 
 # Configuración de tarifas ReteIVA
 CONFIG_RETEIVA = {
@@ -1412,15 +1340,128 @@ def nit_aplica_timbre(nit: str) -> bool:
     es_valido, _, impuestos = validar_nit_administrativo(nit)
     return es_valido and "IMPUESTO_TIMBRE" in impuestos
 
-def obtener_configuracion_iva() -> Dict[str, Any]:
-    """Obtiene toda la configuración de IVA para uso en prompts"""
-    return {
-        "nits_validos": NITS_IVA_RETEIVA,
-        "bienes_no_causan_iva": BIENES_NO_CAUSAN_IVA,
-        "bienes_exentos_iva": BIENES_EXENTOS_IVA,
-        "servicios_excluidos_iva": SERVICIOS_EXCLUIDOS_IVA,
-        "config_reteiva": CONFIG_RETEIVA
-    }
+# Cache global para configuracion IVA desde base de datos
+_cache_config_iva_db = None
+_cache_timestamp_iva = None
+
+# Cache global para rangos estampilla universidad desde base de datos
+_cache_rangos_estampilla_db = None
+_cache_timestamp_estampilla = None
+
+
+def obtener_configuracion_iva(database_manager=None, usar_cache: bool = True) -> Dict[str, Any]:
+    """
+    Obtiene toda la configuracion de IVA desde base de datos Nexura con cache.
+
+    ESTRATEGIA DE OBTENCION:
+    1. Intenta obtener desde base de datos Nexura (OBLIGATORIO - database_manager requerido)
+    2. Implementa cache para evitar llamadas repetidas a la base de datos
+    3. Si falla, lanza excepcion
+
+    PRINCIPIOS SOLID APLICADOS:
+    - SRP: Solo obtiene configuracion de IVA
+    - OCP: Extensible para nuevas fuentes de datos
+    - DIP: Depende de abstraccion (database_manager)
+
+    Args:
+        database_manager: DatabaseManager REQUERIDO para obtener datos desde BD
+        usar_cache: Si True, usa cache de configuracion IVA (default: True)
+
+    Returns:
+        Dict con estructura:
+        {
+            'nits_validos': Dict,
+            'bienes_no_causan_iva': Dict[str, str],
+            'bienes_exentos_iva': Dict[str, str],
+            'servicios_excluidos_iva': Dict[str, str],
+            'config_reteiva': Dict,
+            'fuente': str  # siempre 'database'
+        }
+
+    Raises:
+        ValueError: Si database_manager es None o si falla la obtencion desde BD
+
+    Example:
+        >>> from database.setup import inicializar_database_manager
+        >>> db_manager, _ = inicializar_database_manager()
+        >>> config = obtener_configuracion_iva(db_manager)
+        >>> print(config['fuente'])  # 'database'
+    """
+    global _cache_config_iva_db, _cache_timestamp_iva
+
+    # 1. VERIFICAR CACHE (si esta habilitado)
+    if usar_cache and _cache_config_iva_db is not None:
+        logger.debug("Usando configuracion IVA desde cache")
+        return _cache_config_iva_db
+
+    # 2. VALIDAR QUE DATABASE_MANAGER ESTE DISPONIBLE
+    if database_manager is None:
+        error_msg = "database_manager es requerido para obtener configuracion IVA"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    # 3. OBTENER DESDE BASE DE DATOS
+    try:
+        logger.info("Obteniendo configuracion IVA desde base de datos")
+        resultado = database_manager.obtener_configuracion_iva_db()
+
+        if resultado.get('success', False) and resultado.get('data'):
+            datos_db = resultado['data']
+
+            # Construir configuracion completa con datos de BD
+            config_completa = {
+                'nits_validos': NITS_IVA_RETEIVA,
+                'bienes_no_causan_iva': datos_db.get('bienes_no_causan_iva', {}),
+                'bienes_exentos_iva': datos_db.get('bienes_exentos_iva', {}),
+                'servicios_excluidos_iva': datos_db.get('servicios_excluidos_iva', {}),
+                'config_reteiva': CONFIG_RETEIVA,
+                'fuente': 'database'
+            }
+
+            # Guardar en cache
+            _cache_config_iva_db = config_completa
+            _cache_timestamp_iva = datetime.now()
+
+            logger.info(
+                f"Configuracion IVA obtenida desde base de datos: "
+                f"{len(config_completa['bienes_no_causan_iva'])} bienes no causan, "
+                f"{len(config_completa['bienes_exentos_iva'])} bienes exentos, "
+                f"{len(config_completa['servicios_excluidos_iva'])} servicios excluidos"
+            )
+
+            return config_completa
+
+        else:
+            error_msg = f"No se pudo obtener configuracion IVA desde BD: {resultado.get('message', 'Error desconocido')}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
+    except ValueError:
+        # Re-lanzar ValueError (ya tiene el mensaje correcto)
+        raise
+    except Exception as e:
+        error_msg = f"Error obteniendo configuracion IVA desde base de datos: {e}"
+        logger.error(error_msg)
+        logger.exception("Traceback del error:")
+        raise ValueError(error_msg) from e
+
+
+def limpiar_cache_configuracion_iva():
+    """
+    Limpia el cache de configuracion IVA.
+
+    Util cuando se necesita forzar una recarga desde la base de datos.
+
+    SRP: Solo limpia cache de configuracion IVA
+
+    Example:
+        >>> limpiar_cache_configuracion_iva()
+        >>> config = obtener_configuracion_iva(db_manager, usar_cache=False)
+    """
+    global _cache_config_iva_db, _cache_timestamp_iva
+    _cache_config_iva_db = None
+    _cache_timestamp_iva = None
+    logger.info("Cache de configuracion IVA limpiado")
 
 def es_fuente_ingreso_nacional(respuestas_fuente: Dict[str, bool]) -> bool:
     """Determina si un servicio/bien es de fuente nacional según validaciones
@@ -1483,7 +1524,7 @@ def detectar_impuestos_aplicables(nit: str) -> Dict[str, Any]:
     """
     aplica_estampilla = nit_aplica_estampilla_universidad(nit)
     aplica_obra_publica = nit_aplica_contribucion_obra_publica(nit)
-    aplica_iva = nit_aplica_iva_reteiva(nit)  # ✅ NUEVA VALIDACIÓN
+    aplica_iva = nit_aplica_iva_reteiva(nit)  # NUEVA VALIDACIÓN
     
     impuestos_aplicables = []
     if aplica_estampilla:
@@ -1491,26 +1532,37 @@ def detectar_impuestos_aplicables(nit: str) -> Dict[str, Any]:
     if aplica_obra_publica:
         impuestos_aplicables.append("CONTRIBUCION_OBRA_PUBLICA")
     if aplica_iva:
-        impuestos_aplicables.append("IVA_RETEIVA")  # ✅ NUEVO IMPUESTO
+        impuestos_aplicables.append("IVA_RETEIVA")  # NUEVO IMPUESTO
     
     return {
         "nit": nit,
         "aplica_estampilla_universidad": aplica_estampilla,
         "aplica_contribucion_obra_publica": aplica_obra_publica,
-        "aplica_iva_reteiva": aplica_iva,  # ✅ NUEVO CAMPO
+        "aplica_iva_reteiva": aplica_iva,  # NUEVO CAMPO
         "impuestos_aplicables": impuestos_aplicables,
-        "procesamiento_paralelo": len(impuestos_aplicables) > 1,  # ✅ LÓGICA ACTUALIZADA
+        "procesamiento_paralelo": len(impuestos_aplicables) > 1,  # LÓGICA ACTUALIZADA
         "nombre_entidad_estampilla": NITS_ESTAMPILLA_UNIVERSIDAD.get(nit),
         "nombre_entidad_obra_publica": NITS_CONTRIBUCION_OBRA_PUBLICA.get(nit),
-        "nombre_entidad_iva": NITS_IVA_RETEIVA.get(nit, {}).get("nombre")  # ✅ NUEVO CAMPO
+        "nombre_entidad_iva": NITS_IVA_RETEIVA.get(nit, {}).get("nombre")  # NUEVO CAMPO
     }
 
-def obtener_configuracion_impuestos_integrada() -> Dict[str, Any]:
-    """Obtiene configuración integrada para todos los impuestos - ACTUALIZADO CON IVA"""
+def obtener_configuracion_impuestos_integrada(database_manager=None) -> Dict[str, Any]:
+    """
+    Obtiene configuracion integrada para todos los impuestos - ACTUALIZADO CON IVA
+
+    Args:
+        database_manager: DatabaseManager para obtener configuracion IVA desde BD (REQUERIDO para IVA)
+
+    Returns:
+        Dict con configuraciones de todos los impuestos
+
+    Raises:
+        ValueError: Si database_manager es None (requerido para obtener config IVA)
+    """
     return {
         "estampilla_universidad": obtener_configuracion_estampilla_universidad(),
         "contribucion_obra_publica": obtener_configuracion_obra_publica(),
-        "iva_reteiva": obtener_configuracion_iva(),  # ✅ NUEVA CONFIGURACIÓN
+        "iva_reteiva": obtener_configuracion_iva(database_manager=database_manager),
         "terceros_recursos_publicos_compartidos": list(TERCEROS_RECURSOS_PUBLICOS.keys())
     }
 
@@ -1568,23 +1620,30 @@ def crear_resultado_recurso_extranjero_iva() -> Dict[str, Any]:
         }
     }
 
+def establecer_uvt(valor: int):
+    """Establece el valor UVT global para toda la aplicacion."""
+    global UVT_2025
+    UVT_2025 = valor
+    logger.info(f"UVT establecido desde API: ${valor:,}")
+
+
 # ===============================
 # INICIALIZACIÓN AUTOMÁTICA
 # ===============================
 
 def inicializar_configuracion():
-    """Inicializa y valida la configuración del sistema"""
+    """Inicializa y valida la configuración del sistema (excepto UVT que se obtiene async)."""
     try:
-        # Validar que las constantes estén definidas
-        assert UVT_2025 > 0, "UVT_2025 debe ser mayor a 0"
+        # UVT se valida despues de obtenerlo desde la API
         assert SMMLV_2025 > 0, "SMMLV_2025 debe ser mayor a 0"
-        assert len(TERCEROS_RECURSOS_PUBLICOS) > 0, "Debe haber terceros configurados"
+        # TERCEROS_RECURSOS_PUBLICOS se puebla por solicitud desde la API
+        # (refrescar_codigos_negocio), por eso ya no se valida aquí.
         assert len(CONCEPTOS_RETEFUENTE) > 0, "Debe haber conceptos de retefuente configurados"
         assert len(NITS_IVA_RETEIVA) > 0, "Debe haber NITs configurados para IVA y ReteIVA"
-        
+
         logger.info(" Configuración inicializada correctamente")
-        logger.info(f"   - UVT 2025: ${UVT_2025:,}")
-        logger.info(f"   - Terceros: {len(TERCEROS_RECURSOS_PUBLICOS)}")
+        logger.info(f"   - UVT 2025: pendiente (se obtendra desde API)")
+        logger.info(f"   - Terceros: pendiente (se obtendra desde API por solicitud)")
         logger.info(f"   - Conceptos ReteFuente: {len(CONCEPTOS_RETEFUENTE)}")
         logger.info(f"   - NITs IVA y ReteIVA: {len(NITS_IVA_RETEIVA)}")
         

@@ -121,7 +121,9 @@ class LiquidadorRetencion:
         ]
         
         # Agregar advertencias por conceptos no identificados
-        if conceptos_no_identificados:
+        # Solo cuando hay conceptos mixtos (algunos identificados y otros no).
+        # Si TODOS son no identificados, basta el mensaje "No se identificaron conceptos válidos".
+        if conceptos_no_identificados and conceptos_identificados:
             mensajes_error.append("El concepto facturado no se identifica en los soportes adjuntos. Validar soportes.")
             logger.warning(f"Conceptos no identificados: {len(conceptos_no_identificados)}")
         
@@ -132,12 +134,15 @@ class LiquidadorRetencion:
             logger.error("No hay conceptos identificados válidos")
 
         if not puede_liquidar:
+            # Único caso que llega aquí: no hay ningún concepto identificado.
+            # Gemini confirmó que lo facturado no se relaciona con el diccionario,
+            # por lo que el impuesto no aplica.
             return self._crear_resultado_no_liquidable(
                 mensajes_error,
-                estado="preliquidacion_sin_finalizar",
+                estado="no_aplica_impuesto",
                 valor_factura_sin_iva=analisis.valor_total or 0
             )
-        
+
         #  VALIDACIÓN SEPARADA: ARTÍCULO 383 PARA PERSONAS NATURALES
         # Verificar si se analizó Art 383 y si aplica
         if analisis.articulo_383 :
@@ -202,17 +207,14 @@ class LiquidadorRetencion:
         tolerancia = 1.0  # Tolerancia de $1 peso por redondeos
 
         if abs(suma_bases_gravables - valor_base_total) > tolerancia:
-            diferencia = suma_bases_gravables - valor_base_total
-            mensajes_error.append("Error: La sumatoria de las bases gravables no coincide con el valor total de la factura")
-            mensajes_error.append(f"  • Suma de bases gravables: ${suma_bases_gravables:,.2f}")
-            mensajes_error.append(f"  • Valor total factura (sin IVA): ${valor_base_total:,.2f}")
-            mensajes_error.append(f"  • Diferencia: ${diferencia:,.2f}")
-            logger.error(f"Liquidación detenida: Suma bases (${suma_bases_gravables:,.2f}) != Valor total (${valor_base_total:,.2f})")
-            return self._crear_resultado_no_liquidable(
-                mensajes_error,
-                estado="preliquidacion_sin_finalizar",
-                valor_factura_sin_iva=analisis.valor_total or 0
+            diferencia = abs(suma_bases_gravables - valor_base_total)
+            mensaje_advertencia = (
+                f"Advertencia: La sumatoria de las bases gravables (${suma_bases_gravables:,.2f}) "
+                f"no coincide con el valor total de la factura (${valor_base_total:,.2f}). Diferencia: ${diferencia:,.2f}"
             )
+            mensajes_error.append(mensaje_advertencia)
+            logger.warning(f"Discrepancia en bases: Suma bases (${suma_bases_gravables:,.2f}) != Valor total (${valor_base_total:,.2f})")
+            # Ya no se detiene la ejecución ni se retorna _crear_resultado_no_liquidable
 
         for concepto_item in conceptos_con_bases:
             logger.info(f" Procesando concepto: {concepto_item.concepto} - Base: ${concepto_item.base_gravable:,.2f}")
@@ -371,6 +373,7 @@ class LiquidadorRetencion:
             planilla_seguridad_social = False
             fecha_planilla = "0000-00-00"
             IBC_seguridad_social = 0.0
+            valor_pagado_seguridad_social = 0.0
             
             # Extraer información de planilla de seguridad social
             if deducciones and hasattr(deducciones, 'planilla_seguridad_social'):
@@ -378,6 +381,7 @@ class LiquidadorRetencion:
                 planilla_seguridad_social = getattr(planilla_info, 'planilla_seguridad_social', False)
                 fecha_planilla = getattr(planilla_info, 'fecha_de_planilla_seguridad_social', "0000-00-00")
                 IBC_seguridad_social = getattr(planilla_info, 'IBC_seguridad_social', 0.0)
+                valor_pagado_seguridad_social = getattr(planilla_info, 'valor_pagado_seguridad_social', 0.0)
             
             # VALIDACIÓN 2.1: Si NO es primer pago, planilla es OBLIGATORIA
             if not es_primer_pago and not planilla_seguridad_social:
@@ -584,22 +588,36 @@ class LiquidadorRetencion:
             
             logger.info(" Paso 7: Cálculo final...")
             
-            # Calcular aportes a seguridad social (40% del ingreso)
-            aportes_seguridad_social = ingreso_bruto * LIMITES_DEDUCCIONES_ART383["seguridad_social_porcentaje"]
+            # Calcular aportes a seguridad social (usar valor real pagado en planilla)
+            aportes_seguridad_social = valor_pagado_seguridad_social
             
-            # Sumar todas las deducciones aplicables
-            total_deducciones = sum(deducciones_aplicables.values())
+            # Sumar todas las deducciones aplicables identificadas (sin Renta Exenta del 25%)
+            total_deducciones_iniciales = sum(deducciones_aplicables.values())
+            
+            # Calcular Renta Exenta de Trabajo (25%)
+            base_para_renta_exenta = ingreso_bruto - total_deducciones_iniciales - aportes_seguridad_social
+            if base_para_renta_exenta < 0:
+                base_para_renta_exenta = 0
+            
+            renta_exenta_trabajo = base_para_renta_exenta * 0.25
+            
+            # Agregar la renta exenta a las deducciones aplicables (para trazabilidad en logs)
+            deducciones_aplicables["renta_exenta_25_porc"] = renta_exenta_trabajo
+            logger.info(f" Renta exenta de trabajo (25%) aplicada: ${renta_exenta_trabajo:,.2f}")
+            
+            # Total de deducciones soportadas (incluyendo el 25%)
+            total_deducciones_soportadas = total_deducciones_iniciales + renta_exenta_trabajo
             
             # Aplicar límite máximo del 40% del ingreso bruto
             limite_maximo_deducciones = ingreso_bruto * LIMITES_DEDUCCIONES_ART383["deducciones_maximas_porcentaje"]
-            deducciones_limitadas = min(total_deducciones, limite_maximo_deducciones)
+            deducciones_limitadas = min(total_deducciones_soportadas, limite_maximo_deducciones)
             
-            if total_deducciones > limite_maximo_deducciones:
-                mensajes_error.append(f" Deducciones limitadas al 40% del ingreso: ${deducciones_limitadas:,.2f} (original: ${total_deducciones:,.2f})")
+            if total_deducciones_soportadas > limite_maximo_deducciones:
+                mensajes_error.append(f" Deducciones limitadas al 40% del ingreso: ${deducciones_limitadas:,.2f} (original: ${total_deducciones_soportadas:,.2f})")
                 logger.warning(f"Deducciones limitadas al 40%: ${deducciones_limitadas:,.2f}")
             
-            # Calcular base gravable final
-            base_gravable_final = ingreso_bruto - aportes_seguridad_social - deducciones_limitadas
+            # Calcular base gravable final (ingreso - deducciones limitadas - aportes a seguridad social)
+            base_gravable_final = ingreso_bruto - deducciones_limitadas - aportes_seguridad_social
             
             # Verificar que la base gravable no sea negativa
             if base_gravable_final < 0:
@@ -610,14 +628,20 @@ class LiquidadorRetencion:
             base_gravable_uvt = base_gravable_final / UVT_2025
             
             # Aplicar tarifa progresiva del Artículo 383
-            tarifa_art383 = obtener_tarifa_articulo_383(base_gravable_final)
-            valor_retencion_art383 = base_gravable_final * tarifa_art383
+            tarifa_art383, limite_inferior_uvt = obtener_tarifa_articulo_383(base_gravable_final)
+            limite_inferior_pesos = limite_inferior_uvt * UVT_2025
+            
+            # Validar que la base gravable sea mayor al límite inferior para evitar retenciones negativas
+            base_sujeta_retencion = max(0, base_gravable_final - limite_inferior_pesos)
+            valor_retencion_art383 = base_sujeta_retencion * tarifa_art383
             
             logger.info(f" Cálculo completado:")
             logger.info(f"   - Ingreso bruto: ${ingreso_bruto:,.2f}")
             logger.info(f"   - Aportes seg. social: ${aportes_seguridad_social:,.2f}")
             logger.info(f"   - Deducciones: ${deducciones_limitadas:,.2f}")
             logger.info(f"   - Base gravable: ${base_gravable_final:,.2f}")
+            logger.info(f"   - Límite inferior descontado: ${limite_inferior_pesos:,.2f} ({limite_inferior_uvt} UVT)")
+            logger.info(f"   - Base sujeta a retención: ${base_sujeta_retencion:,.2f}")
             logger.info(f"   - Tarifa: {tarifa_art383*100:.1f}%")
             logger.info(f"   - Retención: ${valor_retencion_art383:,.2f}")
             
@@ -631,7 +655,7 @@ class LiquidadorRetencion:
                 f" Validaciones básicas: Persona natural + Conceptos aplicables",
                 f" Primer pago: {'SÍ' if es_primer_pago else 'NO'} - Planilla: {'Presente' if planilla_seguridad_social else 'No requerida'}",
                 f" Ingreso bruto: ${ingreso_bruto:,.2f}",
-                f" Aportes seguridad social (40%): ${aportes_seguridad_social:,.2f}",
+                f" Valor pagado en seguridad social (PILA): ${aportes_seguridad_social:,.2f}",
                 f" Deducciones aplicables: ${deducciones_limitadas:,.2f}"
             ]
             
@@ -644,6 +668,8 @@ class LiquidadorRetencion:
             mensajes_detalle.extend([
                 f" Base gravable final: ${base_gravable_final:,.2f}",
                 f" Base gravable en UVT: {base_gravable_uvt:.2f} UVT",
+                f" Límite inferior descontado: ${limite_inferior_pesos:,.2f} ({limite_inferior_uvt} UVT)",
+                f" Base sujeta a retención: ${base_sujeta_retencion:,.2f}",
                 f" Tarifa aplicada: {tarifa_art383*100:.1f}%",
                 f" Retención calculada: ${valor_retencion_art383:,.2f}",
                 " Cálculo completado con validaciones manuales"
@@ -691,7 +717,7 @@ class LiquidadorRetencion:
             }
             
         except Exception as e:
-            logger.error(f"💥 Error en cálculo Art. 383 con validaciones manuales: {e}")
+            logger.error(f"Error en cálculo Art. 383 con validaciones manuales: {e}")
             return {
                 "puede_liquidar": False,
                 "mensajes_error": [f"Error en cálculo validado Art. 383: {str(e)}"]
@@ -762,7 +788,7 @@ class LiquidadorRetencion:
             List[str]: Lista de mensajes explicativos
         """
         mensajes_detalle = [
-            "📜 Cálculo bajo Artículo 383 del Estatuto Tributario (ANÁLISIS SEPARADO):",
+            "Cálculo bajo Artículo 383 del Estatuto Tributario (ANÁLISIS SEPARADO):",
             f"  • Ingreso bruto: ${ingreso_bruto:,.2f}",
             f"  • Aportes seguridad social (40%): ${aportes_seguridad_social:,.2f}",
             f"  • Deducciones aplicables: ${deducciones_limitadas:,.2f}"
@@ -779,7 +805,7 @@ class LiquidadorRetencion:
             f"  • Base gravable en UVT: {base_gravable_uvt:.2f} UVT",
             f"  • Tarifa aplicada: {tarifa_art383*100:.1f}%",
             f"  • Retención calculada: ${valor_retencion_art383:,.2f}",
-            "✅ Cálculo completado con análisis separado de Gemini"
+            "Cálculo completado con análisis separado de Gemini"
         ])
         
         return mensajes_detalle
@@ -861,7 +887,7 @@ class LiquidadorRetencion:
             "estado": None  # NUEVO: Se asignará según validaciones
         }
         
-        # 🔧 VALIDACIÓN MEJORADA: Manejar None correctamente
+        # VALIDACIÓN MEJORADA: Manejar None correctamente
         if not naturaleza or naturaleza is None:
             resultado["advertencias"].append("No se pudo identificar la naturaleza del tercero. Por favor adjunte el RUT actualizado.")
             logger.warning("Naturaleza del tercero no identificada o es None")
@@ -880,10 +906,10 @@ class LiquidadorRetencion:
             # Ya no se valida responsable de IVA porque aplica retención igual
 
             # Validar régimen simple
-            if hasattr(naturaleza, 'regimen_tributario') and naturaleza.regimen_tributario == "SIMPLE" and hasattr(naturaleza, 'es_persona_natural') and naturaleza.es_persona_natural == False:
+            if hasattr(naturaleza, 'regimen_tributario') and naturaleza.regimen_tributario == "SIMPLE":
                 resultado["puede_continuar"] = False
-                resultado["mensajes"].append("Régimen Simple de Tributación - Persona Jurídica - NO aplica retención en la fuente")
-                resultado["estado"] = "no_aplica_impuesto"  # NUEVO
+                resultado["mensajes"].append("Régimen Simple de Tributación - NO aplica retención en la fuente")
+                resultado["estado"] = "no_aplica_impuesto"
                 logger.info("Régimen Simple detectado - no aplica retención")
                 return resultado
             
@@ -1083,7 +1109,7 @@ class LiquidadorRetencion:
         Returns:
             ResultadoLiquidacion: Resultado con valores en cero y explicación
         """
-        # 🔧 FIX: Generar concepto descriptivo en lugar de "N/A"
+        # FIX: Generar concepto descriptivo en lugar de "N/A"
         concepto_descriptivo = "No aplica retención"
 
         # NUEVO: Determinar estado si no se proporciona

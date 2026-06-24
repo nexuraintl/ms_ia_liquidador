@@ -242,7 +242,8 @@ async def validar_impuestos_especiales(
     aplica_estampilla: bool,
     aplica_obra_publica: bool,
     codigo_del_negocio: int,
-    nombre_negocio: str
+    nombre_negocio: str,
+    database_manager=None
 ) -> Optional[Dict[str, Any]]:
     """
     Wrapper function para mantener compatibilidad con main.py.
@@ -256,12 +257,15 @@ async def validar_impuestos_especiales(
         aplica_obra_publica: Si aplica Contribucion Obra Publica 5%
         codigo_del_negocio: Codigo del negocio
         nombre_negocio: Nombre del negocio
+        database_manager: DatabaseManager para consultas a BD (opcional)
 
     Returns:
         Dict con estructura para resultado_final["impuestos"]
         o None si no aplica ningun impuesto especial
     """
-    validador = ValidadorImpuestosEspeciales()
+    # Crear liquidador con database_manager inyectado
+    liquidador_estampilla = LiquidadorEstampilla(database_manager=database_manager)
+    validador = ValidadorImpuestosEspeciales(liquidador_estampilla=liquidador_estampilla)
 
     return await validador.validar(
         resultados_analisis=resultados_analisis,

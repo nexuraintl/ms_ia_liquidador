@@ -1,110 +1,153 @@
-# .azure-pipelines.yml
-
+# azure-pipelines.yml
+# Sincroniza ramas de Azure DevOps hacia GitHub (nexuraintl).
+# Si el repo no existe en GitHub, lo crea automáticamente como privado.
+# Requiere variable de pipeline: GITHUB_TOKEN_NEXURAINTL con scope 'repo'.
+ 
 trigger:
   branches:
     include:
       - dev
       - qa
       - master
-
+      - main
+ 
 pool:
   vmImage: ubuntu-latest
-
+ 
 variables:
   GIT_USER: $(Build.RequestedFor)
   GIT_EMAIL: $(Build.RequestedForEmail)
-
+ 
   # Organización GitHub destino
   GITHUB_ORG: "nexuraintl"
-
+ 
   # Rama actual
   BRANCH_NAME: $(Build.SourceBranchName)
-
+ 
 steps:
-
+ 
   # 1️⃣ Checkout completo
   - checkout: self
     clean: true
     persistCredentials: true
     fetchDepth: 0
-
+ 
   # 2️⃣ Configuración Git
   - script: |
       echo "Configurando Git..."
-
+ 
       git config --global user.name "$(GIT_USER)"
       git config --global user.email "$(GIT_EMAIL)"
-
+ 
       echo "Usuario Git configurado:"
       git config --global user.name
       git config --global user.email
     displayName: "Configurar Git"
-
+ 
   # 3️⃣ Detectar nombre del repo dinámicamente
   - script: |
       echo "Repositorio detectado desde ADO:"
       echo "$(Build.Repository.Name)"
-
+ 
       # Si viene tipo Proyecto/repo -> obtiene solo repo
       REPO_NAME=$(basename "$(Build.Repository.Name)")
-
+ 
       echo "Nombre final repo:"
       echo "$REPO_NAME"
-
+ 
       # Guardar variable para siguientes steps
       echo "##vso[task.setvariable variable=REPO_NAME]$REPO_NAME"
     displayName: "Detectar nombre repo"
-
-  # 4️⃣ Validar existencia repo GitHub
+ 
+  # 4️⃣ Verificar existencia del repo en GitHub — crearlo si no existe
   - script: |
-      echo "Validando existencia del repo GitHub..."
-
-      GITHUB_URL="https://$(GITHUB_TOKEN_NEXURAINTL)@github.com/$(GITHUB_ORG)/$(REPO_NAME).git"
-
-      echo "Repo destino:"
-      echo "https://github.com/$(GITHUB_ORG)/$(REPO_NAME).git"
-
-      git ls-remote "$GITHUB_URL" > /dev/null 2>&1
-
-      if [ $? -ne 0 ]; then
+      echo "Verificando existencia del repo en GitHub..."
+      echo "Repo: $(GITHUB_ORG)/$(REPO_NAME)"
+ 
+      # Consultar la API de GitHub para verificar si el repo existe
+      HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: token $(GITHUB_TOKEN_NEXURAINTL)" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/$(GITHUB_ORG)/$(REPO_NAME)")
+ 
+      echo "HTTP status GitHub API: $HTTP_STATUS"
+ 
+      if [ "$HTTP_STATUS" = "200" ]; then
         echo "======================================="
-        echo "ERROR: El repo NO existe en GitHub"
-        echo "Repo esperado:"
+        echo "Repo ya existe en GitHub"
         echo "$(GITHUB_ORG)/$(REPO_NAME)"
+        echo "======================================="
+      elif [ "$HTTP_STATUS" = "404" ]; then
+        echo "Repo no existe. Creando en GitHub..."
+ 
+        CREATE_RESPONSE=$(curl -s -w "\n%{http_code}" \
+          -X POST \
+          -H "Authorization: token $(GITHUB_TOKEN_NEXURAINTL)" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/orgs/$(GITHUB_ORG)/repos" \
+          -d "{
+            \"name\": \"$(REPO_NAME)\",
+            \"private\": true,
+            \"auto_init\": false,
+            \"description\": \"Sincronizado desde Azure DevOps\"
+          }")
+ 
+        CREATE_STATUS=$(echo "$CREATE_RESPONSE" | tail -1)
+        CREATE_BODY=$(echo "$CREATE_RESPONSE" | head -1)
+ 
+        echo "Respuesta creación (HTTP $CREATE_STATUS):"
+        echo "$CREATE_BODY"
+ 
+        if [ "$CREATE_STATUS" = "201" ]; then
+          echo "======================================="
+          echo "Repo creado exitosamente en GitHub"
+          echo "$(GITHUB_ORG)/$(REPO_NAME)"
+          echo "======================================="
+        else
+          echo "======================================="
+          echo "ERROR: No se pudo crear el repo en GitHub"
+          echo "HTTP status: $CREATE_STATUS"
+          echo "Verificar que GITHUB_TOKEN_NEXURAINTL tiene scope 'repo'"
+          echo "======================================="
+          exit 1
+        fi
+      else
+        echo "======================================="
+        echo "ERROR: Respuesta inesperada de la API de GitHub"
+        echo "HTTP status: $HTTP_STATUS"
+        echo "Verificar que GITHUB_TOKEN_NEXURAINTL es válido y tiene scope 'repo'"
         echo "======================================="
         exit 1
       fi
-
-      echo "Repo GitHub validado correctamente"
     env:
       GITHUB_TOKEN_NEXURAINTL: $(GITHUB_TOKEN_NEXURAINTL)
-    displayName: "Validar repo GitHub"
-
+    displayName: "Verificar o crear repo en GitHub"
+ 
   # 5️⃣ Sincronizar rama hacia GitHub
   - script: |
       echo "Sincronizando repo..."
       echo "Repo: $(REPO_NAME)"
       echo "Rama: $(BRANCH_NAME)"
-
+ 
       GITHUB_URL="https://$(GITHUB_TOKEN_NEXURAINTL)@github.com/$(GITHUB_ORG)/$(REPO_NAME).git"
-
+ 
       echo "Actualizando remotos..."
-
+ 
       git remote add github "$GITHUB_URL" || true
       git remote set-url github "$GITHUB_URL"
-
+ 
       echo "Remotos configurados:"
       git remote -v
-
+ 
       echo "Actualizando referencias..."
       git fetch --all
-
+ 
       echo "Push hacia GitHub..."
-
+ 
       git push github HEAD:$(BRANCH_NAME) --force -v
-
+ 
       PUSH_STATUS=$?
-
+ 
       if [ $PUSH_STATUS -ne 0 ]; then
         echo "======================================="
         echo "ERROR: Falló sincronización con GitHub"
@@ -113,7 +156,7 @@ steps:
         echo "======================================="
         exit 1
       fi
-
+ 
       echo "======================================="
       echo "Sincronización completada"
       echo "Repo: $(REPO_NAME)"

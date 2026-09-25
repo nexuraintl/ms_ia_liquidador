@@ -20,10 +20,38 @@ from typing import List
 from .prompt_clasificador import _generar_seccion_archivos_directos
 
 
+def _generar_seccion_conceptos_iva(conceptos_iva: list[dict] | None) -> str:
+    """Genera la tarea de elegir el concepto contable de IVA de la estructura contable.
+
+    Args:
+        conceptos_iva: Conceptos {codigo_concepto, descripcion_concepto, porcentaje} de Nexura.
+
+    Returns:
+        str: Seccion del prompt, o instruccion de dejar el codigo vacio si no hay conceptos.
+    """
+    if not conceptos_iva:
+        return '4. CONCEPTO CONTABLE DE IVA: no hay catalogo, deja "codigo_concepto_iva": ""'
+    tabla = "\n".join(
+        f"   • {c['codigo_concepto']} | {c['descripcion_concepto']} | {c['porcentaje']:g}%"
+        for c in conceptos_iva
+    )
+    return f"""4. CONCEPTO CONTABLE DE IVA (codigo | descripcion | porcentaje):
+{tabla}
+
+   → Elige el codigo cuyo porcentaje sea el porcentaje de IVA de la factura y cuya
+     descripcion mejor describa el caso: pago/proveedor del exterior ("EXTERIOR"),
+     IVA descontable ("DESCONTABLE"), proturismo ("PROTURISMO"), o el regimen comun general.
+   → Si el proveedor es del exterior, elige el concepto de PAGOS AL EXTERIOR del 19%
+     aunque la factura no muestre IVA.
+   → Si no hay IVA o ningun concepto encaja, usa "".
+"""
+
+
 def PROMPT_ANALISIS_IVA(factura_texto: str, rut_texto: str, anexos_texto: str,
                                     cotizaciones_texto: str, anexo_contrato: str,
                                     nombres_archivos_directos: list[str] = None,
-                                    database_manager = None) -> str:
+                                    database_manager = None,
+                                    conceptos_iva: list[dict] | None = None) -> str:
     """
     Prompt optimizado para Gemini - Enfocado en extracción y clasificación de IVA.
 
@@ -35,6 +63,7 @@ def PROMPT_ANALISIS_IVA(factura_texto: str, rut_texto: str, anexos_texto: str,
         anexo_contrato: Texto del anexo de concepto de contrato
         nombres_archivos_directos: Lista de nombres de archivos directos
         database_manager: DatabaseManager REQUERIDO para obtener config IVA desde BD
+        conceptos_iva: Conceptos contables de IVA de la estructura contable (opcional)
 
     Returns:
         str: Prompt formateado para enviar a Gemini
@@ -168,6 +197,8 @@ TAREAS ESPECÍFICAS DE EXTRACCIÓN
 
    IMPORTANTE: Si no puedes clasificar con certeza, usa "no_clasificado"
 
+{_generar_seccion_conceptos_iva(conceptos_iva)}
+
 ═══════════════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (JSON ESTRICTO)
 ═══════════════════════════════════════════════════════════════════════
@@ -185,6 +216,7 @@ Responde ÚNICAMENTE con el siguiente JSON, sin texto adicional:
         "valor_subtotal_sin_iva": valor encontrado o 0.0,
         "valor_total_con_iva": valor encontrado o 0.0,
         "concepto_facturado": "Transcripción textual del concepto/descripción",
+        "codigo_concepto_iva": "codigo elegido en la tarea 4 o \"\""
     }},
     "clasificacion_concepto": {{
         "categoria": "gravado|no_causa_iva|exento|excluido|no_clasificado",

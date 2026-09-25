@@ -398,7 +398,8 @@ class PreparadorTareasAnalisis:
         self,
         clasificadores: Dict[str, Any],
         clasificador_base: ProcesadorGemini,
-        db_manager: DatabaseManager
+        db_manager: DatabaseManager,
+        conceptos_iva: Optional[List[Dict[str, Any]]] = None
     ):
         """
         Inicializa el preparador con clasificadores y dependencias.
@@ -407,10 +408,12 @@ class PreparadorTareasAnalisis:
             clasificadores: Dict con clasificadores ya instanciados.
             clasificador_base: ProcesadorGemini para metodos generales.
             db_manager: DatabaseManager para clasificadores especiales.
+            conceptos_iva: Conceptos contables de IVA de la estructura contable.
         """
         self.clasificadores = clasificadores
         self.clasificador_base = clasificador_base
         self.db_manager = db_manager
+        self.conceptos_iva = conceptos_iva or []
 
     async def preparar_tareas(
         self,
@@ -501,46 +504,7 @@ class PreparadorTareasAnalisis:
         if tarea:
             tareas.append(tarea)
 
-        # Tarea 2: Impuestos Especiales (Estampilla + Obra Publica integrados)
-        tarea = self._crear_tarea_impuestos_especiales(
-            documentos_clasificados,
-            cache_archivos,
-            aplica_estampilla,
-            aplica_obra_publica
-        )
-        if tarea:
-            tareas.append(tarea)
-
-        # Tarea 3: IVA/ReteIVA
-        tarea = self._crear_tarea_iva(
-            documentos_clasificados,
-            cache_archivos,
-            aplica_iva,
-            es_recurso_extranjero,
-            nit_administrativo
-        )
-        if tarea:
-            tareas.append(tarea)
-
-        # Tarea 4: Estampillas Generales (SIEMPRE se crea)
-        tarea = self._crear_tarea_estampillas_generales(
-            documentos_clasificados,
-            cache_archivos
-        )
-        tareas.append(tarea)
-
-        # Tarea 5: Tasa Prodeporte
-        tarea = self._crear_tarea_tasa_prodeporte(
-            documentos_clasificados,
-            cache_archivos,
-            aplica_tasa_prodeporte,
-            observaciones_tp,
-            nit_administrativo
-        )
-        if tarea:
-            tareas.append(tarea)
-
-        # Tarea 6: ICA (con wrapper async)
+        # Tarea 2: ICA (con wrapper async)
         tarea = await self._crear_tarea_ica(
             documentos_clasificados,
             cache_archivos,
@@ -551,9 +515,48 @@ class PreparadorTareasAnalisis:
         if tarea:
             tareas.append(tarea)
 
-        # Tarea 7: Timbre (con wrapper async)
+        # Tarea 3: Timbre (con wrapper async)
         tarea = await self._crear_tarea_timbre(
             aplica_timbre,
+            observaciones_tp,
+            nit_administrativo
+        )
+        if tarea:
+            tareas.append(tarea)
+
+        # Tarea 4: Impuestos Especiales (Estampilla + Obra Publica integrados)
+        tarea = self._crear_tarea_impuestos_especiales(
+            documentos_clasificados,
+            cache_archivos,
+            aplica_estampilla,
+            aplica_obra_publica
+        )
+        if tarea:
+            tareas.append(tarea)
+
+        # Tarea 5: IVA/ReteIVA
+        tarea = self._crear_tarea_iva(
+            documentos_clasificados,
+            cache_archivos,
+            aplica_iva,
+            es_recurso_extranjero,
+            nit_administrativo
+        )
+        if tarea:
+            tareas.append(tarea)
+
+        # Tarea 6: Estampillas Generales (SIEMPRE se crea)
+        tarea = self._crear_tarea_estampillas_generales(
+            documentos_clasificados,
+            cache_archivos
+        )
+        tareas.append(tarea)
+
+        # Tarea 7: Tasa Prodeporte
+        tarea = self._crear_tarea_tasa_prodeporte(
+            documentos_clasificados,
+            cache_archivos,
+            aplica_tasa_prodeporte,
             observaciones_tp,
             nit_administrativo
         )
@@ -679,7 +682,8 @@ class PreparadorTareasAnalisis:
             coroutine = self.clasificadores["iva"].analizar_iva(
                 documentos_clasificados,
                 None,
-                cache_archivos
+                cache_archivos,
+                conceptos_iva=self.conceptos_iva
             )
             return TareaAnalisis(nombre="iva_reteiva", coroutine=coroutine)
 
@@ -942,7 +946,8 @@ class CoordinadorPreparacionTareas:
         self,
         clasificador: ProcesadorGemini,
         estructura_contable: int,
-        db_manager: DatabaseManager
+        db_manager: DatabaseManager,
+        conceptos_iva: Optional[List[Dict[str, Any]]] = None
     ):
         """
         Inicializa el coordinador con dependencias necesarias.
@@ -951,10 +956,12 @@ class CoordinadorPreparacionTareas:
             clasificador: ProcesadorGemini para inyectar en clasificadores.
             estructura_contable: ID de estructura contable.
             db_manager: DatabaseManager para clasificadores que requieren DB.
+            conceptos_iva: Conceptos contables de IVA de la estructura contable.
         """
         self.clasificador = clasificador
         self.estructura_contable = estructura_contable
         self.db_manager = db_manager
+        self.conceptos_iva = conceptos_iva
 
         # Instanciar componentes especializados (DIP)
         self.instanciador = InstanciadorClasificadores(
@@ -1050,7 +1057,8 @@ class CoordinadorPreparacionTareas:
         preparador_tareas = PreparadorTareasAnalisis(
             clasificadores=clasificadores,
             clasificador_base=self.clasificador,
-            db_manager=self.db_manager
+            db_manager=self.db_manager,
+            conceptos_iva=self.conceptos_iva
         )
 
         tareas = await preparador_tareas.preparar_tareas(
@@ -1108,7 +1116,8 @@ async def preparar_tareas_analisis(
     proveedor: str,
     nit_administrativo: str,
     observaciones_tp: Optional[str],
-    impuestos_a_procesar: List[str]
+    impuestos_a_procesar: List[str],
+    conceptos_iva: Optional[Dict[str, Any]] = None
 ) -> ResultadoPreparacionTareas:
     """
     Funcion fachada para preparar tareas de analisis paralelo.
@@ -1136,6 +1145,7 @@ async def preparar_tareas_analisis(
         nit_administrativo: NIT administrativo.
         observaciones_tp: Observaciones de PGD.
         impuestos_a_procesar: Lista de nombres de impuestos a procesar.
+        conceptos_iva: Resultado de `obtener_conceptos_iva_reteiva` (se usa su lista 'iva').
 
     Returns:
         ResultadoPreparacionTareas con:
@@ -1181,7 +1191,8 @@ async def preparar_tareas_analisis(
     coordinador = CoordinadorPreparacionTareas(
         clasificador=clasificador,
         estructura_contable=estructura_contable,
-        db_manager=db_manager
+        db_manager=db_manager,
+        conceptos_iva=(conceptos_iva or {}).get("iva", [])
     )
 
     return await coordinador.preparar_tareas_analisis(

@@ -16,10 +16,70 @@ Version: 1.0 - Refactorizado con POO
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 from Liquidador.liquidador_iva import LiquidadorIVA
 from config import crear_resultado_recurso_extranjero_iva
+
+
+def _asignar_concepto(
+    conceptos: List[Dict[str, Any]], porcentaje: float, codigo_sugerido: str = ""
+) -> Tuple[str, str, Optional[str]]:
+    """Elige el concepto contable cuyo porcentaje coincide con el liquidado.
+
+    Si varios conceptos comparten porcentaje, se usa el codigo sugerido por Gemini.
+
+    Args:
+        conceptos: Conceptos {codigo_concepto, descripcion_concepto, porcentaje} de Nexura.
+        porcentaje: Porcentaje liquidado en puntos (19, 15, 100).
+        codigo_sugerido: Codigo elegido por Gemini (puede ser vacio).
+
+    Returns:
+        Tuple con codigo, descripcion y aviso (None si se asigno un concepto).
+    """
+    if not conceptos:
+        return "", "", "no se pudo obtener el catalogo de conceptos de la estructura contable"
+    candidatos = [c for c in conceptos if round(c["porcentaje"]) == round(porcentaje)]
+    elegido = next((c for c in candidatos if c["codigo_concepto"] == codigo_sugerido), None)
+    if elegido is None and len(candidatos) == 1:
+        elegido = candidatos[0]
+    if elegido:
+        return elegido["codigo_concepto"], elegido["descripcion_concepto"], None
+    if not candidatos:
+        return "", "", f"no hay concepto contable del {porcentaje:g}% para la estructura contable"
+    codigos = ", ".join(c["codigo_concepto"] for c in candidatos)
+    return "", "", f"hay varios conceptos del {porcentaje:g}% ({codigos}) y no se pudo elegir uno"
+
+
+def agregar_conceptos_iva_reteiva(
+    resultado: Dict[str, Any], conceptos: Dict[str, Any], codigo_sugerido: str = ""
+) -> None:
+    """Agrega codigo y descripcion del concepto de IVA y de ReteIVA al resultado (in place).
+
+    Sin IVA o sin ReteIVA liquidados los campos quedan vacios sin aviso; si hay valor pero
+    no hay concepto que encaje, quedan vacios y se agrega una observacion.
+
+    Args:
+        resultado: Dict final de iva_reteiva.
+        conceptos: Resultado de `obtener_conceptos_iva_reteiva` ('iva' y 'reteiva').
+        codigo_sugerido: Codigo de IVA elegido por Gemini.
+    """
+    for clave, valor, porcentaje, sugerido in (
+        ("iva", resultado.get("valor_iva_identificado"), resultado.get("porcentaje_iva"),
+         codigo_sugerido),
+        ("reteiva", resultado.get("valor_reteiva"), resultado.get("tarifa_reteiva"), ""),
+    ):
+        codigo, descripcion = "", ""
+        if (valor or 0) > 0 and (porcentaje or 0) > 0:
+            codigo, descripcion, aviso = _asignar_concepto(
+                conceptos.get(clave) or [], porcentaje * 100, sugerido or ""
+            )
+            if aviso:
+                resultado.setdefault("observaciones", []).append(
+                    f"Concepto {'IVA' if clave == 'iva' else 'ReteIVA'} sin asignar: {aviso}"
+                )
+        resultado[f"codigo_concepto_{clave}"] = codigo
+        resultado[f"descripcion_concepto_{clave}"] = descripcion
 
 
 class ValidadorIVAReteIVA:
@@ -54,7 +114,8 @@ class ValidadorIVAReteIVA:
         es_recurso_extranjero: bool,
         es_facturacion_extranjera: bool,
         nit_administrativo: str,
-        tipoMoneda: str
+        tipoMoneda: str,
+        conceptos_iva: Optional[Dict[str, Any]] = None
     ) -> Optional[Dict[str, Any]]:
         """
         Orquestador principal - valida y liquida IVA y ReteIVA.
@@ -68,24 +129,31 @@ class ValidadorIVAReteIVA:
             es_facturacion_extranjera: Si es facturacion del exterior
             nit_administrativo: NIT de la entidad administrativa
             tipoMoneda: Tipo de moneda ("COP" o "USD")
+            conceptos_iva: Conceptos contables de `obtener_conceptos_iva_reteiva`
 
         Returns:
             Dict con estructura de iva_reteiva o None si no aplica
         """
         # Verificar si debe procesar
         if not self._debe_procesar_iva_reteiva(resultados_analisis, aplica_iva):
-            return self._manejar_caso_especial(aplica_iva, es_recurso_extranjero)
+            resultado = self._manejar_caso_especial(aplica_iva, es_recurso_extranjero)
+        else:
+            try:
+                resultado = await self._procesar_liquidacion(
+                    resultados_analisis,
+                    es_facturacion_extranjera,
+                    nit_administrativo,
+                    tipoMoneda
+                )
+            except Exception as e:
+                return self._manejar_error(e)
 
-        # Procesar liquidacion
-        try:
-            return await self._procesar_liquidacion(
-                resultados_analisis,
-                es_facturacion_extranjera,
-                nit_administrativo,
-                tipoMoneda
-            )
-        except Exception as e:
-            return self._manejar_error(e)
+        if resultado:
+            analisis = resultados_analisis.get("iva_reteiva")
+            extraccion = analisis.get("extraccion_factura") if isinstance(analisis, dict) else None
+            sugerido = (extraccion or {}).get("codigo_concepto_iva", "")
+            agregar_conceptos_iva_reteiva(resultado, conceptos_iva or {}, sugerido)
+        return resultado
 
     def _debe_procesar_iva_reteiva(
         self,
@@ -268,7 +336,8 @@ async def validar_iva_reteiva(
     es_recurso_extranjero: bool,
     es_facturacion_extranjera: bool,
     nit_administrativo: str,
-    tipoMoneda: str
+    tipoMoneda: str,
+    conceptos_iva: Optional[Dict[str, Any]] = None
 ) -> Optional[Dict[str, Any]]:
     """
     Wrapper function para mantener compatibilidad con main.py.
@@ -283,6 +352,7 @@ async def validar_iva_reteiva(
         es_facturacion_extranjera: Si es facturacion del exterior
         nit_administrativo: NIT de la entidad administrativa
         tipoMoneda: Tipo de moneda ("COP" o "USD")
+        conceptos_iva: Conceptos contables de `obtener_conceptos_iva_reteiva`
 
     Returns:
         Dict con estructura para resultado_final["impuestos"]["iva_reteiva"]
@@ -296,5 +366,6 @@ async def validar_iva_reteiva(
         es_recurso_extranjero=es_recurso_extranjero,
         es_facturacion_extranjera=es_facturacion_extranjera,
         nit_administrativo=nit_administrativo,
-        tipoMoneda=tipoMoneda
+        tipoMoneda=tipoMoneda,
+        conceptos_iva=conceptos_iva
     )

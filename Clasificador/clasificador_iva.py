@@ -48,7 +48,10 @@ class ClasificadorIva:
 
         logger.info("Clasificador Iva inicializado correctamente.")
     
-    async def analizar_iva(self, documentos_clasificados: Dict[str, Dict], archivos_directos: List[UploadFile] = None, cache_archivos: Dict[str, bytes] = None) -> Dict[str, Any]:
+    async def analizar_iva(self, documentos_clasificados: Dict[str, Dict],
+                           archivos_directos: List[UploadFile] = None,
+                           cache_archivos: Dict[str, bytes] = None,
+                           conceptos_iva: List[Dict[str, Any]] = None) -> Dict[str, Any]:
         
         """
         Nueva funcionalidad: Análisis especializado de IVA y ReteIVA CON CACHE.
@@ -57,6 +60,7 @@ class ClasificadorIva:
             documentos_clasificados: Diccionario {nombre_archivo: {categoria, texto}}
             archivos_directos: Lista de archivos directos (para compatibilidad)
             cache_archivos: Cache de archivos para workers paralelos
+            conceptos_iva: Conceptos contables de IVA para que Gemini elija el codigo
             
             
         Returns:
@@ -117,7 +121,8 @@ class ClasificadorIva:
                 cotizaciones_texto=cotizaciones_texto,
                 anexo_contrato=anexo_contrato,
                 nombres_archivos_directos=nombres_archivos_directos,
-                database_manager=self.database_manager
+                database_manager=self.database_manager,
+                conceptos_iva=conceptos_iva
             )
             
             # Llamar a Gemini
@@ -249,7 +254,3 @@ class ClasificadorIva:
         }
     
     
-    
-    
-        
-        

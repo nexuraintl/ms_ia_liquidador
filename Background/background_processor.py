@@ -284,6 +284,14 @@ class BackgroundProcessor:
                     f"archivos: {descarga.resumen_fallos}"
                 )
 
+            # Los adjuntos con extension no soportada ya no se descargan, pero antes
+            # contaban en documentos_procesados (se descargaban y ValidadorArchivos los
+            # descartaba). Se conserva ese conteo para no cambiar el contrato.
+            if descarga.omitidos:
+                resultado["documentos_procesados"] = (
+                    resultado.get("documentos_procesados", 0) + len(descarga.omitidos)
+                )
+
             # Guardar JSON local (respaldo). Sin WEBHOOK_URL es la unica forma de ver
             # el resultado; con webhook configurado no escribe (ver modo_pruebas_local).
             from config import guardar_archivo_json
@@ -575,6 +583,11 @@ class BackgroundProcessor:
         numero_contrato = parametros.get("numero_contrato")
         valor_contrato_municipio = parametros.get("valor_contrato_municipio")
         tipoMoneda = parametros.get("tipoMoneda", "COP")
+        # Conceptos IVA/ReteIVA: solo dependen de la estructura contable, se piden ya (I/O)
+        # y se esperan antes de preparar las tareas, solapados con descarga y clasificacion
+        tarea_conceptos_iva = asyncio.create_task(asyncio.to_thread(
+            self.db_manager.obtener_conceptos_iva_reteiva, estructura_contable
+        ))
 
         # ================================
         # PASO 1: VALIDACION Y CONFIGURACION
@@ -639,6 +652,7 @@ class BackgroundProcessor:
         # ================================
         # PASO 4.1: PREPARACION DE TAREAS
         # ================================
+        conceptos_iva = await tarea_conceptos_iva
         resultado_preparacion = await preparar_tareas_analisis(
             clasificador=clasificador,
             estructura_contable=estructura_contable,
@@ -658,7 +672,8 @@ class BackgroundProcessor:
             proveedor=proveedor,
             nit_administrativo=nit_administrativo,
             observaciones_tp=observaciones_tp,
-            impuestos_a_procesar=impuestos_a_procesar
+            impuestos_a_procesar=impuestos_a_procesar,
+            conceptos_iva=conceptos_iva
         )
 
         cache_archivos = resultado_preparacion.cache_archivos
@@ -735,7 +750,8 @@ class BackgroundProcessor:
             es_recurso_extranjero=es_recurso_extranjero,
             es_facturacion_extranjera=es_facturacion_extranjera,
             nit_administrativo=nit_administrativo,
-            tipoMoneda=tipoMoneda
+            tipoMoneda=tipoMoneda,
+            conceptos_iva=conceptos_iva
         )
         if resultado_iva_reteiva:
             resultado_final["impuestos"]["iva_reteiva"] = resultado_iva_reteiva

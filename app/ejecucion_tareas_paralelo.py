@@ -26,6 +26,10 @@ from app.preparacion_tareas_analisis import TareaAnalisis
 
 logger = logging.getLogger(__name__)
 
+# Analisis de impuestos en serie: en Cloud Run (1 vCPU, CPU estrangulada en background)
+# el paralelismo solo agrega contencion y provoca timeouts de Gemini (p. ej. ICA).
+MAX_WORKERS_ANALISIS = 1
+
 
 # =================================
 # DATACLASSES
@@ -243,13 +247,13 @@ class ControladorConcurrencia:
         >>> resultado = await controlador.ejecutar_con_semaforo(tarea_async)
     """
 
-    def __init__(self, max_workers: int = 2):
+    def __init__(self, max_workers: int = MAX_WORKERS_ANALISIS):
         """
         Inicializa controlador con numero maximo de workers.
 
         Args:
             max_workers: Numero maximo de workers simultaneos.
-                        Default: 2 (optimizado para Cloud Run 1 vCPU / 2 GB RAM).
+                        Default: MAX_WORKERS_ANALISIS (1, en serie).
         """
         self.max_workers = max_workers
         self.semaforo = asyncio.Semaphore(max_workers)
@@ -444,14 +448,14 @@ class CoordinadorEjecucionParalela:
 
     def __init__(
         self,
-        max_workers: int = 2,
+        max_workers: int = MAX_WORKERS_ANALISIS,
         logger: Optional[logging.Logger] = None
     ):
         """
         Inicializa coordinador con componentes especializados.
 
         Args:
-            max_workers: Numero maximo de workers simultaneos. Default: 4.
+            max_workers: Numero maximo de workers simultaneos. Default: MAX_WORKERS_ANALISIS.
             logger: Logger personalizado (si None, usa logger del modulo).
         """
         self.max_workers = max_workers
@@ -540,7 +544,7 @@ class CoordinadorEjecucionParalela:
 
 async def ejecutar_tareas_paralelo(
     tareas_analisis: List[TareaAnalisis],
-    max_workers: int = 2
+    max_workers: int = MAX_WORKERS_ANALISIS
 ) -> ResultadoEjecucionParalela:
     """
     Funcion fachada para ejecutar tareas de analisis en paralelo.
@@ -550,7 +554,7 @@ async def ejecutar_tareas_paralelo(
 
     Args:
         tareas_analisis: Lista de TareaAnalisis preparadas para ejecutar.
-        max_workers: Numero maximo de workers simultaneos. Default: 4.
+        max_workers: Numero maximo de workers simultaneos. Default: MAX_WORKERS_ANALISIS.
 
     Returns:
         ResultadoEjecucionParalela con:

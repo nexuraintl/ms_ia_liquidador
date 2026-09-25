@@ -132,6 +132,21 @@ class DatabaseInterface(ABC):
         """
         pass
 
+    def obtener_conceptos_iva_reteiva(self, estructura_contable: int) -> Dict[str, Any]:
+        """Obtiene los conceptos contables de IVA y ReteIVA de una estructura contable.
+
+        Implementacion por defecto para bases sin ese catalogo: listas vacias.
+
+        Args:
+            estructura_contable: Codigo de estructura contable.
+
+        Returns:
+            Dict con 'success', 'iva' y 'reteiva' (listas de dicts con codigo_concepto,
+            descripcion_concepto y porcentaje) y 'message'.
+        """
+        return {'success': False, 'iva': [], 'reteiva': [],
+                'message': 'Catalogo de conceptos IVA/ReteIVA no disponible'}
+
     @abstractmethod
     def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
         """
@@ -953,6 +968,12 @@ class NexuraAPIDatabase(DatabaseInterface):
     - DIP: Depende de IAuthProvider (abstraccion)
     """
 
+    # El WAF de Nexura responde 403 al User-Agent por defecto de python-requests
+    _USER_AGENT = (
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    )
+
     def __init__(self, base_url: str, auth_provider: IAuthProvider, timeout: int = 30):
         """
         Inicializa conexion a Nexura API
@@ -1064,7 +1085,7 @@ class NexuraAPIDatabase(DatabaseInterface):
 
         # Agregar User-Agent de navegador (fix para servidores que bloquean python-requests)
         if 'User-Agent' not in headers:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            headers['User-Agent'] = self._USER_AGENT
 
         # Refrescar token si es necesario
         self.auth_provider.refresh_if_needed()
@@ -1794,6 +1815,59 @@ class NexuraAPIDatabase(DatabaseInterface):
                 'error': str(e),
                 'message': f'Error al consultar conceptos de retefuente: {e}'
             }
+
+    def obtener_conceptos_iva_reteiva(self, estructura_contable: int) -> Dict[str, Any]:
+        """Obtiene los conceptos contables de IVA y ReteIVA de una estructura contable.
+
+        Consulta (GET) `/preliquidador/iva/` y `/preliquidador/reteIva/`. Nunca lanza: si un
+        endpoint falla o responde 404 su lista queda vacia. Si `NEXURA_CATALOGO_IVA_URL` esta
+        definida se consulta esa base sin credenciales (p. ej. preproduccion mientras
+        produccion no publica los catalogos).
+
+        Args:
+            estructura_contable: Codigo de estructura contable.
+
+        Returns:
+            Dict con 'success' (True si alguna lista trae datos), 'iva' y 'reteiva' (listas de
+            dicts con codigo_concepto, descripcion_concepto y porcentaje) y 'message'.
+        """
+        resultado = {'iva': [], 'reteiva': []}
+        errores = []
+        base_catalogo = os.getenv('NEXURA_CATALOGO_IVA_URL', '').rstrip('/')
+        params = {'estructuraContable': estructura_contable}
+        for clave, endpoint in (('iva', '/preliquidador/iva/'),
+                                ('reteiva', '/preliquidador/reteIva/')):
+            try:
+                if base_catalogo:
+                    respuesta = self.session.get(
+                        f'{base_catalogo}{endpoint}', params=params, timeout=self.timeout,
+                        headers={'User-Agent': self._USER_AGENT}
+                    )
+                    respuesta.raise_for_status()
+                    response = respuesta.json()
+                else:
+                    response = self._hacer_request(endpoint=endpoint, method='GET', params=params)
+                codigo = response.get('error', {}).get('code', -1)
+                if codigo not in (0, 404):
+                    errores.append(f"{clave}: {response.get('error', {}).get('message')}")
+                resultado[clave] = [
+                    {'codigo_concepto': str(item.get('codigo_concepto') or ''),
+                     'descripcion_concepto': str(item.get('descripcion_concepto') or ''),
+                     'porcentaje': float(item.get('porcentaje') or 0)}
+                    for item in (response.get('data') or []) if codigo == 0
+                ]
+            except Exception as e:
+                if '404' not in str(e):  # 404 = estructura sin catalogo, no es error
+                    errores.append(f"{clave}: {e}")
+        if errores:
+            logger.warning(f"Conceptos IVA/ReteIVA estructura {estructura_contable}: {errores}")
+        return {
+            'success': bool(resultado['iva'] or resultado['reteiva']),
+            **resultado,
+            'message': (f"{len(resultado['iva'])} conceptos IVA y {len(resultado['reteiva'])} "
+                        f"ReteIVA para estructura contable {estructura_contable}"
+                        + (f"; errores: {errores}" if errores else ''))
+        }
 
     def obtener_concepto_por_index(self, index: int, estructura_contable: int) -> Dict[str, Any]:
         """
@@ -3651,6 +3725,17 @@ class DatabaseManager:
         """
         return self.db_connection.obtener_configuracion_iva_db()
 
+    def obtener_conceptos_iva_reteiva(self, estructura_contable: int) -> Dict[str, Any]:
+        """Obtiene los conceptos contables de IVA y ReteIVA delegando a la implementacion.
+
+        Args:
+            estructura_contable: Codigo de estructura contable.
+
+        Returns:
+            Dict con 'success', 'iva', 'reteiva' y 'message'.
+        """
+        return self.db_connection.obtener_conceptos_iva_reteiva(estructura_contable)
+
     def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
         """
         Obtiene rangos UVT y tarifas para Estampilla Pro Universidad Nacional.
@@ -4017,6 +4102,17 @@ class DatabaseWithFallback(DatabaseInterface):
             self.primary_db.obtener_configuracion_iva_db,
             self.fallback_db.obtener_configuracion_iva_db
         )
+
+    def obtener_conceptos_iva_reteiva(self, estructura_contable: int) -> Dict[str, Any]:
+        """Obtiene los conceptos IVA/ReteIVA solo de la primaria (el fallback no los tiene).
+
+        Args:
+            estructura_contable: Codigo de estructura contable.
+
+        Returns:
+            Dict con 'success', 'iva', 'reteiva' y 'message'.
+        """
+        return self.primary_db.obtener_conceptos_iva_reteiva(estructura_contable)
 
     def obtener_rangos_estampilla_universidad(self) -> Dict[str, Any]:
         """Obtiene rangos UVT y tarifas para Estampilla Universidad con fallback automatico"""

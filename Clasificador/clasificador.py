@@ -20,6 +20,7 @@ import httpcore
 from datetime import datetime
 from typing import Dict, Any, Tuple
 from pathlib import Path
+from weakref import WeakKeyDictionary
 
 # Google Gemini (nuevo SDK v2.0)
 from google import genai
@@ -39,6 +40,30 @@ from io import BytesIO
 
 # Configuración de logging
 logger = logging.getLogger(__name__)
+
+# Llamadas a Gemini simultaneas por proceso: una por vCPU de Cloud Run (hoy 2). Con mas
+# llamadas que CPU compiten al leer la respuesta y agotan el timeout (p. ej. ICA ubicaciones).
+# Las tareas siguen en paralelo; solo Gemini espera turno.
+# Un semaforo por event loop, porque asyncio.Semaphore queda ligado al primer loop que lo usa.
+GEMINI_LLAMADAS_SIMULTANEAS = 2
+GEMINI_TIMEOUT_SEGUNDOS = 180.0
+GEMINI_MAX_INTENTOS = 2
+_SEMAFOROS_GEMINI: "WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Semaphore]" = (
+    WeakKeyDictionary()
+)
+
+
+def _semaforo_gemini() -> asyncio.Semaphore:
+    """Devuelve el semaforo de llamadas a Gemini del event loop en curso.
+
+    Returns:
+        Semaforo de GEMINI_LLAMADAS_SIMULTANEAS plazas, creado la primera vez en este loop.
+    """
+    loop = asyncio.get_running_loop()
+    semaforo = _SEMAFOROS_GEMINI.get(loop)
+    if semaforo is None:
+        semaforo = _SEMAFOROS_GEMINI[loop] = asyncio.Semaphore(GEMINI_LLAMADAS_SIMULTANEAS)
+    return semaforo
 
 # Importar prompts clasificador general
 from prompts.prompt_clasificador import PROMPT_CLASIFICACION, PROMPT_CLASIFICACION_LOTE, PROMPT_ANALISIS_GLOBAL
@@ -728,9 +753,15 @@ class ProcesadorGemini:
         except Exception as e:
             logger.debug(f"No se pudo loguear resumen de uso de tokens: {e}")
 
-    async def _ejecutar_con_retry(self, contenido, config, timeout_segundos, max_reintentos=3, contexto: str = "gemini"):
-        """
-        Ejecuta llamada a Gemini con cliente async nativo y reintentos para errores SSL transitorios.
+    async def _ejecutar_con_retry(
+        self,
+        contenido,
+        config,
+        timeout_segundos: float = GEMINI_TIMEOUT_SEGUNDOS,
+        max_reintentos: int = GEMINI_MAX_INTENTOS,
+        contexto: str = "gemini",
+    ):
+        """Ejecuta una llamada a Gemini con cliente async y reintentos ante fallos transitorios.
 
         Usa client.aio.models.generate_content (async nativo, httpx) en lugar de
         run_in_executor + cliente sync (requests/urllib3). Esto elimina la competencia
@@ -739,8 +770,9 @@ class ProcesadorGemini:
         Args:
             contenido: Lista de contenido para generate_content (prompt + archivos)
             config: Configuracion de generacion (temperature, max_output_tokens, etc.)
-            timeout_segundos: Timeout maximo por intento individual
-            max_reintentos: Numero maximo de reintentos (default 3)
+            timeout_segundos: Timeout maximo por intento individual (default 180 s)
+            max_reintentos: Numero maximo de intentos, incluido el primero (default 2)
+            contexto: Etiqueta de la llamada para los logs y el conteo de tokens
 
         Returns:
             Respuesta de Gemini (objeto GenerateContentResponse)
@@ -752,14 +784,16 @@ class ProcesadorGemini:
 
         for intento in range(1, max_reintentos + 1):
             try:
-                respuesta = await asyncio.wait_for(
-                    self.client.aio.models.generate_content(
-                        model=self.model_name,
-                        contents=contenido,
-                        config=config
-                    ),
-                    timeout=timeout_segundos
-                )
+                # El timeout cuenta desde que se obtiene el turno, no durante la espera
+                async with _semaforo_gemini():
+                    respuesta = await asyncio.wait_for(
+                        self.client.aio.models.generate_content(
+                            model=self.model_name,
+                            contents=contenido,
+                            config=config
+                        ),
+                        timeout=timeout_segundos
+                    )
 
                 if intento > 1:
                     logger.info(f"Llamada a Gemini exitosa en reintento {intento}/{max_reintentos}")
@@ -841,8 +875,7 @@ class ProcesadorGemini:
             ValueError: Si hay error en la llamada a Gemini
         """
         try:
-            timeout_segundos = 120.0
-            
+            timeout_segundos = GEMINI_TIMEOUT_SEGUNDOS
             logger.info(f" Llamada híbrida a Gemini con timeout de {timeout_segundos}s")
             logger.info(f" Contenido: 1 prompt + {len(contents) - 1} archivos directos")
             
@@ -1119,8 +1152,7 @@ class ProcesadorGemini:
             if archivos_directos is None:
                 archivos_directos = []
 
-            # Timeout extendido para análisis de facturas (más complejo que clasificación)
-            timeout_segundos = 280.0  # 4 minutos para análisis detallado
+            timeout_segundos = GEMINI_TIMEOUT_SEGUNDOS
 
             logger.info(f" Análisis híbrido de factura con timeout de {timeout_segundos}s")
             logger.info(f" Contenido: 1 prompt de análisis + {len(archivos_directos)} archivos directos")
@@ -1665,13 +1697,7 @@ class ProcesadorGemini:
             # Seleccionar configuración según el caso
             config = self.generation_config_consorcio if usar_modelo_consorcio else self.generation_config
 
-            # Timeout escalonado según complejidad
-            if usar_modelo_consorcio:
-                timeout_segundos = 120.0  # 2 minutos para consorcios grandes
-            elif "impuestos_especiales" in prompt.lower() or "estampilla" in prompt.lower():
-                timeout_segundos = 120.0   # 90s para análisis de impuestos especiales
-            else:
-                timeout_segundos = 120.0   # 60s para análisis estándar
+            timeout_segundos = GEMINI_TIMEOUT_SEGUNDOS
 
             logger.info(f"Llamando a Gemini (con retry SSL) con timeout de {timeout_segundos}s")
 

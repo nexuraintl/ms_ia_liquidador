@@ -21,6 +21,7 @@ from urllib.parse import urlparse
 
 import httpx
 
+from app.validacion_archivos import EXTENSIONES_SOPORTADAS
 from config import CONFIG
 
 logger = logging.getLogger(__name__)
@@ -63,10 +64,13 @@ class ResultadoDescarga:
             file} que espera BackgroundProcessor. `file` es un BytesIO listo para
             envolver en UploadFile, no bytes: evita duplicar el contenido en memoria.
         fallidos: Adjuntos que no se pudieron descargar, con su motivo.
+        omitidos: Nombres de adjuntos que no se descargaron por tener una extension que
+            el pipeline no procesa (p. ej. audio): bajarlos solo gastaria red y memoria.
     """
 
     archivos_data: List[Dict[str, Any]] = field(default_factory=list)
     fallidos: List[Dict[str, str]] = field(default_factory=list)
+    omitidos: List[str] = field(default_factory=list)
 
     @property
     def resumen_fallos(self) -> str:
@@ -104,6 +108,20 @@ def nombre_seguro(nombre: Optional[str]) -> Optional[str]:
 
     # Path(...).name descarta cualquier intento de traversal en el nombre remoto.
     return Path(nombre.strip()).name or None
+
+
+def extension_soportada(nombre: str) -> bool:
+    """Indica si el pipeline procesa la extension del archivo.
+
+    Mismo criterio que ValidadorArchivos: la extension es lo que va tras el ultimo punto.
+
+    Args:
+        nombre: Nombre del archivo ya saneado.
+
+    Returns:
+        True si la extension esta en EXTENSIONES_SOPORTADAS.
+    """
+    return '.' in nombre and nombre.rsplit('.', 1)[-1].lower() in EXTENSIONES_SOPORTADAS
 
 
 def validar_adjunto(adjunto: Dict[str, Any]) -> None:
@@ -237,30 +255,45 @@ class DescargadorArchivos:
         Secuencial y sobre una unica conexion reutilizada: con 1 vCPU el paralelismo
         no da velocidad, solo multiplica el pico de memoria y los handshakes TLS.
 
+        Los adjuntos con extension no soportada se omiten sin descargar: ValidadorArchivos
+        los descartaria igualmente despues, y no cuentan para el umbral de aborto.
+
         Args:
             archivos: Adjuntos enviados por el cliente.
 
         Returns:
-            ResultadoDescarga con los archivos obtenidos y los adjuntos fallidos.
+            ResultadoDescarga con los archivos obtenidos, los fallidos y los omitidos.
 
         Raises:
             DescargaAbortada: Si falla una proporcion de adjuntos igual o superior a
                 UMBRAL_ABORTO. Se aborta porque la ausencia de un documento puede
                 alterar la liquidacion sin que nadie lo advierta.
         """
-        total = len(archivos)
+        resultado = ResultadoDescarga()
+        descargables = []
+        for adjunto in archivos:
+            nombre = nombre_seguro(adjunto.get('name'))
+            if nombre and not extension_soportada(nombre):
+                resultado.omitidos.append(nombre)
+                logger.warning(
+                    f"Factura {self.factura_id}: Omitido sin descargar '{nombre}' "
+                    '(extension no soportada)'
+                )
+            else:
+                descargables.append(adjunto)
+
+        total = len(descargables)
         logger.info(
             f"Factura {self.factura_id}: Descargando {total} archivos de Nexura "
-            '(secuencial, conexion reutilizada)'
+            f'(secuencial, conexion reutilizada); {len(resultado.omitidos)} omitidos'
         )
 
-        resultado = ResultadoDescarga()
         async with httpx.AsyncClient(
             timeout=self.timeout,
             limits=LIMITES_CONEXION,
             follow_redirects=True,
         ) as cliente:
-            for adjunto in archivos:
+            for adjunto in descargables:
                 try:
                     resultado.archivos_data.append(await self._descargar_uno(cliente, adjunto))
                 except Exception as e:

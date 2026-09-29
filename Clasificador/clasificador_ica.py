@@ -471,6 +471,7 @@ class ClasificadorICA:
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=self.procesador_gemini.generation_config,
+                timeout_segundos=360.0,
                 contexto="ica_ubicaciones"
             )
 
@@ -788,6 +789,7 @@ class ClasificadorICA:
             respuesta = await self.procesador_gemini._ejecutar_con_retry(
                 contenido=contenido_gemini,
                 config=config_matching,
+                timeout_segundos=360.0,
                 contexto="ica_actividades"
             )
 

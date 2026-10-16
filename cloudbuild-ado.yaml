@@ -1,0 +1,78 @@
+# Build + deploy de ms_ia_liquidador a Cloud Run.
+#
+# Se ejecuta directo desde Azure DevOps (gcloud builds submit, sin repo conectado a
+# Cloud Build, autenticado por WIF): ver azure-pipelines.yml y ci/deploy-cloudrun-wif.yml.
+# Ahi NO hay trigger, asi que el pipeline pasa por --substitutions TODO lo que este
+# archivo espera: REPO_NAME, COMMIT_SHA, _SERVICE_NAME, _AR_PROJECT_ID, _AR_REPOSITORY,
+# _DEPLOY_REGION y _TRIGGER_ID (ado-<BuildId>, queda como label del servicio).
+#
+# El deploy usa 'run services update --image' a proposito: solo cambia la imagen y las
+# labels, y conserva las variables de entorno, secretos, service account y escalado
+# (incluyendo --no-cpu-throttling y --no-allow-unauthenticated) ya configurados en el
+# servicio — nada sensible vive en este repo.
+#
+# REQUISITOS
+#  - El servicio de Cloud Run debe existir (este archivo hace 'services update').
+#  - La SA que ejecuta el build (deploy-sa) necesita: escribir en el Artifact Registry,
+#    roles/run.developer, actuar como la SA de runtime del servicio y leer el bucket de
+#    staging <proyecto>_cloudbuild.
+
+steps:
+  # Build
+  - id: Build
+    name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--no-cache'
+      - '-t'
+      - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+
+  # Push a Artifact Registry
+  - id: Push
+    name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+
+  # Deploy a Cloud Run
+  - id: Deploy
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - '${_SERVICE_NAME}'
+      - '--platform=managed'
+      - '--image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID},gcb-trigger-id=${_TRIGGER_ID}'
+      - '--region=${_DEPLOY_REGION}'
+      - '--quiet'
+
+images:
+  - '${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+
+# Defaults = QA. Cuando se agregue PROD, el pipeline sobreescribe estos valores via
+# --substitutions (igual que ms_core_answercode).
+substitutions:
+  _SERVICE_NAME: qam-ia-liquidador
+  _AR_HOSTNAME: us-central1-docker.pkg.dev
+  _AR_PROJECT_ID: pre-qa-functions
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _DEPLOY_REGION: us-central1
+  _PLATFORM: managed
+  _TRIGGER_ID: manual
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: ALLOW_LOOSE
+
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - ms-ia-liquidador
+
+timeout: 1200s

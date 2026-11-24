@@ -291,6 +291,12 @@ class ClasificadorTimbre:
             datos: Datos JSON a guardar
             tipo_analisis: Tipo de analisis (timbre_observaciones o timbre_extraccion_contrato)
         """
+        from config import modo_pruebas_local
+
+        if not modo_pruebas_local():
+            # Solo se deja rastro en disco en pruebas locales (sin WEBHOOK_URL).
+            return
+
         try:
             # Crear estructura de carpetas con fecha
             fecha_actual = datetime.now()

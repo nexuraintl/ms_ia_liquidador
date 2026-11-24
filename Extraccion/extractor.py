@@ -76,6 +76,7 @@ from config import (
     EXCEL_MAX_FILAS_LECTURA,
     EXCEL_MAX_FILAS_POR_HOJA,
     EXCEL_MAX_CHARS_POR_ARCHIVO,
+    modo_pruebas_local,
 )
 
 # Configuración de logging
@@ -153,7 +154,13 @@ class ProcesadorArchivos:
             return None
     
     def _crear_carpetas_guardado(self):
-        """Crea las carpetas necesarias para guardar extracciones"""
+        """Crea las carpetas de extracciones, solo en modo pruebas local (sin WEBHOOK_URL)"""
+        if not modo_pruebas_local():
+            # Con webhook configurado no se deja rastro en disco: ni carpetas vacias.
+            self.carpeta_base = None
+            self.carpeta_fecha = None
+            return
+
         try:
             # Crear carpeta base de extracciones
             self.carpeta_base = Path("Results/Extracciones")
@@ -183,8 +190,11 @@ class ProcesadorArchivos:
             metadatos: Información adicional sobre la extracción
             
         Returns:
-            str: Ruta del archivo guardado
+            str: Ruta del archivo guardado, o cadena vacia si no se guardo
         """
+        if not modo_pruebas_local():
+            return ""
+
         try:
             # Crear timestamp único
             timestamp = datetime.now().strftime("%H%M%S")
@@ -1854,7 +1864,7 @@ FECHA: {fecha}
             "ocr_disponible": self.vision_client is not None,
             "pdf_to_image_disponible": PDF2IMAGE_DISPONIBLE or PYMUPDF_DISPONIBLE,
             "guardado_automatico": guardado_automatico,
-            "carpeta_guardado": str(self.carpeta_fecha)
+            "carpeta_guardado": str(self.carpeta_fecha) if self.carpeta_fecha else ""
         }
     
     async def procesar_multiples_archivos(self, archivos: list) -> Dict[str, str]:
@@ -1915,9 +1925,18 @@ FECHA: {fecha}
         Returns:
             Dict con estadísticas de guardado
         """
+        if not self.carpeta_fecha:
+            # Sin modo pruebas local no se guarda nada, asi que no hay que contar.
+            return {
+                "fecha": datetime.now().strftime("%Y-%m-%d"),
+                "carpeta": "",
+                "total_archivos_guardados": 0,
+                "guardado_deshabilitado": "WEBHOOK_URL configurada"
+            }
+
         try:
             archivos_guardados = list(self.carpeta_fecha.glob("*.txt"))
-            
+
             estadisticas = {
                 "fecha": datetime.now().strftime("%Y-%m-%d"),
                 "carpeta": str(self.carpeta_fecha),
@@ -2185,6 +2204,9 @@ def _guardar_archivo_preprocesado(nombre_archivo: str, texto_preprocesado: str,
         columnas_eliminadas: Número de columnas eliminadas
         total_hojas: Número total de hojas procesadas
     """
+    if not modo_pruebas_local():
+        return
+
     try:
         # 1. CREAR CARPETA EXTRACCIONES SIMPLE
         carpeta_extracciones = Path("extracciones")

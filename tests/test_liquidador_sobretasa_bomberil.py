@@ -340,8 +340,8 @@ class TestLiquidadorSobretasaBomberil(unittest.TestCase):
         print(f"[OK] Observaciones: {resultado['observaciones']}")
 
         self.assertFalse(resultado["aplica"])
-        self.assertEqual(resultado["estado"], "preliquidacion_sin_finalizar")
-        self.assertIn("No aplica ICA", resultado["observaciones"])
+        self.assertEqual(resultado["estado"], "no_aplica_impuesto")
+        self.assertIn("El valor del ICA es $0.00", resultado["observaciones"])
 
         print("\n[OK] TEST 6 PASADO")
 

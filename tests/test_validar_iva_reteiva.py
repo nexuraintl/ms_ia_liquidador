@@ -517,7 +517,8 @@ class TestValidarIVAReteIVAWrapper(unittest.IsolatedAsyncioTestCase):
                 es_recurso_extranjero=False,
                 es_facturacion_extranjera=False,
                 nit_administrativo="900123456",
-                tipoMoneda="COP"
+                tipoMoneda="COP",
+                conceptos_iva=None
             )
             self.assertEqual(resultado, {"test": "result"})
 

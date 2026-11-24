@@ -1015,8 +1015,18 @@ class TestObtenerConceptoPorIndexIntegracion:
         not os.getenv("NEXURA_API_BASE_URL"),
         reason="Requiere NEXURA_API_BASE_URL configurado en .env"
     )
-    def test_integracion_obtener_concepto_index_1_estructura_18(self):
-        """Test de integracion real - index 1, estructura 18"""
+    def test_integracion_obtener_concepto_por_index_estructura_18(self):
+        """Test de integracion real - consulta por index de un concepto existente.
+
+        El index NO se fija por codigo a proposito: se toma del catalogo que
+        devuelve la propia API. Fijarlo hacia la prueba dependiente de que una
+        fila concreta siguiera parametrizada en el entorno, y bastaba con que
+        se reparametrizara para que fallara sin que hubiera defecto alguno.
+
+        Lo que se valida es el contrato de ida y vuelta: todo concepto que el
+        catalogo lista debe poder consultarse individualmente por su index y
+        devolver datos coherentes.
+        """
         base_url = os.getenv("NEXURA_API_BASE_URL")
 
         db = NexuraAPIDatabase(
@@ -1025,14 +1035,26 @@ class TestObtenerConceptoPorIndexIntegracion:
             timeout=30
         )
 
-        resultado = db.obtener_concepto_por_index(index=1, estructura_contable=18)
+        catalogo = db.obtener_conceptos_retefuente(18)
+        conceptos = catalogo.get('data') or []
 
-        print(f"\nResultado API real index 1, estructura 18:")
+        if not conceptos:
+            pytest.skip("La estructura contable 18 no tiene conceptos parametrizados")
+
+        concepto_esperado = conceptos[0]
+        index_existente = concepto_esperado['index']
+
+        resultado = db.obtener_concepto_por_index(
+            index=index_existente,
+            estructura_contable=18
+        )
+
+        print(f"\nResultado API real index {index_existente}, estructura 18:")
         print(f"  Success: {resultado['success']}")
         print(f"  Message: {resultado['message']}")
 
         if resultado['success']:
-            print(f"  Concepto:")
+            print("  Concepto:")
             print(f"    Index: {resultado['data']['index']}")
             print(f"    Descripcion: {resultado['data']['descripcion_concepto']}")
             print(f"    Porcentaje: {resultado['data']['porcentaje']}%")
@@ -1041,8 +1063,12 @@ class TestObtenerConceptoPorIndexIntegracion:
 
         assert resultado['success'] is True
         assert 'data' in resultado
-        assert resultado['data']['index'] == 1
+        assert resultado['data']['index'] == index_existente
         assert resultado['data']['estructura_contable'] == 18
+        assert (
+            resultado['data']['descripcion_concepto']
+            == concepto_esperado['descripcion_concepto']
+        )
 
     @pytest.mark.skipif(
         not os.getenv("NEXURA_API_BASE_URL"),

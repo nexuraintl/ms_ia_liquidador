@@ -16,6 +16,7 @@ Cobertura del fix v3.14.6:
    - _files_get_con_retry propaga errores NO transitorios sin reintentar
 """
 
+import asyncio
 import sys
 import unittest
 from pathlib import Path
@@ -236,7 +237,7 @@ class TestBackgroundEnviaContratoAWebhook(unittest.IsolatedAsyncioTestCase):
         with patch("config.guardar_archivo_json"):
             await proc.procesar_factura_background(
                 factura_id=99664,
-                archivos_data=[],
+                archivos=[],
                 parametros={"codigo_del_negocio": 99664},
             )
 
@@ -269,7 +270,7 @@ class TestBackgroundEnviaContratoAWebhook(unittest.IsolatedAsyncioTestCase):
         with patch("config.guardar_archivo_json"):
             await proc.procesar_factura_background(
                 factura_id=30,
-                archivos_data=[],
+                archivos=[],
                 parametros={"codigo_del_negocio": 30},
             )
 
@@ -295,7 +296,7 @@ class TestBackgroundEnviaContratoAWebhook(unittest.IsolatedAsyncioTestCase):
         with patch("config.guardar_archivo_json"):
             await proc.procesar_factura_background(
                 factura_id=69164,
-                archivos_data=[],
+                archivos=[],
                 parametros={"codigo_del_negocio": 69164},
             )
 
@@ -330,7 +331,7 @@ class TestBackgroundEnviaContratoAWebhook(unittest.IsolatedAsyncioTestCase):
         with patch("config.guardar_archivo_json"):
             await proc.procesar_factura_background(
                 factura_id=125798,
-                archivos_data=[],
+                archivos=[],
                 parametros={"codigo_del_negocio": 125798},
             )
 
@@ -351,6 +352,197 @@ class TestBackgroundEnviaContratoAWebhook(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(diag["servicio_externo"], "Google Gemini API")
         self.assertNotIn("error_traceback", payload)
         self.assertNotIn("error_traceback", diag)
+
+
+class TestCleanupFilesAPI(unittest.IsolatedAsyncioTestCase):
+    """
+    El cleanup de Gemini Files API ocurre UNA vez por factura, en el finally de
+    procesar_factura_background, y tambien cuando el flujo falla: antes se hacia por
+    impuesto dentro del clasificador y dejaba archivos huerfanos si algo fallaba.
+    """
+
+    def _construir_processor(self, resultado_flujo=None, fallo=None):
+        from unittest.mock import MagicMock
+        from Background.background_processor import BackgroundProcessor
+
+        webhook_publisher = MagicMock()
+        webhook_publisher.auth_token = "jwt"
+        webhook_publisher.enviar_resultado = AsyncMock(
+            return_value={"success": True, "intentos": 1, "message": "ok"}
+        )
+
+        clasificador = MagicMock()
+        clasificador.files_manager.uploaded_files = {"a.pdf": object(), "b.pdf": object()}
+        clasificador.files_manager.cleanup_all = AsyncMock()
+
+        proc = BackgroundProcessor(
+            webhook_publisher=webhook_publisher,
+            business_service=MagicMock(),
+            db_manager=MagicMock(),
+        )
+        proc._autenticar_con_retry = AsyncMock(return_value=True)
+        proc._reconstruir_archivos = MagicMock(return_value=[])
+
+        async def _flujo(archivos, parametros, contexto=None):
+            # Reproduce lo que hace el flujo real: publica el clasificador en cuanto
+            # existe, ANTES de que nada pueda fallar.
+            if contexto is not None:
+                contexto["clasificador"] = clasificador
+            if fallo is not None:
+                raise fallo
+            return dict(resultado_flujo or {})
+
+        proc._ejecutar_flujo_completo = _flujo
+        return proc, clasificador
+
+    async def test_limpia_tras_procesamiento_exitoso(self):
+        proc, clasificador = self._construir_processor(resultado_flujo={"impuestos": {}})
+
+        with patch("config.guardar_archivo_json"):
+            await proc.procesar_factura_background(
+                factura_id=1, archivos=[], parametros={"codigo_del_negocio": 1}
+            )
+
+        clasificador.files_manager.cleanup_all.assert_awaited_once()
+
+    async def test_limpia_aunque_el_flujo_falle(self):
+        """El caso que dejaba huerfanos: excepcion despues de subir a Files API."""
+        proc, clasificador = self._construir_processor(fallo=ValueError("fallo del pipeline"))
+
+        with patch("config.guardar_archivo_json"):
+            await proc.procesar_factura_background(
+                factura_id=2, archivos=[], parametros={"codigo_del_negocio": 2}
+            )
+
+        clasificador.files_manager.cleanup_all.assert_awaited_once()
+
+    async def test_no_llama_cleanup_si_no_hay_archivos_subidos(self):
+        """Sin archivos en la cache no se gasta una llamada a la API."""
+        proc, clasificador = self._construir_processor(resultado_flujo={"impuestos": {}})
+        clasificador.files_manager.uploaded_files = {}
+
+        with patch("config.guardar_archivo_json"):
+            await proc.procesar_factura_background(
+                factura_id=3, archivos=[], parametros={"codigo_del_negocio": 3}
+            )
+
+        clasificador.files_manager.cleanup_all.assert_not_awaited()
+
+    async def test_un_fallo_del_cleanup_no_rompe_la_liquidacion(self):
+        """Es best-effort: la factura ya termino y su resultado ya se envio."""
+        proc, clasificador = self._construir_processor(resultado_flujo={"impuestos": {}})
+        clasificador.files_manager.cleanup_all = AsyncMock(side_effect=RuntimeError("boom"))
+
+        with patch("config.guardar_archivo_json"):
+            await proc.procesar_factura_background(
+                factura_id=4, archivos=[], parametros={"codigo_del_negocio": 4}
+            )
+
+        proc.webhook_publisher.enviar_resultado.assert_awaited_once()
+
+
+class TestColaFacturas(unittest.IsolatedAsyncioTestCase):
+    """
+    Las facturas se procesan de una en una por instancia.
+
+    Cloud Run entrega hasta 80 peticiones concurrentes a la misma instancia; sin la
+    cola, varias facturas correrian a la vez sobre 1 vCPU, cada una con su propio juego
+    de archivos en memoria.
+    """
+
+    def _construir_processor(self, en_curso, maximo):
+        from unittest.mock import MagicMock
+        from Background.background_processor import BackgroundProcessor
+
+        webhook_publisher = MagicMock()
+        webhook_publisher.auth_token = "jwt"
+        webhook_publisher.enviar_resultado = AsyncMock(
+            return_value={"success": True, "intentos": 1, "message": "ok"}
+        )
+
+        proc = BackgroundProcessor(
+            webhook_publisher=webhook_publisher,
+            business_service=MagicMock(),
+            db_manager=MagicMock(),
+        )
+        proc._autenticar_con_retry = AsyncMock(return_value=True)
+        proc._reconstruir_archivos = MagicMock(return_value=[])
+
+        async def _flujo(archivos, parametros, contexto=None):
+            en_curso[0] += 1
+            maximo[0] = max(maximo[0], en_curso[0])
+            await asyncio.sleep(0)  # cede el control: delataria un solape
+            en_curso[0] -= 1
+            return {"impuestos": {}}
+
+        proc._ejecutar_flujo_completo = _flujo
+        return proc
+
+    async def test_no_procesa_dos_facturas_a_la_vez(self):
+        """Aunque lleguen juntas, la segunda espera a que termine la primera."""
+        en_curso, maximo = [0], [0]
+        proc = self._construir_processor(en_curso, maximo)
+
+        with patch("config.guardar_archivo_json"):
+            await asyncio.gather(*[
+                proc.procesar_factura_background(
+                    factura_id=i, archivos=[], parametros={"codigo_del_negocio": i}
+                )
+                for i in range(4)
+            ])
+
+        self.assertEqual(maximo[0], 1, "Las facturas no deben solaparse")
+
+    async def test_todas_las_facturas_encoladas_se_procesan(self):
+        """La cola serializa, no descarta: las 4 llegan al webhook."""
+        en_curso, maximo = [0], [0]
+        proc = self._construir_processor(en_curso, maximo)
+
+        with patch("config.guardar_archivo_json"):
+            await asyncio.gather(*[
+                proc.procesar_factura_background(
+                    factura_id=i, archivos=[], parametros={"codigo_del_negocio": i}
+                )
+                for i in range(4)
+            ])
+
+        self.assertEqual(proc.webhook_publisher.enviar_resultado.await_count, 4)
+
+    async def test_una_factura_que_falla_libera_la_cola(self):
+        """Si una revienta, la siguiente debe poder entrar igualmente."""
+        from unittest.mock import MagicMock
+        from Background.background_processor import BackgroundProcessor
+
+        webhook_publisher = MagicMock()
+        webhook_publisher.auth_token = "jwt"
+        webhook_publisher.enviar_resultado = AsyncMock(
+            return_value={"success": True, "intentos": 1, "message": "ok"}
+        )
+        proc = BackgroundProcessor(
+            webhook_publisher=webhook_publisher,
+            business_service=MagicMock(),
+            db_manager=MagicMock(),
+        )
+        proc._autenticar_con_retry = AsyncMock(return_value=True)
+        proc._reconstruir_archivos = MagicMock(return_value=[])
+
+        async def _flujo(archivos, parametros, contexto=None):
+            if parametros["codigo_del_negocio"] == 0:
+                raise ValueError("fallo del pipeline")
+            return {"impuestos": {}}
+
+        proc._ejecutar_flujo_completo = _flujo
+
+        with patch("config.guardar_archivo_json"):
+            await asyncio.gather(*[
+                proc.procesar_factura_background(
+                    factura_id=i, archivos=[], parametros={"codigo_del_negocio": i}
+                )
+                for i in range(2)
+            ])
+
+        # Las dos responden: la fallida con el contrato preliquidacion_sin_finalizar.
+        self.assertEqual(proc.webhook_publisher.enviar_resultado.await_count, 2)
 
 
 if __name__ == "__main__":

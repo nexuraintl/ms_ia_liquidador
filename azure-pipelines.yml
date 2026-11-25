@@ -4,6 +4,9 @@
 # El trigger dispara segun la rama que RECIBE el push (rama destino de un PR fusionado):
 #   qa     -> Cloud Run QA            (qam-ia-liquidador)
 #   master -> Cloud Run PREPRODUCCION (prem-ia-liquidador)
+#   main   -> push --force al espejo GitHub nexuraintl/ms_ia_liquidador (rama main);
+#             alli el trigger de Cloud Build construye la imagen y despliega a Cloud Run.
+#             Requiere la variable secreta de pipeline GITHUB_TOKEN_NEXURAINTL.
 # Pasos en ci/deploy-cloudrun-wif.yml; build+deploy en Cloud Build (cloudbuild.yaml).
 
 trigger:
@@ -11,6 +14,7 @@ trigger:
     include:
       - qa
       - master
+      - main
 
 pool:
   vmImage: "ubuntu-latest"
@@ -41,3 +45,27 @@ jobs:
               arProjectId: pre-qa-functions
               arRepository: cloud-run-source-deploy
               cloudbuildFile: cloudbuild-ado.yaml
+
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - job: SyncGitHubMain
+        displayName: 'Sincronizar main con espejo GitHub (--force)'
+        steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 0          # historia completa: GitHub rechaza push desde clones shallow
+            persistCredentials: false
+
+          - script: |
+              set -euo pipefail
+              if [ -z "${GITHUB_TOKEN:-}" ] || [[ "$GITHUB_TOKEN" == '$('* ]]; then   # sin definir, ADO deja el literal $(...)
+                echo "##vso[task.logissue type=error]Falta la variable secreta GITHUB_TOKEN_NEXURAINTL en el pipeline"
+                exit 1
+              fi
+              AUTH=$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)
+              echo "##vso[task.setsecret]$AUTH"
+              echo "Push $(Build.SourceVersion) -> github.com/nexuraintl/ms_ia_liquidador (main)"
+              git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH" \
+                push --force https://github.com/nexuraintl/ms_ia_liquidador.git HEAD:refs/heads/main
+            displayName: 'git push --force a GitHub (main)'
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN_NEXURAINTL)

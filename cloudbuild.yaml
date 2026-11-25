@@ -1,3 +1,12 @@
+# cloudbuild.yaml — PRODUCCION (prod-ia-liquidador)
+#
+# Lo usa SOLO el trigger 'trigger-prod-ia-liquidador' (proyecto produccion-functions), que
+# se dispara con push a 'main' del espejo GitHub nexuraintl/ms_ia_liquidador. Ese push lo
+# hace el job SyncGitHubMain de azure-pipelines.yml.
+# qa y master NO usan este archivo: despliegan con cloudbuild-ado.yaml via WIF.
+# No reemplazar con la version de master: la imagen debe ir a Artifact Registry
+# (us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-images), no a gcr.io.
+
 steps:
   - id: Build
     name: 'gcr.io/cloud-builders/docker'
